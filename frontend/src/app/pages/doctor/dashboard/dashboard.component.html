@@ -1,0 +1,69 @@
+<div class="dashboard-layout">
+  <app-sidebar [items]="sidebarItems" title="Doctor"></app-sidebar>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header animate-fade-in-up">
+      <div>
+        <h1 id="doctor-dashboard-title">Doctor Dashboard 🩺</h1>
+        <p class="subtitle">Manage your appointments and patients</p>
+      </div>
+    </div>
+
+    <div class="stats-grid animate-fade-in-up">
+      <div class="stat-card stat-blue">
+        <div class="stat-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number">{{ todayCount }}</span>
+          <span class="stat-label">Today</span>
+        </div>
+      </div>
+      <div class="stat-card stat-green">
+        <div class="stat-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number">{{ totalCount }}</span>
+          <span class="stat-label">Total Appointments</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section animate-fade-in-up">
+      <h2 class="section-title">Appointment Management</h2>
+      <div class="table-wrapper">
+        <table class="data-table" *ngIf="appointments.length > 0" id="doctor-appointments-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Patient ID</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let apt of appointments">
+              <td>#{{ apt.id }}</td>
+              <td>Patient #{{ apt.patient_id }}</td>
+              <td>{{ apt.date_rdv }}</td>
+              <td><span class="badge" [ngClass]="getStatusClass(apt.statut)">{{ getStatusLabel(apt.statut) }}</span></td>
+              <td>
+                <div class="action-btns" *ngIf="apt.statut === 'PREVU'">
+                  <button class="btn btn-accent btn-sm" (click)="updateStatus(apt.id!, 'TERMINE')">Complete</button>
+                  <button class="btn btn-danger btn-sm" (click)="updateStatus(apt.id!, 'ANNULE')">Cancel</button>
+                </div>
+                <span *ngIf="apt.statut !== 'PREVU'" class="text-muted">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="appointments.length === 0" class="empty-state">
+          <h3>No Appointments</h3>
+          <p>You don't have any appointments yet</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
