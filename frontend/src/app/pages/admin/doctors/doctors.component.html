@@ -1,0 +1,59 @@
+<div class="dashboard-layout">
+  <app-sidebar [items]="sidebarItems" title="Admin"></app-sidebar>
+  <main class="dashboard-main">
+    <div class="page-header animate-fade-in-up">
+      <h1 id="admin-doctors-title">Doctor Verification</h1>
+      <p class="subtitle">Review and approve doctor registrations</p>
+    </div>
+
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner-lg"></div>
+    </div>
+
+    <div *ngIf="!loading" class="doctors-list animate-fade-in-up">
+      <div *ngFor="let doc of allDoctors" class="verification-card">
+        <div class="verify-header">
+          <div class="doctor-avatar-verify">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="verify-info">
+            <h3>Doctor #{{ doc.id }}</h3>
+            <p>User ID: {{ doc.user_id }} · Specialty: {{ doc.specialite_id }}</p>
+          </div>
+          <span class="badge" [ngClass]="getStatusClass(doc.statut_validation)">
+            {{ getStatusLabel(doc.statut_validation) }}
+          </span>
+        </div>
+
+        <div class="verify-details">
+          <div class="detail-chip">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ doc.adresse }}
+          </div>
+          <div class="detail-chip">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            {{ doc.tarif }} DH
+          </div>
+        </div>
+
+        <div class="verify-actions" *ngIf="doc.statut_validation !== 'VALIDE'">
+          <button class="btn btn-accent btn-sm" (click)="validateDoctor(doc.id!)" [id]="'btn-verify-' + doc.id">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Approve
+          </button>
+        </div>
+        <div class="verify-actions" *ngIf="doc.statut_validation === 'VALIDE'">
+          <span class="verified-text">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Verified
+          </span>
+        </div>
+      </div>
+
+      <div *ngIf="allDoctors.length === 0" class="empty-state">
+        <h3>No Doctors to Verify</h3>
+        <p>All doctors have been reviewed</p>
+      </div>
+    </div>
+  </main>
+</div>

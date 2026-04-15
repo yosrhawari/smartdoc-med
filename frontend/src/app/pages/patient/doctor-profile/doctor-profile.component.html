@@ -1,0 +1,84 @@
+<div class="profile-page animate-fade-in-up">
+  <div class="container">
+    <a routerLink="/patient/doctors" class="back-link" id="back-to-doctors">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Doctors
+    </a>
+
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner-lg"></div>
+    </div>
+
+    <div *ngIf="!loading && doctor" class="profile-layout">
+      <!-- Profile Card -->
+      <div class="profile-card">
+        <div class="profile-header-section">
+          <div class="profile-avatar-lg">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="profile-info">
+            <h1 id="doctor-name">Doctor #{{ doctor.id }}</h1>
+            <div class="profile-badges">
+              <span class="badge badge-primary">Specialist</span>
+              <span class="badge badge-success" *ngIf="doctor.statut_validation === 'VALIDE'">Verified</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-stats-row">
+          <div class="profile-stat">
+            <span class="stat-val">{{ averageRating.toFixed(1) }}</span>
+            <span class="stat-lbl">Rating</span>
+          </div>
+          <div class="profile-stat">
+            <span class="stat-val">{{ doctorReviews.length }}</span>
+            <span class="stat-lbl">Reviews</span>
+          </div>
+          <div class="profile-stat">
+            <span class="stat-val">{{ doctor.tarif }} DH</span>
+            <span class="stat-lbl">Fee</span>
+          </div>
+        </div>
+
+        <div class="profile-details">
+          <div class="detail-row">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>{{ doctor.adresse }}</span>
+          </div>
+          <div class="detail-row" *ngIf="doctor.biographie">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span>{{ doctor.biographie }}</span>
+          </div>
+        </div>
+
+        <a [routerLink]="['/patient/book', doctor.id]" class="btn btn-primary btn-full" id="btn-book-appointment">
+          Book Appointment
+        </a>
+      </div>
+
+      <!-- Reviews -->
+      <div class="reviews-section">
+        <h2>Patient Reviews</h2>
+        <div *ngIf="doctorReviews.length === 0" class="empty-reviews">
+          <p>No reviews yet for this doctor.</p>
+        </div>
+        <div *ngFor="let review of doctorReviews" class="review-card">
+          <div class="review-header">
+            <div class="stars">
+              <svg *ngFor="let filled of getStarArray(review.note)"
+                   width="14" height="14" viewBox="0 0 24 24"
+                   [attr.fill]="filled ? '#F59E0B' : 'none'"
+                   [attr.stroke]="filled ? '#F59E0B' : '#CBD5E1'" stroke-width="2">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </div>
+          </div>
+          <p class="review-text">{{ review.commentaire }}</p>
+          <div *ngIf="review.reponse_medecin" class="doctor-response">
+            <strong>Doctor's Response:</strong> {{ review.reponse_medecin }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

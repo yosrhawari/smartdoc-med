@@ -1,0 +1,23 @@
+<aside class="sidebar" [class.collapsed]="collapsed" id="dashboard-sidebar">
+  <div class="sidebar-header">
+    <h3 *ngIf="!collapsed">{{ title }}</h3>
+    <button class="collapse-btn" (click)="toggleCollapse()" id="sidebar-toggle">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline *ngIf="!collapsed" points="15 18 9 12 15 6"></polyline>
+        <polyline *ngIf="collapsed" points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a *ngFor="let item of items"
+       [routerLink]="item.route"
+       routerLinkActive="active"
+       [routerLinkActiveOptions]="{exact: true}"
+       class="sidebar-link"
+       [title]="item.label">
+      <span class="sidebar-icon" [innerHTML]="item.icon"></span>
+      <span class="sidebar-label" *ngIf="!collapsed">{{ item.label }}</span>
+    </a>
+  </nav>
+</aside>

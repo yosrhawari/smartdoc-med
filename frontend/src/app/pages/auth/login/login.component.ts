@@ -1,0 +1,53 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
+
+@Component({
+  selector: 'app-login',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule],
+  templateUrl: './login.component.html',
+  styleUrl: './login.component.css'
+})
+export class LoginComponent {
+  email = '';
+  password = '';
+  error = '';
+  loading = false;
+  showPassword = false;
+
+  constructor(private authService: AuthService, private router: Router) {}
+
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  onSubmit(): void {
+    if (!this.email || !this.password) {
+      this.error = 'Please fill in all fields';
+      return;
+    }
+
+    this.loading = true;
+    this.error = '';
+
+    this.authService.login(this.email, this.password).subscribe({
+      next: () => {
+        this.loading = false;
+        const role = this.authService.getRole();
+        switch (role) {
+          case 'PATIENT': this.router.navigate(['/patient/dashboard']); break;
+          case 'MEDECIN': this.router.navigate(['/doctor/dashboard']); break;
+          case 'ADMIN': this.router.navigate(['/admin/dashboard']); break;
+          default: this.router.navigate(['/']);
+        }
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = err.error?.detail || 'Invalid email or password';
+      }
+    });
+  }
+}

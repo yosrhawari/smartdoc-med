@@ -1,0 +1,37 @@
+<div class="dashboard-layout">
+  <app-sidebar [items]="sidebarItems" title="Doctor"></app-sidebar>
+  <main class="dashboard-main">
+    <div class="page-header animate-fade-in-up">
+      <h1 id="patients-title">My Patients</h1>
+      <p class="subtitle">All patients who have booked appointments with you</p>
+    </div>
+
+    <div class="table-wrapper animate-fade-in-up">
+      <table class="data-table" *ngIf="patients.length > 0" id="patients-table">
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Appointments</th>
+            <th>Last Visit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of patients">
+            <td>
+              <div class="patient-cell">
+                <div class="patient-avatar-sm">{{ p.id }}</div>
+                <span>Patient #{{ p.id }}</span>
+              </div>
+            </td>
+            <td><span class="badge badge-primary">{{ p.appointmentCount }}</span></td>
+            <td>{{ p.lastVisit }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="patients.length === 0" class="empty-state">
+        <h3>No Patients Yet</h3>
+        <p>Patients will appear here after they book appointments</p>
+      </div>
+    </div>
+  </main>
+</div>
