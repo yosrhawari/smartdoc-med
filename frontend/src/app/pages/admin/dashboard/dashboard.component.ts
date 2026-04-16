@@ -12,7 +12,7 @@ import { AdminService, PlatformStats } from '../../../core/services/admin.servic
   styleUrl: './dashboard.component.css'
 })
 export class AdminDashboardComponent implements OnInit {
-  stats: PlatformStats | null = null;
+  stats: PlatformStats | null = null; // stats = null au départ, on va le remplir avec les données de l’API
   loading = true;
   Math = Math;
 
@@ -23,7 +23,6 @@ export class AdminDashboardComponent implements OnInit {
   ];
 
   constructor(private adminService: AdminService) {}
-
   ngOnInit(): void {
     this.adminService.getStats().subscribe({
       next: (data) => {
@@ -34,3 +33,5 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 }
+
+//Au démarrage, le composant est créé, ensuite ngOnInit est exécuté, un appel API est fait, les données sont récupérées, stockées dans stats, loading devient false, puis le HTML affiche les données.-->
