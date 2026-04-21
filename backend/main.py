@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import SQLModel
 from database import engine
 
@@ -6,6 +7,15 @@ from database import engine
 from routers import users, medecins, rendezvous, reviews,test,admin
 
 app = FastAPI()
+
+# CORS for Angular frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # création des tables
 @app.on_event("startup")

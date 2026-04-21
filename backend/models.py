@@ -22,13 +22,14 @@ class Specialite(SQLModel, table=True):
 # PROFIL MEDECIN
 class ProfilMedecin(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int
-    specialite_id: int
+    user_id: int = Field(foreign_key="users.id")
+    specialite_id: Optional[int] = Field(default=None, foreign_key="specialite.id")
     adresse: str
     tarif: float
     biographie: Optional[str] = None
     diplome_path: Optional[str] = None
-    statut_validation: str = "EN_ATTENTE"
+    statut_validation: str = "en_attente"
+    spec_nom_temp: Optional[str] = None  # cache temporaire pour spécialité
 
 
 # RENDEZ-VOUS
@@ -37,7 +38,7 @@ class RendezVous(SQLModel, table=True):
     patient_id: int
     medecin_id: int
     date_rdv: str
-    statut: str = "PREVU"
+    statut: str = "prevu"
 
 
 # REVIEW
