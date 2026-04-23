@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from './api.service';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface LoginResponse {
   access_token: string;
@@ -16,39 +15,54 @@ export interface UserInfo {
   providedIn: 'root'
 })
 export class AuthService {
+
   private currentUserSubject = new BehaviorSubject<UserInfo | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private api: ApiService, private router: Router) {
-    this.loadUser();
-  }
+  constructor(private router: Router) {}
 
-  private loadUser(): void {
-    const token = this.getToken();
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        this.currentUserSubject.next({
-          id: payload.user_id,
-          role: payload.role
-        });
-      } catch {
-        this.logout();
-      }
-    }
-  }
-
+  // 🔥 Mock Register (just for demo)
   register(email: string, password: string, role: string): Observable<any> {
-    return this.api.post('/users/register', { email, password, role });
+    return new Observable(observer => {
+      setTimeout(() => {
+        observer.next({ message: 'User registered successfully' });
+        observer.complete();
+      }, 800);
+    });
   }
 
+  // 🔥 Mock Login
   login(email: string, password: string): Observable<LoginResponse> {
-    return this.api.post<LoginResponse>('/users/login', { email, password }).pipe(
-      tap(res => {
-        localStorage.setItem('smartdoc_token', res.access_token);
-        this.loadUser();
-      })
-    );
+
+    const users = [
+      { id: 1, email: 'patient@test.com', password: '1234', role: 'PATIENT' },
+      { id: 2, email: 'doctor@test.com', password: '1234', role: 'MEDECIN' },
+      { id: 3, email: 'admin@test.com', password: '1234', role: 'ADMIN' }
+    ];
+
+    const user = users.find(u => u.email === email && u.password === password);
+
+    if (user) {
+      this.currentUserSubject.next({
+        id: user.id,
+        role: user.role
+      });
+
+      localStorage.setItem('smartdoc_token', 'fake-token');
+
+      return new Observable(observer => {
+        setTimeout(() => {
+          observer.next({ access_token: 'fake-token' });
+          observer.complete();
+        }, 800);
+      });
+    }
+
+    return new Observable(observer => {
+      setTimeout(() => {
+        observer.error({ error: { detail: 'Invalid email or password' } });
+      }, 800);
+    });
   }
 
   logout(): void {

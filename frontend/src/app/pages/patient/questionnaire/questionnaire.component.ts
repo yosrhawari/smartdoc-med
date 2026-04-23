@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
-import { DoctorService, SmartSearchResult } from '../../../core/services/doctor.service';
+//import { DoctorService, SmartSearchResult } from '../../../core/services/doctor.service';
 
 @Component({
   selector: 'app-questionnaire',
@@ -32,8 +32,20 @@ export class QuestionnaireComponent {
   symptomDuration = '';
 
   // Step 3 - Results
-  results: SmartSearchResult[] = [];
+  results: any[] = [];
   searching = false;
+  doctors = [
+  { id: 1, name: 'Dr. Ali', speciality: 'Cardiologue', keywords: ['chest', 'heart'] },
+   {
+  id: 2,
+  name: 'Dr. Sana',
+  specialite: 'Dentiste',
+  rating: 4.5,
+  match: 'Dental symptoms',
+  keywords: ['tooth', 'dental', 'pain']
+  },
+  { id: 3, name: 'Dr. Karim', speciality: 'Généraliste', keywords: ['fever', 'headache'] }
+];
 
   sidebarItems = [
     { label: 'Dashboard', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>', route: '/patient/dashboard' },
@@ -41,8 +53,7 @@ export class QuestionnaireComponent {
     { label: 'Doctors', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>', route: '/patient/doctors' }
   ];
 
-  constructor(private doctorService: DoctorService, private router: Router) {}
-
+ constructor(private router: Router) {}
   selectCategory(id: string): void {
     this.selectedCategory = id;
   }
@@ -69,22 +80,32 @@ export class QuestionnaireComponent {
       default: return true;
     }
   }
+searchDoctors() {
+  this.searching = true;
 
-  searchDoctors(): void {
-    this.searching = true;
-    const category = this.categories.find(c => c.id === this.selectedCategory);
-    const query = `${category?.keywords || ''} ${this.symptomText}`;
+  const input = this.symptomText.toLowerCase();
 
-    this.doctorService.searchDoctors(query).subscribe({
-      next: (data) => {
-        this.results = data;
-        this.searching = false;
-      },
-      error: () => {
-        this.searching = false;
-      }
-    });
+  setTimeout(() => {
+    this.results = [
+  {
+    id: 1,
+    name: 'Dr. Sana',
+    specialite: 'Dentiste',
+    rating: 4.5,
+    match: 'Tooth pain detected'
   }
+];
+
+    if (this.results.length === 0) {
+      this.results = [
+        { name: 'Dr. Sana', speciality: 'Dentiste' }
+      ];
+    }
+
+    this.searching = false;
+  }, 500);
+}
+
 
   bookDoctor(doctorId: number): void {
     this.router.navigate(['/patient/book', doctorId]);
