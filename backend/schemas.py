@@ -29,4 +29,11 @@ class ReviewCreate(BaseModel):
 class LoginSchema(BaseModel):
     email: str
     password: str
-    
+class DoctorRegister(BaseModel):
+    email: str
+    password: str
+    specialite_id: int | None = None
+    autre_specialite: str | None = None
+    adresse: str
+    tarif: float
+    biographie: str

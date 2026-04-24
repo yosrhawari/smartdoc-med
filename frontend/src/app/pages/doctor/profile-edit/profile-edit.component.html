@@ -1,0 +1,82 @@
+<div class="dashboard-layout">
+  <app-sidebar [items]="sidebarItems" title="Doctor"></app-sidebar>
+
+  <main class="dashboard-main">
+    <div class="page-header animate-fade-in-up">
+      <h1 id="profile-edit-title">Edit Profile</h1>
+      <p class="subtitle">Update your professional information</p>
+    </div>
+
+    <div class="profile-form-card animate-fade-in-up">
+      <form (ngSubmit)="onSubmit()" id="doctor-profile-form">
+
+        <!-- SPECIALITE -->
+        <div class="form-group">
+          <label for="specialite">Spécialité</label>
+
+          <select id="specialite" class="form-control"
+                  [(ngModel)]="selectedSpecialite"
+                  name="specialite"
+                  (change)="onSpecialiteChange()">
+
+            <option value="">-- Choisir une spécialité --</option>
+
+            <option *ngFor="let sp of specialites" [value]="sp.id">
+              {{ sp.nom }}
+            </option>
+
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+
+        <!-- AUTRE SPECIALITE -->
+        <div class="form-group" *ngIf="selectedSpecialite === 'autre'">
+          <label>Votre spécialité</label>
+          <input type="text" class="form-control"
+                 [(ngModel)]="autreSpecialite"
+                 name="autreSpecialite"
+                 placeholder="Entrez votre spécialité">
+        </div>
+
+        <!-- ADDRESS -->
+        <div class="form-group">
+          <label for="adresse">Address</label>
+          <input type="text" id="adresse" class="form-control"
+                 [(ngModel)]="profile.adresse" name="adresse"
+                 placeholder="Your clinic address">
+        </div>
+
+        <!-- TARIF -->
+        <div class="form-group">
+          <label for="tarif">Consultation Fee (DT)</label>
+          <input type="number" id="tarif" class="form-control"
+                 [(ngModel)]="profile.tarif" name="tarif"
+                 placeholder="e.g., 200" min="0">
+        </div>
+
+        <!-- BIO -->
+        <div class="form-group">
+          <label for="bio">Biography</label>
+          <textarea id="bio" class="form-control textarea"
+                    [(ngModel)]="profile.biographie" name="biographie"
+                    placeholder="Tell patients about your experience..."
+                    rows="4"></textarea>
+        </div>
+
+        <!-- ALERTS -->
+        <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+        <div *ngIf="success" class="alert alert-success">{{ success }}</div>
+
+        <!-- BUTTON -->
+        <button type="submit" class="btn btn-primary"
+                [disabled]="loading"
+                id="btn-save-profile">
+
+          <span *ngIf="!loading">Save Profile</span>
+          <span *ngIf="loading" class="spinner"></span>
+        </button>
+
+      </form>
+    </div>
+  </main>
+</div>

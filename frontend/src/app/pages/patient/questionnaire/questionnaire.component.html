@@ -1,0 +1,145 @@
+<div class="dashboard-layout">
+  <app-sidebar [items]="sidebarItems" title="Patient"></app-sidebar>
+
+  <main class="dashboard-main">
+    <div class="questionnaire-wrapper animate-fade-in-up">
+      <!-- Progress Bar -->
+      <div class="progress-bar" id="questionnaire-progress">
+        <div class="progress-track">
+          <div class="progress-fill" [style.width.%]="(currentStep / totalSteps) * 100"></div>
+        </div>
+        <div class="progress-steps">
+          <div *ngFor="let step of [1,2,3]; let i = index"
+               class="progress-step"
+               [class.active]="currentStep >= step"
+               [class.current]="currentStep === step">
+            <div class="step-dot">{{ step }}</div>
+            <span class="step-label">
+              {{ step === 1 ? 'Category' : step === 2 ? 'Symptoms' : 'Results' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 1: Category Selection -->
+      <div class="step-content" *ngIf="currentStep === 1">
+        <div class="step-header">
+          <h2 id="step1-title">What concerns you?</h2>
+          <p>Select the category that best describes your health concern</p>
+        </div>
+
+        <div class="category-grid">
+          <div *ngFor="let cat of categories"
+               class="category-card"
+               [class.selected]="selectedCategory === cat.id"
+               (click)="selectCategory(cat.id)"
+               [id]="'cat-' + cat.id">
+            <div class="category-icon">{{ cat.icon }}</div>
+            <span class="category-label">{{ cat.label }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Describe Symptoms -->
+      <div class="step-content" *ngIf="currentStep === 2">
+        <div class="step-header">
+          <h2 id="step2-title">Describe Your Symptoms</h2>
+          <p>Provide details so we can find the best doctor for you</p>
+        </div>
+
+        <div class="form-group">
+          <label for="symptom-text">What are your symptoms?</label>
+          <textarea id="symptom-text"
+                    class="form-control textarea"
+                    [(ngModel)]="symptomText"
+                    placeholder="e.g., I've been experiencing headaches and dizziness for the past week..."
+                    rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="symptom-duration">How long have you had these symptoms?</label>
+          <select id="symptom-duration" class="form-control" [(ngModel)]="symptomDuration">
+            <option value="">Select duration</option>
+            <option value="today">Today</option>
+            <option value="days">A few days</option>
+            <option value="week">About a week</option>
+            <option value="weeks">Several weeks</option>
+            <option value="month">A month or more</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Step 3: Results -->
+      <div class="step-content" *ngIf="currentStep === 3">
+        <div class="step-header">
+          <h2 id="step3-title">Recommended Doctors</h2>
+          <p>Based on your symptoms, here are the best matching doctors</p>
+        </div>
+
+        <div *ngIf="searching" class="loading-state">
+          <div class="spinner-lg"></div>
+          <p>Finding the best doctors for you...</p>
+        </div>
+
+        <div *ngIf="!searching && results.length > 0" class="results-grid">
+          <div *ngFor="let doc of results; let i = index" class="doctor-result-card" [style.animation-delay]="(i * 0.1) + 's'">
+            <div class="result-header">
+              <div class="doctor-avatar-sm">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div>
+                <h4>Doctor #{{ doc.medecin_id }}</h4>
+                <p class="location">📍 {{ doc.adresse }}</p>
+              </div>
+              <div class="match-score">
+                <span class="score-value">{{ doc.score_final }}</span>
+                <span class="score-label">Match</span>
+              </div>
+            </div>
+            <div class="result-details">
+              <div class="detail-item">
+                <span class="detail-label">Rating</span>
+                <div class="stars">
+                  <svg *ngFor="let filled of getStarArray(doc.note_moyenne)"
+                       width="14" height="14" viewBox="0 0 24 24"
+                       [attr.fill]="filled ? '#F59E0B' : 'none'"
+                       [attr.stroke]="filled ? '#F59E0B' : '#CBD5E1'" stroke-width="2">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  <span class="rating-text">{{ doc.note_moyenne }}/5</span>
+                </div>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Symptom Match</span>
+                <span class="detail-value">{{ doc.score_matching }} keywords</span>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm btn-full-width" (click)="bookDoctor(doc.medecin_id)">
+              Book Appointment
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="!searching && results.length === 0" class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <h3>No Doctors Found</h3>
+          <p>Try describing your symptoms differently or select another category</p>
+          <button class="btn btn-secondary btn-sm" (click)="currentStep = 1">Start Over</button>
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="step-navigation" *ngIf="currentStep < 3">
+        <button class="btn btn-ghost" (click)="prevStep()" *ngIf="currentStep > 1" id="btn-prev">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Back
+        </button>
+        <div class="spacer" *ngIf="currentStep === 1"></div>
+        <button class="btn btn-primary" (click)="nextStep()" [disabled]="!canProceed()" id="btn-next">
+          {{ currentStep === 2 ? 'Find Doctors' : 'Next' }}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+    </div>
+  </main>
+</div>

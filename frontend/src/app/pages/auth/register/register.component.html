@@ -1,0 +1,149 @@
+<div class="auth-page">
+  <div class="auth-container animate-fade-in-up">
+
+    <!-- HEADER -->
+    <div class="auth-header">
+      <a routerLink="/" class="auth-logo">
+        <svg width="40" height="40" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="#2563EB"/>
+          <path d="M16 7V25M7 16H25" stroke="white" stroke-width="3"/>
+        </svg>
+      </a>
+      <h1>Create Account</h1>
+      <p>Join SmartDoc Med today</p>
+    </div>
+
+    <!-- FORM -->
+    <form (ngSubmit)="onSubmit()" class="auth-form">
+
+      <!-- ROLE -->
+      <label>I am a</label>
+      <div class="role-selector">
+
+        <div class="role-option"
+             [class.selected]="role === 'PATIENT'"
+             (click)="selectRole('PATIENT')">
+          <div>🏥 Patient</div>
+        </div>
+
+        <div class="role-option"
+             [class.selected]="role === 'MEDECIN'"
+             (click)="selectRole('MEDECIN')">
+          <div>🩺 Doctor</div>
+        </div>
+
+      </div>
+
+      <!-- EMAIL -->
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email"
+               [(ngModel)]="email"
+               name="email"
+               class="form-control">
+      </div>
+
+      <!-- PASSWORD -->
+      <div class="form-group">
+        <label>Password</label>
+        <input [type]="showPassword ? 'text' : 'password'"
+               [(ngModel)]="password"
+               name="password"
+               class="form-control">
+      </div>
+
+      <!-- CONFIRM -->
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input [type]="showPassword ? 'text' : 'password'"
+               [(ngModel)]="confirmPassword"
+               name="confirmPassword"
+               class="form-control">
+      </div>
+
+      <!-- DOCTOR SECTION -->
+      <div *ngIf="role === 'MEDECIN'">
+
+        <h3>Doctor Profile</h3>
+
+        <!-- SPECIALITE -->
+        <div class="form-group">
+          <label>Spécialité</label>
+
+          <select [(ngModel)]="selectedSpecialite"
+                  name="selectedSpecialite"
+                  class="form-control">
+
+            <option value="">-- Choisir --</option>
+
+            <option *ngFor="let sp of specialites" [value]="sp.id">
+              {{ sp.nom }}
+            </option>
+
+            <option value="autre">Autre</option>
+
+          </select>
+        </div>
+
+        <!-- AUTRE -->
+        <div *ngIf="selectedSpecialite === 'autre'" class="form-group">
+          <label>Votre spécialité</label>
+
+          <input type="text"
+                 [(ngModel)]="autreSpecialite"
+                 name="autreSpecialite"
+                 class="form-control">
+        </div>
+
+        <!-- ADRESSE -->
+        <div class="form-group">
+          <label>Adresse</label>
+          <input type="text"
+                 [(ngModel)]="adresse"
+                 name="adresse"
+                 class="form-control">
+        </div>
+
+        <!-- TARIF -->
+        <div class="form-group">
+          <label>Tarif</label>
+          <input type="number"
+                 [(ngModel)]="tarif"
+                 name="tarif"
+                 class="form-control">
+        </div>
+
+        <!-- BIO -->
+        <div class="form-group">
+          <label>Bio</label>
+          <textarea [(ngModel)]="biographie"
+                    name="biographie"
+                    class="form-control"></textarea>
+        </div>
+
+      </div>
+
+      <!-- ERROR -->
+      <div *ngIf="error" class="alert alert-error">
+        {{ error }}
+      </div>
+
+      <!-- SUCCESS -->
+      <div *ngIf="success" class="alert alert-success">
+        {{ success }}
+      </div>
+
+      <!-- BUTTON -->
+      <button type="submit" [disabled]="loading" class="btn btn-primary">
+        {{ loading ? 'Loading...' : 'Create Account' }}
+      </button>
+
+    </form>
+
+    <!-- FOOTER -->
+    <div class="auth-footer">
+      <p>Already have account? <a routerLink="/login">Login</a></p>
+    </div>
+
+  </div>
+</div>

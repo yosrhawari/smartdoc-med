@@ -5,6 +5,10 @@ from models import User
 from schemas import UserCreate, LoginSchema
 from utils.security import hash_password, verify_password
 from utils.jwt_handler import create_token
+from passlib.hash import bcrypt
+from pydantic import BaseModel
+from models import User, ProfilMedecin, Specialite
+from schemas import DoctorRegister
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -47,7 +51,51 @@ def register(user: UserCreate, session: Session = Depends(get_session)):
     session.refresh(db_user)
 
     return {"message": "User created"}
+@router.post("/register-doctor")
+def register_doctor(data: DoctorRegister, session: Session = Depends(get_session)):
 
+    # check email
+    existing = session.exec(
+        select(User).where(User.email == data.email)
+    ).first()
+
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already exists")
+
+    # create user
+    user = User(
+        email=data.email,
+        password=hash_password(data.password),
+        role="MEDECIN"
+    )
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    # spécialité
+    specialite_id = data.specialite_id
+
+    if data.autre_specialite:
+        new_sp = Specialite(nom=data.autre_specialite)
+        session.add(new_sp)
+        session.commit()
+        session.refresh(new_sp)
+        specialite_id = new_sp.id
+
+    # create profil
+    profil = ProfilMedecin(
+        user_id=user.id,
+        specialite_id=specialite_id,
+        adresse=data.adresse,
+        tarif=data.tarif,
+        biographie=data.biographie,
+        statut_validation="EN_ATTENTE"
+    )
+
+    session.add(profil)
+    session.commit()
+
+    return {"message": "Doctor created successfully"}
 
 # LOGIN
 @router.post("/login")
