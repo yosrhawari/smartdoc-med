@@ -35,4 +35,6 @@ class ReviewCreate(BaseModel):
 class LoginSchema(BaseModel):
     email: str
     password: str
+class SymptomeInput(BaseModel):
+    symptome: str
     

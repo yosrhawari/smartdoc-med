@@ -8,7 +8,7 @@ import { Button } from '../../components/Button';
 export function DoctorList() {
   const doctors = [
     {
-      id: 1,
+      id: 1
       name: 'Dr. Sarah Johnson',
       specialty: 'Cardiologist',
       rating: 4.9,
