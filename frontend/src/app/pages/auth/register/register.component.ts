@@ -110,7 +110,6 @@ export class RegisterComponent implements OnInit {
       });
 
     } else {
-
       // PATIENT
       this.authService.register(this.email, this.password, this.role).subscribe({
         next: () => {

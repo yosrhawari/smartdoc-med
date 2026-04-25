@@ -13,7 +13,6 @@ export interface UserInfo {
   id: number;
   role: string;
 }
-
 @Injectable({
   providedIn: 'root'// Permet d’injecter ce service dans toute l’application
 })
