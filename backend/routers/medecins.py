@@ -1,13 +1,14 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends,HTTPException
 from sqlmodel import Session, select
 from database import get_session
-from models import ProfilMedecin,Specialite
+from models import ProfilMedecin,Specialite,RendezVous
 from schemas import MedecinCreate
 from services.matching_service import find_medecins_by_symptome
 from services.medecin_service import get_medecins_with_rating
 from services.matching_service import find_medecins_advanced
 from services.ai_service import detect_specialite
 from services.score_service import compute_score
+from utils.dependencies import get_current_user
 
 
 router = APIRouter(prefix="/medecins", tags=["Medecins"])
@@ -112,3 +113,87 @@ def ai_smart_search(symptome: str, session: Session = Depends(get_session)):
         "specialite_detected": specialite_nom,
         "medecins": results
     }
+@router.put("/rdv/{rdv_id}/accept")
+def accepter_rdv(
+    rdv_id: int,
+    session: Session = Depends(get_session),
+    user = Depends(get_current_user)
+):
+
+    # 🔹 vérifier rôle
+    if user["role"] != "MEDECIN":
+        raise HTTPException(status_code=403, detail="Accès interdit")
+
+    # 🔹 récupérer profil médecin
+    profil = session.exec(
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["id"])
+    ).first()
+
+    if not profil:
+        raise HTTPException(status_code=404, detail="Profil médecin introuvable")
+
+    # 🔹 récupérer rdv
+    rdv = session.exec(
+        select(RendezVous).where(RendezVous.id == rdv_id)
+    ).first()
+
+    if not rdv:
+        raise HTTPException(status_code=404, detail="Rendez-vous introuvable")
+
+    # 🔹 vérifier que ce rdv appartient au médecin
+    if rdv.medecin_id != profil.id:
+        raise HTTPException(status_code=403, detail="Non autorisé")
+
+    # 🔥 update statut
+    rdv.statut = "ACCEPTE"
+    session.add(rdv)
+    session.commit()
+
+    return {"message": "Rendez-vous accepté"}
+@router.put("/rdv/{rdv_id}/refuse")
+def refuser_rdv(
+    rdv_id: int,
+    session: Session = Depends(get_session),
+    user = Depends(get_current_user)
+):
+
+    if user["role"] != "MEDECIN":
+        raise HTTPException(status_code=403, detail="Accès interdit")
+
+    profil = session.exec(
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["id"])
+    ).first()
+
+    rdv = session.exec(
+        select(RendezVous).where(RendezVous.id == rdv_id)
+    ).first()
+
+    if not rdv or not profil:
+        raise HTTPException(status_code=404, detail="Introuvable")
+
+    if rdv.medecin_id != profil.id:
+        raise HTTPException(status_code=403, detail="Non autorisé")
+
+    rdv.statut = "REFUSE"
+    session.add(rdv)
+    session.commit()
+
+    return {"message": "Rendez-vous refusé"}
+@router.get("/rdv")
+def get_mes_rdv(
+    session: Session = Depends(get_session),
+    user = Depends(get_current_user)
+):
+
+    if user["role"] != "MEDECIN":
+        raise HTTPException(status_code=403, detail="Accès interdit")
+
+    profil = session.exec(
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["id"])
+    ).first()
+
+    rdvs = session.exec(
+        select(RendezVous).where(RendezVous.medecin_id == profil.id)
+    ).all()
+
+    return rdvs

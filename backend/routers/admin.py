@@ -36,12 +36,11 @@ def validate_medecin(
 
 
 
-    # 🔹 3. vérifier / créer spécialité
+
     specialite = session.exec(
         select(Specialite).where(Specialite.nom == n_specialite)
     ).first()
 
-    # 🔥 si n'existe pas → créer
     if not specialite:
         specialite = Specialite(
             nom=n_specialite,
@@ -98,3 +97,20 @@ def get_stats(
         "rendezvous": total_rdv,
         "reviews": total_reviews
     }
+@router.get("/users")
+def get_all_users(
+    session: Session = Depends(get_session),
+    admin = Depends(require_role("ADMIN"))
+):
+    users = session.exec(
+        select(User).where(
+            (User.role == "PATIENT")
+        )
+    ).all()
+    return [
+        {
+            "email": u.email,
+            "role": u.role
+        }
+        for u in users
+    ]
