@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from './api.service';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 export interface LoginResponse {
   access_token: string;
@@ -16,10 +16,13 @@ export interface UserInfo {
   providedIn: 'root'
 })
 export class AuthService {
+
+  private API = 'http://localhost:8000';
+
   private currentUserSubject = new BehaviorSubject<UserInfo | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private api: ApiService, private router: Router) {
+  constructor(private http: HttpClient, private router: Router) {
     this.loadUser();
   }
 
@@ -38,12 +41,13 @@ export class AuthService {
     }
   }
 
-  register(email: string, password: string, role: string): Observable<any> {
-    return this.api.post('/users/register', { email, password, role });
+  // ✅ REGISTER (patient + doctor)
+  register(data: any): Observable<any> {
+    return this.http.post(`${this.API}/users/register`, data);
   }
 
   login(email: string, password: string): Observable<LoginResponse> {
-    return this.api.post<LoginResponse>('/users/login', { email, password }).pipe(
+    return this.http.post<LoginResponse>(`${this.API}/users/login`, { email, password }).pipe(
       tap(res => {
         localStorage.setItem('smartdoc_token', res.access_token);
         this.loadUser();
@@ -66,16 +70,10 @@ export class AuthService {
   }
 
   getRole(): string | null {
-    const user = this.currentUserSubject.value;
-    return user ? user.role : null;
+    return this.currentUserSubject.value?.role || null;
   }
 
   getUserId(): number | null {
-    const user = this.currentUserSubject.value;
-    return user ? user.id : null;
-  }
-
-  getCurrentUser(): UserInfo | null {
-    return this.currentUserSubject.value;
+    return this.currentUserSubject.value?.id || null;
   }
 }

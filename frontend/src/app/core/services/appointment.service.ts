@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 export interface Appointment {
   id?: number;
@@ -14,17 +15,19 @@ export interface Appointment {
   providedIn: 'root'
 })
 export class AppointmentService {
-  constructor(private api: ApiService) {}
+  private API = 'http://localhost:8000';
+
+  constructor(private http: HttpClient) {}
 
   getAppointments(): Observable<Appointment[]> {
-    return this.api.get<Appointment[]>('/rendezvous/');
+    return this.http.get<Appointment[]>(`${this.API}/rendezvous/`);
   }
 
   createAppointment(data: { medecin_id: number; date_rdv: string }): Observable<Appointment> {
-    return this.api.post<Appointment>('/rendezvous/', data);
+    return this.http.post<Appointment>(`${this.API}/rendezvous/`, data);
   }
 
   updateStatus(id: number, status: string): Observable<any> {
-    return this.api.put(`/rendezvous/${id}/status`, null);
+    return this.http.put(`${this.API}/rendezvous/${id}/status`, null);
   }
 }

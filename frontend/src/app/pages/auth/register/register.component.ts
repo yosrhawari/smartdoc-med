@@ -1,27 +1,49 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { DoctorService } from '../../../core/services/doctor.service';
 
 @Component({
   selector: 'app-register',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.css'
+  styleUrls: ['./register.component.css'] // ✅ FIX
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
+
   email = '';
   password = '';
   confirmPassword = '';
   role = 'PATIENT';
+
+  selectedSpecialite: number | 'autre' | '' = '';
+  autreSpecialite = '';
+  adresse = '';
+  tarif = 0;
+  biographie = '';
+
+  specialites: any[] = [];
+
   error = '';
   success = '';
   loading = false;
   showPassword = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private doctorService: DoctorService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.doctorService.getSpecialites().subscribe({
+      next: (data) => this.specialites = data,
+      error: () => console.error('Failed to load specialites')
+    });
+  }
 
   selectRole(role: string): void {
     this.role = role;
@@ -36,7 +58,7 @@ export class RegisterComponent {
     this.success = '';
 
     if (!this.email || !this.password || !this.confirmPassword) {
-      this.error = 'Please fill in all fields';
+      this.error = 'Please fill all fields';
       return;
     }
 
@@ -52,16 +74,57 @@ export class RegisterComponent {
 
     this.loading = true;
 
-    this.authService.register(this.email, this.password, this.role).subscribe({
-      next: () => {
-        this.loading = false;
-        this.success = 'Account created! Redirecting to login...';
-        setTimeout(() => this.router.navigate(['/login']), 1500);
-      },
-      error: (err) => {
-        this.loading = false;
-        this.error = err.error?.detail || 'Registration failed. Please try again.';
-      }
-    });
+    // ✅ DOCTOR
+    if (this.role === 'MEDECIN') {
+
+      const specialiteNom =
+        this.selectedSpecialite === 'autre'
+          ? this.autreSpecialite
+          : this.specialites.find(s => s.id === this.selectedSpecialite)?.nom;
+
+      const payload = {
+        email: this.email,
+        password: this.password,
+        role: "MEDECIN",
+        specialite_nom: specialiteNom,
+        adresse: this.adresse,
+        tarif: this.tarif,
+        biographie: this.biographie
+      };
+
+      this.authService.register(payload).subscribe({
+        next: () => {
+          this.loading = false;
+          this.success = 'Doctor created successfully!';
+          this.router.navigate(['/login']);
+        },
+        error: (err) => {
+          console.log(err);
+          this.loading = false;
+          this.error = err.error?.detail || 'Doctor creation failed';
+        }
+      });
+
+    } else {
+      // ✅ PATIENT
+      const payload = {
+        email: this.email,
+        password: this.password,
+        role: "PATIENT"
+      };
+
+      this.authService.register(payload).subscribe({
+        next: () => {
+          this.loading = false;
+          this.success = 'Account created!';
+          this.router.navigate(['/login']);
+        },
+        error: (err) => {
+          console.log(err);
+          this.loading = false;
+          this.error = err.error?.detail || 'Registration failed';
+        }
+      });
+    }
   }
 }
