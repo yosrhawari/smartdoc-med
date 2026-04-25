@@ -1,12 +1,18 @@
 
 from pydantic import BaseModel
 from typing import Optional
+from sqlmodel import SQLModel, Field
 
-class UserCreate(BaseModel):
+class UserCreate(SQLModel):
     email: str
     password: str
     role: str
-
+    # Ajoute ces champs pour qu'ils soient acceptés dans le JSON
+    specialite_nom: Optional[str] = None
+    adresse: Optional[str] = None
+    tarif: Optional[float] = 0
+    biographie: Optional[str] = None  # <--- C'est lui qui manquait !
+    diplome_path: Optional[str] = None
 
 class MedecinCreate(BaseModel):
     user_id: int
@@ -29,11 +35,6 @@ class ReviewCreate(BaseModel):
 class LoginSchema(BaseModel):
     email: str
     password: str
-class DoctorRegister(BaseModel):
-    email: str
-    password: str
-    specialite_id: int | None = None
-    autre_specialite: str | None = None
-    adresse: str
-    tarif: float
-    biographie: str
+class SymptomeInput(BaseModel):
+    symptome: str
+    
