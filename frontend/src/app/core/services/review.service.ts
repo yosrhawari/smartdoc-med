@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 export interface Review {
   id?: number;
@@ -14,13 +15,15 @@ export interface Review {
   providedIn: 'root'
 })
 export class ReviewService {
-  constructor(private api: ApiService) {}
+  private API = 'http://localhost:8000';
+
+  constructor(private http: HttpClient) { }
 
   getReviews(): Observable<Review[]> {
-    return this.api.get<Review[]>('/reviews/');
+    return this.http.get<Review[]>(`${this.API}/reviews/`);
   }
 
   createReview(data: { rendezvous_id: number; note: number; commentaire: string }): Observable<Review> {
-    return this.api.post<Review>('/reviews/', data);
+    return this.http.post<Review>(`${this.API}/reviews/`, data);
   }
 }
