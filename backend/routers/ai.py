@@ -41,6 +41,8 @@ def predict(data: SymptomeInput, session: Session = Depends(get_session)):
 
         result.append({
             "id": m.id,
+            "nom": m.nom,
+            "prenom": m.prenom,
             "email": user.email if user else None,
             "adresse": m.adresse,
             "tarif": m.tarif,

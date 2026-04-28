@@ -25,6 +25,8 @@ class ProfilMedecin(SQLModel, table=True):
     user_id: int = Field(foreign_key="users.id")
     specialite_id: Optional[int] = Field(default=None, foreign_key="specialite.id")
     adresse: str
+    nom: str
+    prenom: str
     tarif: float
     biographie: Optional[str] = None
     diplome_path: Optional[str] = None

@@ -4,7 +4,7 @@ from sqlmodel import SQLModel
 from database import engine
 
 # routers
-from routers import users, medecins, rendezvous, reviews,test,admin,ai
+from routers import users, medecins, rendezvous, reviews,test,admin,specialite,ai
 
 app = FastAPI()
 
@@ -31,3 +31,4 @@ app.include_router(rendezvous.router)
 app.include_router(reviews.router)
 app.include_router(admin.router)
 app.include_router(ai.router)
+app.include_router(specialite.router)
