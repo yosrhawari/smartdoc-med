@@ -21,6 +21,8 @@ export interface DoctorWithRating {
   medecin_id: number;
   adresse: string;
   note_moyenne: number;
+  nom?: string;
+  prenom?: string;
 }
 
 export interface SmartSearchResult {

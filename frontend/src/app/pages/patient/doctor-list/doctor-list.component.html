@@ -44,8 +44,9 @@
           </div>
         </div>
 
-        <h3 class="doctor-name">Doctor #{{ doctor.medecin_id }}</h3>
-        <div class="doctor-meta">
+<h3 class="doctor-name">
+  {{ doctor.nom ? ('Dr. ' + doctor.nom + ' ' + doctor.prenom) : ('Doctor #' + doctor.medecin_id) }}
+</h3>        <div class="doctor-meta">
           <span class="meta-item">📍 {{ doctor.adresse }}</span>
         </div>
 

@@ -93,7 +93,11 @@ export class DoctorProfileEditComponent implements OnInit {
         this.loading = false;
         return;
       }
+<<<<<<< HEAD
       data.new_specialite = this.autreSpecialite; // 👈 clean backend
+=======
+      data.new_specialite = this.autreSpecialite; // clean backend
+>>>>>>> 409a706604a097d37dec7af54589f99e5e528cc0
     } else {
       if (!this.selectedSpecialite) {
         this.error = 'Veuillez choisir une spécialité';
@@ -118,4 +122,8 @@ export class DoctorProfileEditComponent implements OnInit {
     this.error = 'Erreur inconnue';
   }
 }
+<<<<<<< HEAD
   }}
+=======
+  }}
+>>>>>>> 409a706604a097d37dec7af54589f99e5e528cc0

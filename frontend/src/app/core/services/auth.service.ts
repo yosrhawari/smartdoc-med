@@ -18,6 +18,7 @@ export interface UserInfo {
 })
 // Service qui gère l’authentification et les informations de l’utilisateur
 export class AuthService {
+<<<<<<< HEAD
 
   // Stocke les informations de l’utilisateur connecté et les partage dans l’application
   private currentUserSubject = new BehaviorSubject<UserInfo | null>(null);
@@ -27,6 +28,15 @@ export class AuthService {
   // Injecte les services nécessaires : ApiService pour les requêtes HTTP et Router pour la navigation
   constructor(private http: HttpClient, private router: Router) {
     // Charge l’utilisateur au démarrage
+=======
+
+  private API = 'http://localhost:8000';
+
+  private currentUserSubject = new BehaviorSubject<UserInfo | null>(null);
+  currentUser$ = this.currentUserSubject.asObservable();
+
+  constructor(private http: HttpClient, private router: Router) {
+>>>>>>> 409a706604a097d37dec7af54589f99e5e528cc0
     this.loadUser();
   }
 
@@ -48,6 +58,7 @@ export class AuthService {
     }
   }
 
+<<<<<<< HEAD
   // Envoie les données d’inscription au backend
   register(email: string, password: string, role: string): Observable<any> {
    return this.http.post('http://localhost:8000/users/register', {
@@ -55,12 +66,21 @@ export class AuthService {
      password,
       role
 });
+=======
+  // ✅ REGISTER (patient + doctor)
+  register(data: any): Observable<any> {
+    return this.http.post(`${this.API}/users/register`, data);
+>>>>>>> 409a706604a097d37dec7af54589f99e5e528cc0
   }
 
   // Envoie les identifiants au backend et récupère le token
   login(email: string, password: string): Observable<LoginResponse> {
+<<<<<<< HEAD
     return this.http.post<LoginResponse>('http://localhost:8000/users/login', { email, password }).pipe(
       // Exécute une action après la réponse
+=======
+    return this.http.post<LoginResponse>(`${this.API}/users/login`, { email, password }).pipe(
+>>>>>>> 409a706604a097d37dec7af54589f99e5e528cc0
       tap(res => {
         // Sauvegarde le token dans le stockage local
         localStorage.setItem('smartdoc_token', res.access_token);
@@ -89,18 +109,19 @@ export class AuthService {
 
   // Retourne le rôle de l’utilisateur
   getRole(): string | null {
-    const user = this.currentUserSubject.value;
-    return user ? user.role : null;
+    return this.currentUserSubject.value?.role || null;
   }
 
   // Retourne l’identifiant de l’utilisateur
   getUserId(): number | null {
-    const user = this.currentUserSubject.value;
-    return user ? user.id : null;
+    return this.currentUserSubject.value?.id || null;
   }
+<<<<<<< HEAD
 
   // Retourne les informations complètes de l’utilisateur
   getCurrentUser(): UserInfo | null {
     return this.currentUserSubject.value;
   }
+=======
+>>>>>>> 409a706604a097d37dec7af54589f99e5e528cc0
 }

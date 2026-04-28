@@ -1,5 +1,6 @@
 from sqlmodel import Session, select
-from models import ProfilMedecin, RendezVous, Review
+from models import ProfilMedecin, RendezVous, Review ,User
+
 
 
 def get_medecins_with_rating(session: Session):
@@ -9,7 +10,9 @@ def get_medecins_with_rating(session: Session):
     result = []
 
     for med in medecins:
-
+        user = session.exec(
+            select(User).where(User.id == med.user_id)
+        ).first()
         rdvs = session.exec(
             select(RendezVous).where(RendezVous.medecin_id == med.id)
         ).all()
@@ -28,8 +31,10 @@ def get_medecins_with_rating(session: Session):
 
         result.append({
             "medecin_id": med.id,
+            "nom": med.nom ,
+            "prenom": med.prenom ,
             "adresse": med.adresse,
             "note_moyenne": round(moyenne, 2)
         })
-
+        
     return result
