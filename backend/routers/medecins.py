@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends,HTTPException
 from sqlmodel import Session, select
 from database import get_session
-from models import ProfilMedecin,Specialite,RendezVous
+from models import ProfilMedecin,Specialite,RendezVous, User
 from schemas import MedecinCreate
 from services.matching_service import find_medecins_by_symptome
 from services.medecin_service import get_medecins_with_rating
@@ -197,3 +197,21 @@ def get_mes_rdv(
     ).all()
 
     return rdvs
+@router.get("/{id}")
+def get_medecin_by_id(id: int, session: Session = Depends(get_session)):
+
+    med = session.get(ProfilMedecin, id)
+
+    if not med:
+        raise HTTPException(status_code=404, detail="Médecin introuvable")
+
+    user = session.get(User, med.user_id)
+
+    return {
+        "id": med.id,
+        "nom": user.nom if user else None,
+        "prenom": user.prenom if user else None,
+        "adresse": med.adresse,
+        "tarif": med.tarif,
+        "biographie": med.biographie
+    }
