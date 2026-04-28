@@ -74,7 +74,7 @@ export class RegisterComponent implements OnInit {
 
     this.loading = true;
 
-    // ✅ DOCTOR
+    // DOCTOR
     if (this.role === 'MEDECIN') {
 
       const specialiteNom =
