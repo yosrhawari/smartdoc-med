@@ -11,7 +11,8 @@
       <p>Sign in to your SmartDoc Med account</p>
     </div>
 
-    <form (ngSubmit)="onSubmit()" class="auth-form" id="login-form">
+    <form (ngSubmit)="onSubmit()" class="auth-form" id="login-form"> <!-- formulaire de connexion avec un événement ngSubmit qui appelle la méthode onSubmit() du composant --> 
+      <!--(ngSubmit)="onSubmit()" permet de déclencher la méthode onSubmit() lorsque le formulaire est soumis, ce qui gère la logique de connexion de l'utilisateur -->
       <div class="form-group">
         <label for="email">Email Address</label>
         <div class="input-wrapper">

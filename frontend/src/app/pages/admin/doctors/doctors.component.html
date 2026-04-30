@@ -22,7 +22,7 @@
           </div>
           <span class="badge" [ngClass]="getStatusClass(doc.statut_validation)">
             {{ getStatusLabel(doc.statut_validation) }}
-          </span>
+          </span><!-- afficher le statut de validation du docteur (VALIDE, EN_ATTENTE, REJETE) avec une classe CSS différente pour chaque statut (ex: badge-validated, badge-pending, badge-rejected) --> 
         </div>
 
         <div class="verify-details">

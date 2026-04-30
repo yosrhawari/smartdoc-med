@@ -38,15 +38,15 @@ export class AdminUsersComponent implements OnInit {
   }
 
   onSearch(): void {
-    const q = this.searchQuery.toLowerCase();
-    this.filteredUsers = this.users.filter(u =>
-      u.email.toLowerCase().includes(q) ||
+    const q = this.searchQuery.toLowerCase(); //<!-- convertir la requête de recherche en minuscules pour une comparaison insensible à la casse -->
+    this.filteredUsers = this.users.filter(u => //<!-- filtrer les utilisateurs en fonction de la requête de recherche -->
+      u.email.toLowerCase().includes(q) || //<!-- vérifier si l'email de l'utilisateur contient la requête de recherche -->
       u.role.toLowerCase().includes(q)
     );
   }
 
   getRoleBadgeClass(role: string): string {
-    switch (role) {
+    switch (role) {//<!-- retourner une classe CSS différente en fonction du rôle de l'utilisateur -->
       case 'ADMIN': return 'badge-danger';
       case 'MEDECIN': return 'badge-primary';
       case 'PATIENT': return 'badge-success';

@@ -22,7 +22,7 @@ export class LoginComponent {
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
-  }
+  } // Méthode pour basculer la visibilité du mot de passe dans le champ de saisie (type="password" ou type="text") en fonction de l'état de showPassword
 
   onSubmit(): void {
     if (!this.email || !this.password) {
@@ -36,7 +36,7 @@ export class LoginComponent {
     this.authService.login(this.email, this.password).subscribe({
       next: () => {
         this.loading = false;
-        const role = this.authService.getRole();
+        const role = this.authService.getRole();// Récupérer le rôle de l'utilisateur connecté à partir du service d'authentification
         switch (role) {
           case 'PATIENT': this.router.navigate(['/patient/dashboard']); break;
           case 'MEDECIN': this.router.navigate(['/doctor/dashboard']); break;

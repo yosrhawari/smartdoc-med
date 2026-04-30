@@ -78,6 +78,6 @@ export class DoctorService {
   }
   // REGISTER DOCTOR (AUTH + PROFILE)
   registerDoctor(data: any): Observable<any> {
-    return this.http.post(`${this.API}/users/register`, data);
-  }
+    return this.http.post(`${this.API}/users/register-doctor`, data);
+}
 }

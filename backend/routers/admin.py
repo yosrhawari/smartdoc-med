@@ -36,11 +36,19 @@ def validate_medecin(
 
 
 
+<<<<<<< HEAD
+    # 🔹 3. vérifier / créer spécialité
+=======
 
+>>>>>>> 409a706604a097d37dec7af54589f99e5e528cc0
     specialite = session.exec(
         select(Specialite).where(Specialite.nom == n_specialite)
     ).first()
 
+<<<<<<< HEAD
+    # 🔥 si n'existe pas → créer
+=======
+>>>>>>> 409a706604a097d37dec7af54589f99e5e528cc0
     if not specialite:
         specialite = Specialite(
             nom=n_specialite,

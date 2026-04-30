@@ -10,7 +10,7 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  get<T>(endpoint: string, params?: any): Observable<T> {
+  get<T>(endpoint: string, params?: any): Observable<T> { // Méthode pour effectuer une requête GET à l'API, avec un endpoint spécifique et des paramètres optionnels
     return this.http.get<T>(`${this.baseUrl}${endpoint}`, { params });
   }
 

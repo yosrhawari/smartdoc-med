@@ -17,7 +17,7 @@
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </div>
           <div class="profile-info">
-            <h1 id="doctor-name">Doctor #{{ doctor.id }}</h1>
+            <h1 id="doctor-name">{{ doctor.id }}</h1>
             <div class="profile-badges">
               <span class="badge badge-primary">Specialist</span>
               <span class="badge badge-success" *ngIf="doctor.statut_validation === 'VALIDE'">Verified</span>
@@ -30,12 +30,12 @@
             <span class="stat-val">{{ averageRating.toFixed(1) }}</span>
             <span class="stat-lbl">Rating</span>
           </div>
-          <div class="profile-stat">
+          <div class="profile-stat"> </div>
             <span class="stat-val">{{ doctorReviews.length }}</span>
             <span class="stat-lbl">Reviews</span>
           </div>
           <div class="profile-stat">
-            <span class="stat-val">{{ doctor.tarif }} DH</span>
+            <span class="stat-val">{{ doctor.tarif }} DT</span>
             <span class="stat-lbl">Fee</span>
           </div>
         </div>
@@ -81,4 +81,4 @@
       </div>
     </div>
   </div>
-</div>
+

@@ -6,7 +6,7 @@ import { AdminService, PlatformStats } from '../../../core/services/admin.servic
 
 @Component({
   selector: 'app-admin-dashboard',
-  standalone: true,
+  standalone: true, 
   imports: [CommonModule, RouterModule, SidebarComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
@@ -22,7 +22,7 @@ export class AdminDashboardComponent implements OnInit {
     { label: 'Verification', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', route: '/admin/doctors' }
   ];
 
-  constructor(private adminService: AdminService) {}
+  constructor(private adminService: AdminService) {} // Injection du service AdminService
 
   ngOnInit(): void {
     this.adminService.getStats().subscribe({

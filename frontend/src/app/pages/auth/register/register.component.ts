@@ -10,23 +10,27 @@ import { DoctorService } from '../../../core/services/doctor.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.css'] // ✅ FIX
+  styleUrl: './register.component.css'
 })
 export class RegisterComponent implements OnInit {
 
+  // AUTH
   email = '';
   password = '';
   confirmPassword = '';
   role = 'PATIENT';
 
+  // DOCTOR PROFILE
   selectedSpecialite: number | 'autre' | '' = '';
   autreSpecialite = '';
   adresse = '';
   tarif = 0;
   biographie = '';
 
+  // DATA
   specialites: any[] = [];
 
+  // UI
   error = '';
   success = '';
   loading = false;
@@ -36,7 +40,7 @@ export class RegisterComponent implements OnInit {
     private authService: AuthService,
     private doctorService: DoctorService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.doctorService.getSpecialites().subscribe({
@@ -57,6 +61,7 @@ export class RegisterComponent implements OnInit {
     this.error = '';
     this.success = '';
 
+    // VALIDATION
     if (!this.email || !this.password || !this.confirmPassword) {
       this.error = 'Please fill all fields';
       return;
@@ -74,25 +79,24 @@ export class RegisterComponent implements OnInit {
 
     this.loading = true;
 
-    // DOCTOR
+    //  MEDECIN
     if (this.role === 'MEDECIN') {
-
-      const specialiteNom =
-        this.selectedSpecialite === 'autre'
-          ? this.autreSpecialite
-          : this.specialites.find(s => s.id === Number(this.selectedSpecialite))?.nom;
 
       const payload = {
         email: this.email,
         password: this.password,
-        role: "MEDECIN",
-        specialite_nom: specialiteNom,
+        specialite_id: this.selectedSpecialite !== 'autre'
+          ? Number(this.selectedSpecialite)
+          : null,
+        autre_specialite: this.selectedSpecialite === 'autre'
+          ? this.autreSpecialite
+          : null,
         adresse: this.adresse,
         tarif: this.tarif,
         biographie: this.biographie
       };
 
-      this.authService.register(payload).subscribe({
+      this.doctorService.registerDoctor(payload).subscribe({
         next: () => {
           this.loading = false;
           this.success = 'Doctor created successfully!';
@@ -106,14 +110,8 @@ export class RegisterComponent implements OnInit {
       });
 
     } else {
-      // ✅ PATIENT
-      const payload = {
-        email: this.email,
-        password: this.password,
-        role: "PATIENT"
-      };
-
-      this.authService.register(payload).subscribe({
+      // PATIENT
+      this.authService.register(this.email, this.password, this.role).subscribe({
         next: () => {
           this.loading = false;
           this.success = 'Account created!';
@@ -125,6 +123,7 @@ export class RegisterComponent implements OnInit {
           this.error = err.error?.detail || 'Registration failed';
         }
       });
+
     }
   }
 }

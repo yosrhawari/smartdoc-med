@@ -1,14 +1,21 @@
 from fastapi import APIRouter, Depends,HTTPException
 from sqlmodel import Session, select
 from database import get_session
+<<<<<<< HEAD
+from models import ProfilMedecin,Specialite
+=======
 from models import ProfilMedecin,Specialite,RendezVous, User
+>>>>>>> 409a706604a097d37dec7af54589f99e5e528cc0
 from schemas import MedecinCreate
 from services.matching_service import find_medecins_by_symptome
 from services.medecin_service import get_medecins_with_rating
 from services.matching_service import find_medecins_advanced
 from services.ai_service import detect_specialite
 from services.score_service import compute_score
+<<<<<<< HEAD
+=======
 from utils.dependencies import get_current_user
+>>>>>>> 409a706604a097d37dec7af54589f99e5e528cc0
 
 
 router = APIRouter(prefix="/medecins", tags=["Medecins"])
@@ -112,6 +119,9 @@ def ai_smart_search(symptome: str, session: Session = Depends(get_session)):
     return {
         "specialite_detected": specialite_nom,
         "medecins": results
+<<<<<<< HEAD
+    }
+=======
     }
 @router.put("/rdv/{rdv_id}/accept")
 def accepter_rdv(
@@ -215,3 +225,4 @@ def get_medecin_by_id(id: int, session: Session = Depends(get_session)):
         "tarif": med.tarif,
         "biographie": med.biographie
     }
+>>>>>>> 409a706604a097d37dec7af54589f99e5e528cc0
