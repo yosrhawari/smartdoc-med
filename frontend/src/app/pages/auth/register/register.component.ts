@@ -80,7 +80,7 @@ export class RegisterComponent implements OnInit {
       const specialiteNom =
         this.selectedSpecialite === 'autre'
           ? this.autreSpecialite
-          : this.specialites.find(s => s.id === this.selectedSpecialite)?.nom;
+          : this.specialites.find(s => s.id === Number(this.selectedSpecialite))?.nom;
 
       const payload = {
         email: this.email,

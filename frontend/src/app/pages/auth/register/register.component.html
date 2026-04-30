@@ -22,13 +22,13 @@
 
         <div class="role-option"
              [class.selected]="role === 'PATIENT'"
-             (click)="selectRole('PATIENT')">
+             (click)="selectRole('PATIENT')" id="role-patient">
           <div>🏥 Patient</div>
         </div>
 
         <div class="role-option"
              [class.selected]="role === 'MEDECIN'"
-             (click)="selectRole('MEDECIN')">
+             (click)="selectRole('MEDECIN')" id="role-doctor">
           <div>🩺 Doctor</div>
         </div>
 
@@ -80,7 +80,7 @@
               {{ sp.nom }}
             </option>
 
-            <option value="autre">Autre</option>
+            <option value="autre" id="autre">Autre</option>
 
           </select>
         </div>
@@ -133,7 +133,7 @@
         {{ success }}
       </div>
       <!-- BUTTON -->
-      <button type="submit" [disabled]="loading" class="btn btn-primary">
+      <button type="submit" class="btn btn-primary" id="register-submit">
         {{ loading ? 'Loading...' : 'Create Account' }}
       </button>
 
