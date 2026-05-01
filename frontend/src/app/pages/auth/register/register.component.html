@@ -22,13 +22,13 @@
 
         <div class="role-option"
              [class.selected]="role === 'PATIENT'"
-             (click)="selectRole('PATIENT')" id="role-patient">
+             (click)="selectRole('PATIENT')">
           <div>🏥 Patient</div>
         </div>
 
         <div class="role-option"
              [class.selected]="role === 'MEDECIN'"
-             (click)="selectRole('MEDECIN')" id="role-doctor">
+             (click)="selectRole('MEDECIN')">
           <div>🩺 Doctor</div>
         </div>
 
@@ -40,7 +40,8 @@
         <input type="email"
                [(ngModel)]="email"
                name="email"
-               class="form-control">
+               class="form-control"
+               required>
       </div>
 
       <!-- PASSWORD -->
@@ -49,7 +50,8 @@
         <input [type]="showPassword ? 'text' : 'password'"
                [(ngModel)]="password"
                name="password"
-               class="form-control">
+               class="form-control"
+               required>
       </div>
 
       <!-- CONFIRM -->
@@ -58,13 +60,39 @@
         <input [type]="showPassword ? 'text' : 'password'"
                [(ngModel)]="confirmPassword"
                name="confirmPassword"
-               class="form-control">
+               class="form-control"
+               required>
       </div>
 
-      <!-- DOCTOR SECTION -->
+      <!-- ================= DOCTOR SECTION ================= -->
       <div *ngIf="role === 'MEDECIN'">
 
         <h3>Doctor Profile</h3>
+
+        <!-- IMAGE -->
+        <div class="form-group">
+          <label>Photo de profil</label>
+
+          <input type="file"
+                 name="image"
+                 (change)="onFileSelected($event)"
+                 class="form-control"
+                 accept="image/*"
+                 required>
+        </div>
+
+        <!-- PREVIEW -->
+        <div *ngIf="imagePreview" class="form-group">
+          <img [src]="imagePreview"
+               alt="Preview"
+               width="120"
+               style="border-radius: 10px; margin-top: 10px;">
+        </div>
+
+        <!-- FILE NAME -->
+        <div *ngIf="selectedFile" class="form-group">
+          <small>Selected: {{ selectedFile.name }}</small>
+        </div>
 
         <!-- SPECIALITE -->
         <div class="form-group">
@@ -72,15 +100,14 @@
 
           <select [(ngModel)]="selectedSpecialite"
                   name="selectedSpecialite"
-                  class="form-control">
-
+                  class="form-control"> 
             <option value="">-- Choisir --</option>
 
-            <option *ngFor="let sp of specialites" [value]="sp.id">
+            <option *ngFor="let sp of specialites" [value]="sp.nom">
               {{ sp.nom }}
             </option>
 
-            <option value="autre" id="autre">Autre</option>
+            <option value="autre">Autre</option>
 
           </select>
         </div>
@@ -92,7 +119,8 @@
           <input type="text"
                  [(ngModel)]="autreSpecialite"
                  name="autreSpecialite"
-                 class="form-control">
+                 class="form-control"
+                 required>
         </div>
 
         <!-- ADRESSE -->
@@ -101,7 +129,8 @@
           <input type="text"
                  [(ngModel)]="adresse"
                  name="adresse"
-                 class="form-control">
+                 class="form-control"
+                 required>
         </div>
 
         <!-- TARIF -->
@@ -110,7 +139,8 @@
           <input type="number"
                  [(ngModel)]="tarif"
                  name="tarif"
-                 class="form-control">
+                 class="form-control"
+                 required>
         </div>
 
         <!-- BIO -->
@@ -132,8 +162,9 @@
       <div *ngIf="success" class="alert alert-success">
         {{ success }}
       </div>
+
       <!-- BUTTON -->
-      <button type="submit" class="btn btn-primary" id="register-submit">
+      <button type="submit" class="btn btn-primary">
         {{ loading ? 'Loading...' : 'Create Account' }}
       </button>
 

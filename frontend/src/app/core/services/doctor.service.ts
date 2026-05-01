@@ -77,7 +77,7 @@ export class DoctorService {
     return this.http.get<Specialite[]>(`${this.API}/specialites/`);
   }
   // REGISTER DOCTOR (AUTH + PROFILE)
-  registerDoctor(data: any): Observable<any> {
-    return this.http.post(`${this.API}/users/register-doctor`, data);
+  registerDoctor(data: FormData): Observable<any> {
+  return this.http.post(`${this.API}/medecins/create`, data);
 }
 }

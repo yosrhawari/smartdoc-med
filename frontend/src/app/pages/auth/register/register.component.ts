@@ -21,11 +21,15 @@ export class RegisterComponent implements OnInit {
   role = 'PATIENT';
 
   // DOCTOR PROFILE
-  selectedSpecialite: number | 'autre' | '' = '';
+  selectedSpecialite: string | 'autre' | '' = '';
   autreSpecialite = '';
   adresse = '';
   tarif = 0;
   biographie = '';
+
+  // 📸 IMAGE
+  selectedFile!: File;
+  imagePreview: string | ArrayBuffer | null = null;
 
   // DATA
   specialites: any[] = [];
@@ -40,7 +44,7 @@ export class RegisterComponent implements OnInit {
     private authService: AuthService,
     private doctorService: DoctorService,
     private router: Router
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.doctorService.getSpecialites().subscribe({
@@ -55,6 +59,21 @@ export class RegisterComponent implements OnInit {
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
+  }
+
+  // 📸 IMAGE SELECT
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+
+    if (file) {
+      this.selectedFile = file;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagePreview = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   onSubmit(): void {
@@ -79,24 +98,42 @@ export class RegisterComponent implements OnInit {
 
     this.loading = true;
 
-    //  MEDECIN
+    // ===================== MEDECIN =====================
     if (this.role === 'MEDECIN') {
+
+      if (!this.selectedFile) {
+        this.error = "Image obligatoire";
+        this.loading = false;
+        return;
+      }
+
+      if (
+        this.selectedSpecialite === 'autre' &&
+        !this.autreSpecialite.trim()
+      ) {
+        this.error = "Veuillez saisir votre spécialité";
+        this.loading = false;
+        return;
+      }
 
       const payload = {
         email: this.email,
         password: this.password,
-        specialite_id: this.selectedSpecialite !== 'autre'
-          ? Number(this.selectedSpecialite)
-          : null,
-        autre_specialite: this.selectedSpecialite === 'autre'
-          ? this.autreSpecialite
-          : null,
+        role: "MEDECIN",
+
+        specialite_nom:
+          this.selectedSpecialite === 'autre'
+            ? this.autreSpecialite.trim()
+            : String(this.selectedSpecialite).trim(),
+
         adresse: this.adresse,
         tarif: this.tarif,
         biographie: this.biographie
       };
 
-      this.doctorService.registerDoctor(payload).subscribe({
+      console.log("PAYLOAD =", payload);
+
+      this.authService.register(payload).subscribe({
         next: () => {
           this.loading = false;
           this.success = 'Doctor created successfully!';
@@ -108,10 +145,18 @@ export class RegisterComponent implements OnInit {
           this.error = err.error?.detail || 'Doctor creation failed';
         }
       });
+    }
 
-    } else {
-      // PATIENT
-      this.authService.register(this.email, this.password, this.role).subscribe({
+    // ===================== PATIENT =====================
+    else {
+
+      const payload = {
+        email: this.email,
+        password: this.password,
+        role: "PATIENT"
+      };
+
+      this.authService.register(payload).subscribe({
         next: () => {
           this.loading = false;
           this.success = 'Account created!';
@@ -123,7 +168,6 @@ export class RegisterComponent implements OnInit {
           this.error = err.error?.detail || 'Registration failed';
         }
       });
-
     }
   }
 }
