@@ -29,7 +29,7 @@ class ProfilMedecin(SQLModel, table=True):
     prenom: str
     tarif: float
     biographie: Optional[str] = None
-    diplome_path: Optional[str] = None
+    image_path: Optional[str] = None
     statut_validation: str = "en_attente"
     spec_nom_temp: Optional[str] = None  # cache temporaire pour spécialité
     est_disponible: bool = Field(default=True)
