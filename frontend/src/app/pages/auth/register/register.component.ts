@@ -21,6 +21,8 @@ export class RegisterComponent implements OnInit {
   role = 'PATIENT';
 
   // DOCTOR PROFILE
+  nom = '';
+  prenom = '';
   selectedSpecialite: string | 'autre' | '' = '';
   autreSpecialite = '';
   adresse = '';
@@ -32,7 +34,7 @@ export class RegisterComponent implements OnInit {
   imagePreview: string | ArrayBuffer | null = null;
 
   // DATA
- specialites: any[] = [];
+  specialites: any[] = [];
 
   // UI
   error = '';
@@ -44,7 +46,7 @@ export class RegisterComponent implements OnInit {
     private authService: AuthService,
     private doctorService: DoctorService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.doctorService.getSpecialites().subscribe({
@@ -67,15 +69,8 @@ export class RegisterComponent implements OnInit {
 
     if (file) {
       this.selectedFile = file;
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.imagePreview = reader.result;
-      };
-      reader.readAsDataURL(file);
     }
   }
-
   onSubmit(): void {
     this.error = '';
     this.success = '';
@@ -120,6 +115,8 @@ export class RegisterComponent implements OnInit {
         email: this.email,
         password: this.password,
         role: "MEDECIN",
+        nom: this.nom,
+        prenom: this.prenom,
 
         specialite_nom:
           this.selectedSpecialite === 'autre'
