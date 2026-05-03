@@ -82,6 +82,12 @@ export class DoctorProfileEditComponent implements OnInit {
         this.profile.biographie  = data.biographie || '';
         this.profile.specialite_id = data.specialite_id || null;
         this.profile.specialite  = data.specialite || '';
+
+        // Load profile photo from backend
+        if (data.image) {
+          this.photoPreview = `http://localhost:8000/uploads/${data.image}`;
+        }
+
         this.loadingProfile = false;
       },
       error: (err) => {

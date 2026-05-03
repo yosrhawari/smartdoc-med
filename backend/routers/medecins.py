@@ -55,7 +55,7 @@ def create_medecin(
         tarif=tarif,
         specialite_id=None,          # sera ajouté après validation admin
         spec_nom_temp=specialite_nom, # ✔ stockage temporaire propre
-        diplome_path=filename,
+        image_path=filename,
         statut_validation="en_attente"
     )
 
@@ -317,6 +317,6 @@ def get_medecin_by_id(id: int, session: Session = Depends(get_session)):
         "biographie": med.biographie,
         "est_disponible": getattr(med, "est_disponible", True),
         "prochain_rdv": get_next_available(med.id, session),
-        "image": med.image  
+        "image": med.image_path  
     }
     

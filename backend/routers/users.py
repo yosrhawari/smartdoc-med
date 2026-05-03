@@ -47,7 +47,7 @@ def register(user: UserCreate, session: Session = Depends(get_session)):
                 adresse=user.adresse or "",
                 tarif=user.tarif or 0,
                 biographie=user.biographie or "",
-                diplome_path=user.diplome_path or "",
+                image_path=user.diplome_path or "",
                 statut_validation="en_attente",
                 spec_nom_temp=user.specialite_nom
             )
