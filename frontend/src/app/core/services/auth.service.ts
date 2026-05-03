@@ -46,19 +46,14 @@ export class AuthService {
     }
   }
 
-  // Envoie les données d’inscription au backend
-  register(email: string, password: string, role: string): Observable<any> {
-   return this.http.post('http://localhost:8000/users/register', {
-     email,
-     password,
-      role
-});
+  // ✅ REGISTER (patient + doctor)
+  register(data: any) {
+    return this.http.post('http://localhost:8000/users/register', { ...data });
   }
 
   // Envoie les identifiants au backend et récupère le token
   login(email: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>('http://localhost:8000/users/login', { email, password }).pipe(
-      // Exécute une action après la réponse
+    return this.http.post<LoginResponse>(`${this.API}/users/login`, { email, password }).pipe(
       tap(res => {
         // Sauvegarde le token dans le stockage local
         localStorage.setItem('smartdoc_token', res.access_token);

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import SQLModel
 from database import engine
+from fastapi.staticfiles import StaticFiles
 
 # routers
 from routers import users, medecins, rendezvous, reviews,test,admin,specialite,ai
@@ -21,6 +22,7 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     SQLModel.metadata.create_all(engine)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # inclusion des routes
 

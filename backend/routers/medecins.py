@@ -10,48 +10,74 @@ from services.ai_service import detect_specialite
 from services.score_service import compute_score
 from utils.dependencies import get_current_user
 from services.availability_service import get_next_available
+from fastapi import UploadFile, File, Form
+import shutil
+import os
+
 
 router = APIRouter(prefix="/medecins", tags=["Medecins"])
 
-# CREATE MEDECIN
-from models import Specialite
-from sqlmodel import select
-
+ 
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.post("/create")
-def create_medecin(data: dict, session: Session = Depends(get_session)):
+def create_medecin(
+    user_id: int = Form(...),
+    nom: str = Form(...),
+    prenom: str = Form(...),
+    adresse: str = Form(...),
+    tarif: float = Form(...),
+    specialite_nom: str = Form(...),
+    image: UploadFile = File(...),
+    session: Session = Depends(get_session)
+):
+    import os, shutil
 
-    specialite_nom = data.get("specialite_nom")
+    UPLOAD_DIR = "uploads"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-    # chercher si spécialité existe
-    specialite = session.exec(
-        select(Specialite).where(Specialite.nom == specialite_nom)
-    ).first()
+    #  sauvegarder image
+    filename = f"{user_id}_{image.filename}"
+    file_path = os.path.join(UPLOAD_DIR, filename)
 
-    #  ne pas créer maintenant → attendre validation admin
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+
+    #  créer profil médecin (spécialité en attente)
     med = ProfilMedecin(
-        user_id=data["user_id"],
-        adresse=data["adresse"],
-        tarif=data["tarif"],
-        specialite_id=None  # sera ajouté plus tard
+        user_id=user_id,
+        nom=nom,
+        prenom=prenom,
+        adresse=adresse,
+        tarif=tarif,
+        specialite_id=None,          # sera ajouté après validation admin
+        spec_nom_temp=specialite_nom, # ✔ stockage temporaire propre
+        diplome_path=filename,
+        statut_validation="en_attente"
     )
-
-    #  stocker temporairement dans mémoire (ou payload)
-    med._specialite_nom = specialite_nom  #  hack temporaire
 
     session.add(med)
     session.commit()
+    session.refresh(med)
 
-    return med
+    return {
+        "message": "Médecin créé, en attente de validation",
+        "medecin_id": med.id
+    }
 
-# GET ALL MEDECINS (VALIDES SEULEMENT)
 @router.get("/")
 def get_medecins(session: Session = Depends(get_session)):
-    return get_medecins_with_rating(session)
+    statement = select(ProfilMedecin).where(
+        ProfilMedecin.statut_validation == "VALIDE"
+    )
+    return session.exec(statement).all()
+
 #find medecin by symptome
 @router.get("/search")
 def search_medecins(symptome: str, session: Session = Depends(get_session)):
     return find_medecins_by_symptome(symptome, session)
+
 #get medecinsz with rating
 @router.get("/with-rating")
 def medecins_with_rating(session: Session = Depends(get_session)):
@@ -60,7 +86,6 @@ def medecins_with_rating(session: Session = Depends(get_session)):
 @router.get("/smart-search")
 def smart_search(symptome: str, session: Session = Depends(get_session)):
     return find_medecins_advanced(symptome, session)
-
 
 
 @router.get("/ai-smart-search")
@@ -110,6 +135,7 @@ def ai_smart_search(symptome: str, session: Session = Depends(get_session)):
         "specialite_detected": specialite_nom,
         "medecins": results
     }
+
 @router.put("/rdv/{rdv_id}/accept")
 def accepter_rdv(
     rdv_id: int,
@@ -147,6 +173,7 @@ def accepter_rdv(
     session.commit()
 
     return {"message": "Rendez-vous accepté"}
+
 @router.put("/rdv/{rdv_id}/refuse")
 def refuser_rdv(
     rdv_id: int,
@@ -176,6 +203,7 @@ def refuser_rdv(
     session.commit()
 
     return {"message": "Rendez-vous refusé"}
+
 @router.get("/rdv")
 def get_mes_rdv(
     session: Session = Depends(get_session),
@@ -194,6 +222,7 @@ def get_mes_rdv(
     ).all()
 
     return rdvs
+
 @router.get("/{id}")
 def get_medecin_by_id(id: int, session: Session = Depends(get_session)):
 
@@ -217,5 +246,7 @@ def get_medecin_by_id(id: int, session: Session = Depends(get_session)):
         "specialite": spec.nom if spec else "Médecin",
         "biographie": med.biographie,
         "est_disponible": getattr(med, "est_disponible", True),
-        "prochain_rdv": get_next_available(med.id, session)
+        "prochain_rdv": get_next_available(med.id, session),
+        "image": med.image  
     }
+    
