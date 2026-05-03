@@ -1,111 +1,173 @@
-<div class="booking-page animate-fade-in-up">
-  <div class="container">
-    <a routerLink="/patient/doctors" class="back-link" id="back-from-booking">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-      Back to Doctors
-    </a>
+<div class="dashboard-layout">
+  <app-sidebar title="Patient"></app-sidebar>
 
-    <!-- Booking Form -->
-    <div *ngIf="!booked" class="booking-layout">
-      <div class="booking-card">
-        <h2 id="booking-title">Book an Appointment</h2>
-        <p class="booking-subtitle">Doctor #{{ doctorId }} — Select a date and time</p>
-
-        <!-- Calendar -->
-        <div class="calendar" id="booking-calendar">
-          <div class="calendar-header">
-            <button class="cal-nav" (click)="prevMonth()" id="cal-prev">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            <h3 class="cal-month">{{ getMonthName() }}</h3>
-            <button class="cal-nav" (click)="nextMonth()" id="cal-next">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
+  <main class="dashboard-main">
+    <div class="booking-container animate-fade-in" *ngIf="!booked">
+      <!-- Layout Grid -->
+      <div class="booking-grid">
+        
+        <!-- Left Column: Calendar -->
+        <div class="calendar-section glass-card">
+          <div class="section-header">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <h2>Select Date</h2>
           </div>
 
-          <div class="calendar-grid">
-            <div *ngFor="let day of weekDays" class="cal-weekday">{{ day }}</div>
-            <div *ngFor="let day of calendarDays"
-                 class="cal-day"
-                 [class.empty]="day === null"
-                 [class.selected]="day !== null && isSelectedDay(day)"
-                 [class.today]="day !== null && isToday(day)"
-                 [class.past]="day !== null && isPastDate(day)"
-                 (click)="day !== null && selectDate(day)">
-              {{ day }}
+          <div class="calendar">
+            <div class="calendar-header">
+              <span class="cal-month">{{ currentMonth | date:'MMMM yyyy' }}</span>
+              <div class="cal-controls">
+                <button (click)="prevMonth()" class="cal-nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+                <button (click)="nextMonth()" class="cal-nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+              </div>
+            </div>
+
+            <div class="calendar-grid">
+              <div *ngFor="let day of weekDays" class="cal-weekday">{{ day }}</div>
+              <div *ngFor="let day of calendarDays" 
+                   class="cal-day"
+                   [class.empty]="!day"
+                   [class.past]="day && isPastDate(day)"
+                   [class.today]="day && isToday(day)"
+                   [class.selected]="day && selectedDate === (currentMonth.getFullYear() + '-' + ((currentMonth.getMonth() + 1) | number:'2.0') + '-' + (day | number:'2.0'))"
+                   (click)="day && selectDate(day)">
+                {{ day }}
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Time Slots -->
-        <div class="time-section" *ngIf="selectedDate">
-          <h3>Select Time</h3>
-          <div class="time-grid">
-            <button *ngFor="let time of timeSlots"
-                    class="time-slot"
-                    [class.selected]="selectedTime === time"
-                    (click)="selectTime(time)">
-              {{ time }}
+        <!-- Right Column: Slots & Summary -->
+        <div class="right-column">
+          
+          <!-- Slots Section -->
+          <div class="slots-section glass-card">
+            <div class="section-header">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <h2>Available Time Slots</h2>
+            </div>
+
+            <div class="slots-content">
+              <div *ngIf="!selectedDate" class="slot-placeholder">
+                <p>Please select a date first</p>
+              </div>
+
+              <div *ngIf="selectedDate && loadingSlots" class="loading-slots">
+                <div class="spinner-sm"></div>
+                <span>Loading availability...</span>
+              </div>
+
+              <div class="time-grid" *ngIf="selectedDate && !loadingSlots && timeSlots.length > 0">
+                <button *ngFor="let time of timeSlots"
+                        class="time-slot"
+                        [class.selected]="selectedTime === time"
+                        (click)="selectTime(time)">
+                  {{ time }}
+                </button>
+              </div>
+
+              <div *ngIf="selectedDate && !loadingSlots && timeSlots.length === 0" class="no-slots">
+                <span>No slots available for this date.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Summary Section -->
+          <div class="summary-section glass-card">
+            <h2 class="section-title">Appointment Summary</h2>
+            
+            <div class="summary-list">
+              <div class="summary-item">
+                <span class="label">Doctor</span>
+                <span class="value">Dr. {{ doctor?.nom ? (doctor?.nom + ' ' + doctor?.prenom) : doctorId }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">Specialty</span>
+                <span class="value">{{ doctor?.specialite || 'General Physician' }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">Date</span>
+                <span class="value" [class.not-selected]="!selectedDate">{{ selectedDate || 'Not selected' }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">Time</span>
+                <span class="value" [class.not-selected]="!selectedTime">{{ selectedTime || 'Not selected' }}</span>
+              </div>
+              <div class="summary-divider"></div>
+              <div class="summary-item total">
+                <span class="label">Consultation Fee</span>
+                <span class="value fee">{{ doctor?.tarif || 0 }} DT</span>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-full confirm-btn" 
+                    [disabled]="!selectedDate || !selectedTime || loading"
+                    (click)="confirmBooking()">
+              <span *ngIf="!loading">Confirm Booking</span>
+              <span *ngIf="loading" class="spinner-white"></span>
             </button>
           </div>
         </div>
 
-        <div *ngIf="error" class="alert alert-error">{{ error }}</div>
-
-        <button class="btn btn-primary btn-full"
-                [disabled]="!canBook() || loading"
-                (click)="bookAppointment()"
-                id="btn-confirm-booking">
-          <span *ngIf="!loading">Confirm Booking</span>
-          <span *ngIf="loading" class="spinner"></span>
-        </button>
-      </div>
-
-      <!-- Summary Sidebar -->
-      <div class="booking-summary">
-        <h3>Booking Summary</h3>
-        <div class="summary-item">
-          <span class="summary-label">Doctor</span>
-          <span class="summary-value">Doctor #{{ doctorId }}</span>
-        </div>
-        <div class="summary-item">
-          <span class="summary-label">Date</span>
-          <span class="summary-value">{{ selectedDate || 'Not selected' }}</span>
-        </div>
-        <div class="summary-item">
-          <span class="summary-label">Time</span>
-          <span class="summary-value">{{ selectedTime || 'Not selected' }}</span>
-        </div>
       </div>
     </div>
 
-    <!-- Confirmation -->
-    <div *ngIf="booked" class="confirmation-card animate-fade-in-up" id="booking-confirmation">
-      <div class="confirm-icon">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      </div>
-      <h2>Booking Confirmed! 🎉</h2>
-      <p>Your appointment has been scheduled successfully</p>
-
-      <div class="confirm-details">
-        <div class="confirm-row">
-          <span>Doctor</span>
-          <strong>Doctor #{{ doctorId }}</strong>
-        </div>
-        <div class="confirm-row">
-          <span>Date</span>
-          <strong>{{ selectedDate }}</strong>
-        </div>
-        <div class="confirm-row">
-          <span>Time</span>
-          <strong>{{ selectedTime }}</strong>
+    <!-- Success Screen (Screenshot 4) -->
+    <div class="success-screen animate-fade-in" *ngIf="booked">
+      <div class="success-icon-wrapper">
+        <div class="success-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/><circle cx="12" cy="12" r="11" stroke="white" stroke-width="2"/></svg>
         </div>
       </div>
+      
+      <h1 class="success-title">Appointment Confirmed!</h1>
+      <p class="success-msg">Your appointment has been successfully scheduled</p>
 
-      <div class="confirm-actions">
-        <a routerLink="/patient/dashboard" class="btn btn-primary" id="btn-go-dashboard">Go to Dashboard</a>
-        <a routerLink="/patient/doctors" class="btn btn-secondary">Browse More Doctors</a>
+      <div class="success-card">
+        <div class="confirm-details-card">
+          <div class="confirm-doc">
+            <div class="doc-avatar-square-sm"></div>
+            <div class="doc-info">
+              <h3>Dr. {{ doctor?.nom ? (doctor?.nom + ' ' + doctor?.prenom) : doctorId }}</h3>
+              <p>{{ doctor?.specialite || 'General Physician' }}</p>
+            </div>
+          </div>
+
+          <div class="confirm-rows">
+            <div class="confirm-row">
+              <div class="row-icon icon-light-blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+              <div class="row-text">
+                <label>Date</label>
+                <p>Tomorrow, {{ selectedDate | date:'MMMM d, yyyy' }}</p>
+              </div>
+            </div>
+            <div class="confirm-row">
+              <div class="row-icon icon-light-blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+              <div class="row-text">
+                <label>Time</label>
+                <p>{{ selectedTime }}</p>
+              </div>
+            </div>
+            <div class="confirm-row">
+              <div class="row-icon icon-light-blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+              <div class="row-text">
+                <label>Location</label>
+                <p>{{ doctor?.adresse || 'Main Medical Center' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="booking-id-tag">
+            <span>Booking ID</span>
+            <strong>#{{ bookedId || 'REF-000100' }}</strong>
+          </div>
+        </div>
+
+        <div class="success-actions">
+          <button class="btn btn-primary" routerLink="/patient/dashboard">Back to Dashboard</button>
+          <button class="btn btn-ghost" (click)="booked = false">Book Another</button>
+        </div>
       </div>
     </div>
-  </div>
+  </main>
 </div>

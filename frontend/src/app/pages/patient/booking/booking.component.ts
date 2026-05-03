@@ -2,11 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { AppointmentService } from '../../../core/services/appointment.service';
+import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
+import { DoctorService, Doctor } from '../../../core/services/doctor.service';
 
 @Component({
   selector: 'app-booking',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, SidebarComponent],
   templateUrl: './booking.component.html',
   styleUrl: './booking.component.css'
 })
@@ -15,28 +17,38 @@ export class BookingComponent implements OnInit {
   selectedDate: string = '';
   selectedTime: string = '';
   booked = false;
+  bookedId: string | null = null;
   loading = false;
   error = '';
+  doctor: Doctor | null = null;
 
   currentMonth: Date = new Date();
   calendarDays: (number | null)[] = [];
 
-  timeSlots = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
-  ];
+  timeSlots: string[] = [];
+  loadingSlots = false;
 
   weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private appointmentService: AppointmentService
+    private appointmentService: AppointmentService,
+    private doctorService: DoctorService
   ) {}
 
   ngOnInit(): void {
     this.doctorId = Number(this.route.snapshot.paramMap.get('id'));
+    this.loadDoctor();
     this.generateCalendar();
+  }
+
+  loadDoctor(): void {
+    this.doctorService.getDoctors().subscribe({
+      next: (doctors) => {
+        this.doctor = doctors.find(d => d.id === this.doctorId) || null;
+      }
+    });
   }
 
   generateCalendar(): void {
@@ -69,7 +81,23 @@ export class BookingComponent implements OnInit {
       const month = String(this.currentMonth.getMonth() + 1).padStart(2, '0');
       const dayStr = String(day).padStart(2, '0');
       this.selectedDate = `${this.currentMonth.getFullYear()}-${month}-${dayStr}`;
+      this.selectedTime = '';
+      this.fetchSlots();
     }
+  }
+
+  fetchSlots(): void {
+    this.loadingSlots = true;
+    this.appointmentService.getAvailableSlots(this.doctorId, this.selectedDate).subscribe({
+      next: (res: any) => {
+        this.timeSlots = res.available_slots;
+        this.loadingSlots = false;
+      },
+      error: () => {
+        this.loadingSlots = false;
+        this.error = 'Could not load availability. Please try again.';
+      }
+    });
   }
 
   selectTime(time: string): void {
@@ -82,12 +110,12 @@ export class BookingComponent implements OnInit {
     return this.selectedDate === `${this.currentMonth.getFullYear()}-${month}-${dayStr}`;
   }
 
-  isPastDate(day: number): boolean {
-    const date = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth(), day);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return date < today;
-  }
+isPastDate(day: number): boolean {
+  const checkDate = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth(), day);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return checkDate < today;
+}
 
   isToday(day: number): boolean {
     const today = new Date();
@@ -104,21 +132,21 @@ export class BookingComponent implements OnInit {
     return !!this.selectedDate && !!this.selectedTime;
   }
 
-  bookAppointment(): void {
+  confirmBooking(): void {
     if (!this.canBook()) return;
 
     this.loading = true;
     this.error = '';
 
-    const dateTime = `${this.selectedDate} ${this.selectedTime}`;
-
-    this.appointmentService.createAppointment({
-      medecin_id: this.doctorId,
-      date_rdv: dateTime
-    }).subscribe({
-      next: () => {
+  this.appointmentService.createAppointment({
+    medecin_id: this.doctorId,
+    date: this.selectedDate,
+    heure: this.selectedTime
+  }).subscribe({
+      next: (res: any) => {
         this.loading = false;
         this.booked = true;
+        this.bookedId = res.id;
       },
       error: (err) => {
         this.loading = false;

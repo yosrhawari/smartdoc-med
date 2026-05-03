@@ -28,7 +28,7 @@ export class RegisterComponent implements OnInit {
   biographie = '';
 
   // DATA
-  specialites: any[] = [];
+ specialites: any[] = [];
 
   // UI
   error = '';

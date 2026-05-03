@@ -9,12 +9,19 @@ export interface Doctor {
   id: number;
   user_id: number;
   specialite_id: number;
+  nom?: string;
+  prenom?: string;
+  specialite?: string;
   adresse: string;
   tarif: number;
   biographie?: string;
   diplome_path?: string;
   statut_validation: string;
- 
+  est_disponible: boolean;
+  prochain_rdv?: {
+    date: string;
+    heure: string;
+  };
 }
 
 export interface DoctorWithRating {
@@ -23,6 +30,13 @@ export interface DoctorWithRating {
   note_moyenne: number;
   nom?: string;
   prenom?: string;
+  specialite?: string;
+  tarif?: number;
+  est_disponible?: boolean;
+  prochain_rdv?: {
+    date: string;
+    heure: string;
+  };
 }
 
 export interface SmartSearchResult {
@@ -31,6 +45,15 @@ export interface SmartSearchResult {
   score_matching: number;
   note_moyenne: number;
   score_final: number;
+  nom?: string;
+  prenom?: string;
+  specialite?: string;
+  tarif?: number;
+  est_disponible?: boolean;
+  prochain_rdv?: {
+    date: string;
+    heure: string;
+  };
 }
 
 // NEW interface
@@ -45,9 +68,9 @@ export interface Specialite {
   providedIn: 'root'
 })
 export class DoctorService {
-   private API = 'http://localhost:8000';
+  private API = 'http://localhost:8000';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // Doctors
   getDoctors(): Observable<Doctor[]> {
@@ -58,7 +81,7 @@ export class DoctorService {
   searchDoctors(symptom: string): Observable<SmartSearchResult[]> {
     return this.http.get<SmartSearchResult[]>(
       `${this.API}/medecins/smart-search`,
-      { params :{ symptome: symptom } }
+      { params: { symptome: symptom } }
     );
   }
 
@@ -79,5 +102,5 @@ export class DoctorService {
   // REGISTER DOCTOR (AUTH + PROFILE)
   registerDoctor(data: any): Observable<any> {
     return this.http.post(`${this.API}/users/register-doctor`, data);
-}
+  }
 }

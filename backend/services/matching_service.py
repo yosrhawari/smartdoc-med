@@ -89,8 +89,17 @@ def find_medecins_advanced(symptome: str, session: Session):
             # score final
             final_score = item["score"] * 2 + moyenne
 
+            from services.availability_service import get_next_available
+            spec_name = session.get(Specialite, med.specialite_id).nom if med.specialite_id else "Médecin"
+
             results.append({
                 "medecin_id": med.id,
+                "nom": med.nom,
+                "prenom": med.prenom,
+                "specialite": spec_name,
+                "tarif": med.tarif,
+                "est_disponible": getattr(med, "est_disponible", True),
+                "prochain_rdv": get_next_available(med.id, session),
                 "adresse": med.adresse,
                 "score_matching": item["score"],
                 "note_moyenne": round(moyenne, 2),

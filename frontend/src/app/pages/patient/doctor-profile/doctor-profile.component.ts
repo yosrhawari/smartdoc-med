@@ -4,11 +4,12 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
 import { DoctorService, Doctor } from '../../../core/services/doctor.service';
 import { ReviewService, Review } from '../../../core/services/review.service';
 import { AppointmentService } from '../../../core/services/appointment.service';
+import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-doctor-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, SidebarComponent],
   templateUrl: './doctor-profile.component.html',
   styleUrl: './doctor-profile.component.css'
 })
@@ -25,7 +26,7 @@ export class DoctorProfileComponent implements OnInit {
     private doctorService: DoctorService,
     private reviewService: ReviewService,
     private appointmentService: AppointmentService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.doctorId = Number(this.route.snapshot.paramMap.get('id'));

@@ -1,6 +1,6 @@
 from typing import Optional
 from sqlmodel import SQLModel, Field
-
+from datetime import date, time
 
 # USERS
 class User(SQLModel, table=True):
@@ -32,6 +32,7 @@ class ProfilMedecin(SQLModel, table=True):
     diplome_path: Optional[str] = None
     statut_validation: str = "en_attente"
     spec_nom_temp: Optional[str] = None  # cache temporaire pour spécialité
+    est_disponible: bool = Field(default=True)
 
 
 # RENDEZ-VOUS
@@ -39,7 +40,8 @@ class RendezVous(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     patient_id: int
     medecin_id: int
-    date_rdv: str
+    date: date
+    heure: time
     statut: str = "prevu"
 
 

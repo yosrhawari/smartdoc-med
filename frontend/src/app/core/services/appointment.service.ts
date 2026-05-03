@@ -23,9 +23,15 @@ export class AppointmentService {
     return this.http.get<Appointment[]>(`${this.API}/rendezvous/`);
   }
 
-  createAppointment(data: { medecin_id: number; date_rdv: string }): Observable<Appointment> {
-    return this.http.post<Appointment>(`${this.API}/rendezvous/`, data);
+  getAvailableSlots(medecinId: number, date: string): Observable<any> {
+    return this.http.get(`${this.API}/rendezvous/medecin/${medecinId}/availability`, {
+      params: { date_selected: date }
+    });
   }
+
+  createAppointment(data: { medecin_id: number; date: string; heure: string }) {
+  return this.http.post('http://localhost:8000/rendezvous/create', data);
+}
 
   updateStatus(id: number, status: string): Observable<any> {
     return this.http.put(`${this.API}/rendezvous/${id}/status`, null);

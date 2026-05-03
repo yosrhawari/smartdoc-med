@@ -42,6 +42,8 @@ def register(user: UserCreate, session: Session = Depends(get_session)):
 
             profil = ProfilMedecin(
                 user_id=db_user.id,
+                nom=user.nom or "",
+                prenom=user.prenom or "",
                 adresse=user.adresse or "",
                 tarif=user.tarif or 0,
                 biographie=user.biographie or "",

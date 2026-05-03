@@ -1,22 +1,15 @@
 from fastapi import APIRouter, Depends,HTTPException
 from sqlmodel import Session, select
 from database import get_session
-<<<<<<< HEAD
-from models import ProfilMedecin,Specialite
-=======
 from models import ProfilMedecin,Specialite,RendezVous, User
->>>>>>> 409a706604a097d37dec7af54589f99e5e528cc0
 from schemas import MedecinCreate
 from services.matching_service import find_medecins_by_symptome
 from services.medecin_service import get_medecins_with_rating
 from services.matching_service import find_medecins_advanced
 from services.ai_service import detect_specialite
 from services.score_service import compute_score
-<<<<<<< HEAD
-=======
 from utils.dependencies import get_current_user
->>>>>>> 409a706604a097d37dec7af54589f99e5e528cc0
-
+from services.availability_service import get_next_available
 
 router = APIRouter(prefix="/medecins", tags=["Medecins"])
 
@@ -54,10 +47,7 @@ def create_medecin(data: dict, session: Session = Depends(get_session)):
 # GET ALL MEDECINS (VALIDES SEULEMENT)
 @router.get("/")
 def get_medecins(session: Session = Depends(get_session)):
-    statement = select(ProfilMedecin).where(
-        ProfilMedecin.statut_validation == "VALIDE"
-    )
-    return session.exec(statement).all()
+    return get_medecins_with_rating(session)
 #find medecin by symptome
 @router.get("/search")
 def search_medecins(symptome: str, session: Session = Depends(get_session)):
@@ -119,9 +109,6 @@ def ai_smart_search(symptome: str, session: Session = Depends(get_session)):
     return {
         "specialite_detected": specialite_nom,
         "medecins": results
-<<<<<<< HEAD
-    }
-=======
     }
 @router.put("/rdv/{rdv_id}/accept")
 def accepter_rdv(
@@ -217,12 +204,18 @@ def get_medecin_by_id(id: int, session: Session = Depends(get_session)):
 
     user = session.get(User, med.user_id)
 
+    # 🏥 Spécialité
+    spec = session.get(Specialite, med.specialite_id) if med.specialite_id else None
+
     return {
         "id": med.id,
-        "nom": user.nom if user else None,
-        "prenom": user.prenom if user else None,
+        "medecin_id": med.id,
+        "nom": med.nom,
+        "prenom": med.prenom,
         "adresse": med.adresse,
         "tarif": med.tarif,
-        "biographie": med.biographie
+        "specialite": spec.nom if spec else "Médecin",
+        "biographie": med.biographie,
+        "est_disponible": getattr(med, "est_disponible", True),
+        "prochain_rdv": get_next_available(med.id, session)
     }
->>>>>>> 409a706604a097d37dec7af54589f99e5e528cc0

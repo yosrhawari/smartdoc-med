@@ -2,11 +2,14 @@
 from pydantic import BaseModel
 from typing import Optional
 from sqlmodel import SQLModel, Field
+from datetime import date, time
 
 class UserCreate(SQLModel):
     email: str
     password: str
     role: str
+    nom: Optional[str] = None
+    prenom: Optional[str] = None
     # Ajoute ces champs pour qu'ils soient acceptés dans le JSON
     specialite_nom: Optional[str] = None
     adresse: Optional[str] = None
@@ -22,9 +25,9 @@ class MedecinCreate(BaseModel):
 
 
 class RendezVousCreate(BaseModel):
-    patient_id: int
     medecin_id: int
-    date_rdv: str
+    date: date
+    heure: time
 
 
 class ReviewCreate(BaseModel):

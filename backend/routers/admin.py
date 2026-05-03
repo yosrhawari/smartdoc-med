@@ -61,6 +61,15 @@ def validate_medecin(
     clear_cache()
 
     return {"message": "Medecin validé avec spécialité"}
+    
+@router.get("/medecins/pending")
+def get_pending_medecins(
+    session: Session = Depends(get_session),
+    admin = Depends(require_role("ADMIN"))
+):
+    return session.exec(
+        select(ProfilMedecin).where(ProfilMedecin.statut_validation == "en_attente")
+    ).all()
 
 @router.get("/stats")
 def get_stats(
