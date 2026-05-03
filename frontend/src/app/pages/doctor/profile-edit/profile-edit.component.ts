@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { DoctorService } from '../../../core/services/doctor.service';
@@ -15,107 +15,150 @@ import { DoctorService } from '../../../core/services/doctor.service';
 })
 export class DoctorProfileEditComponent implements OnInit {
 
+  // ── Profile data ────────────────────────────────────────────────────────────
   profile = {
-    specialite_id: null as any,
+    nom: '',
+    prenom: '',
+    email: '',
     adresse: '',
     tarif: 0,
-    biographie: ''
+    biographie: '',
+    specialite_id: null as number | null,
+    specialite: ''
   };
 
-  //  spécialités njiboha API
+  // ── Specialities list ────────────────────────────────────────────────────────
   specialites: any[] = [];
-  loadingSpecialites = false;
 
-  //  spécialité select
-  selectedSpecialite: any = '';
-  autreSpecialite: string = '';
+  // ── Photo preview ────────────────────────────────────────────────────────────
+  photoPreview: string | null = null;
 
+  // ── UI state ─────────────────────────────────────────────────────────────────
   success = '';
   error = '';
   loading = false;
+  loadingProfile = true;
 
+  // ── Sidebar ──────────────────────────────────────────────────────────────────
   sidebarItems = [
-    { label: 'Dashboard', icon: '<svg width="18" height="18" ...></svg>', route: '/doctor/dashboard' },
-    { label: 'Patients', icon: '<svg width="18" height="18" ...></svg>', route: '/doctor/patients' },
-    { label: 'My Profile', icon: '<svg width="18" height="18" ...></svg>', route: '/doctor/profile' }
+    {
+      label: 'Dashboard',
+      icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
+      route: '/doctor/dashboard'
+    },
+    {
+      label: 'Patients',
+      icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
+      route: '/doctor/patients'
+    },
+    {
+      label: 'My Profile',
+      icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+      route: '/doctor/profile'
+    }
   ];
 
   constructor(
     private auth: AuthService,
-    private doctorService: DoctorService
+    private doctorService: DoctorService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadSpecialites();
+    this.loadMyProfile();
   }
 
-  // load API
-  loadSpecialites() {
-    this.loadingSpecialites = true;
-
-    this.doctorService.getSpecialites().subscribe({
+  // ── Load logged-in doctor's profile ──────────────────────────────────────────
+  loadMyProfile(): void {
+    this.loadingProfile = true;
+    this.doctorService.getMyProfile().subscribe({
       next: (data) => {
-        this.specialites = data;
-        this.loadingSpecialites = false;
+        this.profile.nom         = data.nom    || '';
+        this.profile.prenom      = data.prenom || '';
+        this.profile.email       = data.email  || '';
+        this.profile.adresse     = data.adresse || '';
+        this.profile.tarif       = data.tarif  || 0;
+        this.profile.biographie  = data.biographie || '';
+        this.profile.specialite_id = data.specialite_id || null;
+        this.profile.specialite  = data.specialite || '';
+        this.loadingProfile = false;
       },
       error: (err) => {
-        console.error(err);
-        this.error = 'Failed to load specialties';
-        this.loadingSpecialites = false;
+        console.error('Failed to load profile:', err);
+        this.error = 'Impossible de charger le profil';
+        this.loadingProfile = false;
       }
     });
   }
 
-  // change handler
-  onSpecialiteChange() {
-    if (this.selectedSpecialite !== 'autre') {
-      this.autreSpecialite = '';
+  // ── Load specialities list ────────────────────────────────────────────────────
+  loadSpecialites(): void {
+    this.doctorService.getSpecialites().subscribe({
+      next: (data) => { this.specialites = data; },
+      error: (err) => { console.error('Specialites error:', err); }
+    });
+  }
+
+  // ── Photo upload preview ──────────────────────────────────────────────────────
+  onPhotoChange(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.photoPreview = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
     }
   }
 
-  // submit handler
+  triggerPhotoInput(): void {
+    document.getElementById('photo-input')?.click();
+  }
+
+  // ── Get initials for avatar fallback ─────────────────────────────────────────
+  getInitials(): string {
+    const first = this.profile.prenom?.[0] || '';
+    const last  = this.profile.nom?.[0]    || '';
+    return (first + last).toUpperCase() || 'DR';
+  }
+
+  // ── Submit form ───────────────────────────────────────────────────────────────
   onSubmit(): void {
     this.loading = true;
-    this.error = '';
+    this.error   = '';
     this.success = '';
 
-    const data: any = {
-      user_id: this.auth.getUserId(),
-      adresse: this.profile.adresse,
-      tarif: this.profile.tarif,
-      biographie: this.profile.biographie
+    const payload: any = {
+      nom:          this.profile.nom,
+      prenom:       this.profile.prenom,
+      adresse:      this.profile.adresse,
+      tarif:        this.profile.tarif,
+      biographie:   this.profile.biographie,
+      specialite_id: this.profile.specialite_id
     };
 
-    // Validation spécialité
-    if (this.selectedSpecialite === 'autre') {
-      if (!this.autreSpecialite.trim()) {
-        this.error = 'Veuillez entrer votre spécialité';
+    this.doctorService.updateMyProfile(payload).subscribe({
+      next: () => {
         this.loading = false;
-        return;
-      }
-      data.new_specialite = this.autreSpecialite; // 👈 clean backend
-    } else {
-      if (!this.selectedSpecialite) {
-        this.error = 'Veuillez choisir une spécialité';
+        this.success = 'Profil mis à jour avec succès ✓';
+        setTimeout(() => { this.success = ''; }, 4000);
+      },
+      error: (err) => {
         this.loading = false;
-        return;
+        if (err.error?.detail) {
+          this.error = typeof err.error.detail === 'string'
+            ? err.error.detail
+            : err.error.detail[0]?.msg || 'Erreur inconnue';
+        } else {
+          this.error = 'Erreur lors de la mise à jour';
+        }
       }
-      data.specialite_id = this.selectedSpecialite;
-    }
+    });
+  }
 
-    error: (err : any) => {
-  this.loading = false;
-
-  console.log('FULL ERROR:', err); // Affiche l'erreur complète pour le débogage    
-
-  if (err.error?.detail?.msg) {
-    this.error = err.error.detail.msg;
-  } else if (Array.isArray(err.error?.detail)) {
-    this.error = err.error.detail[0]?.msg;
-  } else if (typeof err.error?.detail === 'string') {
-    this.error = err.error.detail;
-  } else {
-    this.error = 'Erreur inconnue';
+  // ── Cancel ────────────────────────────────────────────────────────────────────
+  onCancel(): void {
+    this.router.navigate(['/doctor/dashboard']);
   }
 }
-  }}

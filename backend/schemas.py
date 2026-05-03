@@ -40,4 +40,11 @@ class LoginSchema(BaseModel):
     password: str
 class SymptomeInput(BaseModel):
     symptome: str
-    
+class ProfileUpdateData(BaseModel):
+    nom: Optional[str] = None
+    prenom: Optional[str] = None
+    adresse: Optional[str] = None
+    tarif: Optional[float] = None
+    biographie: Optional[str] = None
+    specialite_id: Optional[int] = None
+  

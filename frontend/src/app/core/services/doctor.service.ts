@@ -103,4 +103,14 @@ export class DoctorService {
   registerDoctor(data: any): Observable<any> {
     return this.http.post(`${this.API}/users/register-doctor`, data);
   }
-}
+
+  // GET MY OWN PROFILE (médecin connecté)
+  getMyProfile(): Observable<any> {
+    return this.http.get(`${this.API}/medecins/me`);
+  }
+
+  // UPDATE MY OWN PROFILE
+  updateMyProfile(data: any): Observable<any> {
+    return this.http.put(`${this.API}/medecins/me/update`, data);
+  }
+}

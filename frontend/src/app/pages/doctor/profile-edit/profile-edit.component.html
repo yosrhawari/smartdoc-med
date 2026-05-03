@@ -2,81 +2,132 @@
   <app-sidebar [items]="sidebarItems" title="Doctor"></app-sidebar>
 
   <main class="dashboard-main">
+
+    <!-- ── Header ─────────────────────────────────────────────────────── -->
     <div class="page-header animate-fade-in-up">
       <h1 id="profile-edit-title">Edit Profile</h1>
       <p class="subtitle">Update your professional information</p>
     </div>
 
-    <div class="profile-form-card animate-fade-in-up">
+    <!-- ── Loading skeleton ──────────────────────────────────────────── -->
+    <div *ngIf="loadingProfile" class="loading-card animate-fade-in-up">
+      <div class="skeleton skeleton-avatar"></div>
+      <div class="skeleton-fields">
+        <div class="skeleton skeleton-line"></div>
+        <div class="skeleton skeleton-line short"></div>
+        <div class="skeleton skeleton-line"></div>
+      </div>
+    </div>
+
+    <!-- ── Form card ─────────────────────────────────────────────────── -->
+    <div *ngIf="!loadingProfile" class="profile-form-card animate-fade-in-up">
       <form (ngSubmit)="onSubmit()" id="doctor-profile-form">
 
-        <!-- SPECIALITE -->
-        <div class="form-group">
-          <label for="specialite">Spécialité</label>
-
-          <select id="specialite" class="form-control"
-                  [(ngModel)]="selectedSpecialite"
-                  name="specialite"
-                  (change)="onSpecialiteChange()">
-
-            <option value="">-- Choisir une spécialité --</option>
-
-            <option *ngFor="let sp of specialites" [value]="sp.id">
-              {{ sp.nom }}
-            </option>
-
-            <option value="autre">Autre</option>
-          </select>
+        <!-- Photo section -->
+        <div class="photo-section">
+          <div class="avatar-wrapper" (click)="triggerPhotoInput()" title="Change photo">
+            <img *ngIf="photoPreview" [src]="photoPreview" alt="Profile" class="avatar-img" />
+            <div *ngIf="!photoPreview" class="avatar-placeholder">
+              <span class="avatar-initials">{{ getInitials() }}</span>
+            </div>
+            <div class="avatar-overlay">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </div>
+          </div>
+          <div class="photo-info">
+            <p class="photo-label">Profile Photo</p>
+            <button type="button" class="btn-change-photo" (click)="triggerPhotoInput()" id="btn-change-photo">
+              Change Photo
+            </button>
+          </div>
+          <input type="file" id="photo-input" accept="image/*" (change)="onPhotoChange($event)" hidden />
         </div>
 
-        <!-- AUTRE SPECIALITE -->
-        <div class="form-group" *ngIf="selectedSpecialite === 'autre'">
-          <label>Votre spécialité</label>
-          <input type="text" class="form-control"
-                 [(ngModel)]="autreSpecialite"
-                 name="autreSpecialite"
-                 placeholder="Entrez votre spécialité">
+        <div class="divider"></div>
+
+        <!-- Row 1: Full Name + Email -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prenom" class="form-label">Full Name</label>
+            <div class="input-row">
+              <input type="text" id="prenom" class="form-control"
+                     [(ngModel)]="profile.prenom" name="prenom"
+                     placeholder="First name" />
+              <input type="text" id="nom" class="form-control"
+                     [(ngModel)]="profile.nom" name="nom"
+                     placeholder="Last name" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" id="email" class="form-control readonly"
+                   [value]="profile.email" name="email"
+                   readonly />
+          </div>
         </div>
 
-        <!-- ADDRESS -->
-        <div class="form-group">
-          <label for="adresse">Address</label>
+        <!-- Row 2: Specialty + Consultation Fee -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="specialite" class="form-label">Specialty</label>
+            <select id="specialite" class="form-control"
+                    [(ngModel)]="profile.specialite_id" name="specialite_id">
+              <option [ngValue]="null">-- Select a specialty --</option>
+              <option *ngFor="let sp of specialites" [ngValue]="sp.id">{{ sp.nom }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="tarif" class="form-label">Consultation Fee (DT)</label>
+            <input type="number" id="tarif" class="form-control"
+                   [(ngModel)]="profile.tarif" name="tarif"
+                   placeholder="e.g., 150" min="0" />
+          </div>
+        </div>
+
+        <!-- Practice Location (full width) -->
+        <div class="form-group full-width">
+          <label for="adresse" class="form-label">Practice Location</label>
           <input type="text" id="adresse" class="form-control"
                  [(ngModel)]="profile.adresse" name="adresse"
-                 placeholder="Your clinic address">
+                 placeholder="Your clinic address" />
         </div>
 
-        <!-- TARIF -->
-        <div class="form-group">
-          <label for="tarif">Consultation Fee (DT)</label>
-          <input type="number" id="tarif" class="form-control"
-                 [(ngModel)]="profile.tarif" name="tarif"
-                 placeholder="e.g., 200" min="0">
-        </div>
-
-        <!-- BIO -->
-        <div class="form-group">
-          <label for="bio">Biography</label>
+        <!-- Bio (full width) -->
+        <div class="form-group full-width">
+          <label for="bio" class="form-label">Bio</label>
           <textarea id="bio" class="form-control textarea"
                     [(ngModel)]="profile.biographie" name="biographie"
-                    placeholder="Tell patients about your experience..."
-                    rows="4"></textarea>
+                    placeholder="Tell patients about your experience and approach..."
+                    rows="5"></textarea>
         </div>
 
-        <!-- ALERTS -->
-        <div *ngIf="error" class="alert alert-error">{{ error }}</div>
-        <div *ngIf="success" class="alert alert-success">{{ success }}</div>
+        <!-- Alerts -->
+        <div *ngIf="error"   class="alert alert-error"   id="profile-error">{{ error }}</div>
+        <div *ngIf="success" class="alert alert-success" id="profile-success">{{ success }}</div>
 
-        <!-- BUTTON -->
-        <button type="submit" class="btn btn-primary"
-                [disabled]="loading"
-                id="btn-save-profile">
-
-          <span *ngIf="!loading">Save Profile</span>
-          <span *ngIf="loading" class="spinner"></span>
-        </button>
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-cancel" (click)="onCancel()" id="btn-cancel">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-save" [disabled]="loading" id="btn-save-profile">
+            <span *ngIf="!loading">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              Save Changes
+            </span>
+            <span *ngIf="loading" class="spinner"></span>
+          </button>
+        </div>
 
       </form>
     </div>
+
   </main>
 </div>
