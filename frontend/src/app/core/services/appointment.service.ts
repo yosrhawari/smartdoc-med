@@ -8,6 +8,7 @@ export interface Appointment {
   patient_id: number;
   medecin_id: number;
   date_rdv: string;
+  heure?: string;
   statut: string;
 }
 
@@ -23,7 +24,7 @@ export class AppointmentService {
     return this.http.get<Appointment[]>(`${this.API}/rendezvous/`);
   }
 
-  createAppointment(data: { medecin_id: number; date_rdv: string }): Observable<Appointment> {
+  createAppointment(data: { medecin_id: number; date_rdv: string; heure?: string }): Observable<Appointment> {
     return this.http.post<Appointment>(`${this.API}/rendezvous/`, data);
   }
 

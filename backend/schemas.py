@@ -30,6 +30,7 @@ class RendezVousCreate(BaseModel):
     patient_id: Optional[int] = None
     medecin_id: int
     date_rdv: str
+    heure: Optional[str] = None
 
 
 class ReviewCreate(BaseModel):

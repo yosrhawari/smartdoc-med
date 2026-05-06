@@ -44,6 +44,7 @@ class RendezVous(SQLModel, table=True):
     patient_id: int
     medecin_id: int
     date_rdv: str
+    heure: Optional[str] = None
     statut: str = "prevu"
 
 

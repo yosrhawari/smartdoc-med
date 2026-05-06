@@ -21,6 +21,7 @@ def create_rdv(
         patient_id=patient_id,
         medecin_id=data.medecin_id,
         date_rdv=data.date_rdv,
+        heure=data.heure,
         statut="prevu"
     )
     

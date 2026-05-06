@@ -160,7 +160,8 @@ export class BookingComponent implements OnInit {
     // request clean
     this.appointmentService.createAppointment({
       medecin_id: this.doctorId,
-      date_rdv: dateTime
+      date_rdv: dateTime,
+      heure: this.selectedTime
     }).subscribe({
       next: () => {
         this.loading = false;
