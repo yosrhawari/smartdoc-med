@@ -9,6 +9,8 @@ export interface Appointment {
   medecin_id: number;
   date_rdv: string;
   heure?: string;
+  patient_name?: string;
+  doctor_name?: string;
   statut: string;
 }
 
@@ -24,11 +26,19 @@ export class AppointmentService {
     return this.http.get<Appointment[]>(`${this.API}/rendezvous/`);
   }
 
+  getMyAppointments(): Observable<Appointment[]> {
+    return this.http.get<Appointment[]>(`${this.API}/rendezvous/my-appointments`);
+  }
+
+  getDoctorAppointments(): Observable<Appointment[]> {
+    return this.http.get<Appointment[]>(`${this.API}/medecins/rdv`);
+  }
+
   createAppointment(data: { medecin_id: number; date_rdv: string; heure?: string }): Observable<Appointment> {
     return this.http.post<Appointment>(`${this.API}/rendezvous/`, data);
   }
 
   updateStatus(id: number, status: string): Observable<any> {
-    return this.http.put(`${this.API}/rendezvous/${id}/status`, null);
+    return this.http.put(`${this.API}/rendezvous/${id}/status?status=${status}`, null);
   }
 }

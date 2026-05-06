@@ -26,10 +26,9 @@ export class DoctorDashboardComponent implements OnInit {
   constructor(public auth: AuthService, private aptService: AppointmentService) {}
 
   ngOnInit(): void {
-    this.aptService.getAppointments().subscribe({
+    this.aptService.getDoctorAppointments().subscribe({
       next: (data) => {
-        const userId = this.auth.getUserId();
-        this.appointments = data.filter(a => a.medecin_id === userId);
+        this.appointments = data;
         this.totalCount = this.appointments.length;
         const today = new Date().toISOString().split('T')[0];
         this.todayCount = this.appointments.filter(a => a.date_rdv.startsWith(today)).length;

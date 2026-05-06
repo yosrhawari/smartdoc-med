@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from database import get_session
-from models import RendezVous
+from models import RendezVous, ProfilMedecin, User
 from schemas import RendezVousCreate
 from utils.role_checker import require_role
 
@@ -22,7 +22,7 @@ def create_rdv(
         medecin_id=data.medecin_id,
         date_rdv=data.date_rdv,
         heure=data.heure,
-        statut="prevu"
+        statut="PREVU"
     )
     
     session.add(new_rdv)
@@ -50,3 +50,31 @@ def update_status(
 @router.get("/")
 def get_rdv(session: Session = Depends(get_session)):
     return session.exec(select(RendezVous)).all()
+
+# GET PATIENT RDV WITH DOCTOR NAME
+@router.get("/my-appointments")
+def get_my_appointments(
+    session: Session = Depends(get_session),
+    user = Depends(require_role("PATIENT"))
+):
+    patient_id = user.get("user_id")
+    
+    statement = select(RendezVous, ProfilMedecin, User).join(
+        ProfilMedecin, RendezVous.medecin_id == ProfilMedecin.id
+    ).join(
+        User, ProfilMedecin.user_id == User.id
+    ).where(RendezVous.patient_id == patient_id)
+    
+    results = session.exec(statement).all()
+    
+    return [
+        {
+            "id": rdv.id,
+            "date_rdv": rdv.date_rdv,
+            "heure": rdv.heure,
+            "statut": rdv.statut,
+            "doctor_name": f"Dr. {u.nom} {u.prenom}",
+            "medecin_id": rdv.medecin_id
+        }
+        for rdv, pm, u in results
+    ]

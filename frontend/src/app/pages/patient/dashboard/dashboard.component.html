@@ -80,16 +80,16 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Doctor ID</th>
-              <th>Date</th>
+              <th>Doctor</th>
+              <th>Date & Time</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let apt of appointments">
               <td>#{{ apt.id }}</td>
-              <td>Dr. {{ apt.medecin_id }}</td>
-              <td>{{ apt.date_rdv }}</td>
+              <td>{{ apt.doctor_name }}</td>
+              <td>{{ apt.date_rdv }} at {{ apt.heure }}</td>
               <td><span class="badge" [ngClass]="getStatusClass(apt.statut)">{{ getStatusLabel(apt.statut) }}</span></td>
             </tr>
           </tbody>

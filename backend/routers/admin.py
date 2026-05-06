@@ -62,7 +62,7 @@ def get_stats(
     ).all())
 
     medecins_attente = len(session.exec(
-        select(ProfilMedecin).where(ProfilMedecin.statut_validation == "en_attente")
+        select(ProfilMedecin).where(ProfilMedecin.statut_validation == "EN_ATTENTE")
     ).all())
 
     # RDV
@@ -104,7 +104,7 @@ from sqlmodel import select
 def get_pending_medecins(session: Session = Depends(get_session)):
     # join f blast loop 
     statement = select(ProfilMedecin, User).join(User, ProfilMedecin.user_id == User.id).where(
-        ProfilMedecin.statut_validation == "en_attente"
+        ProfilMedecin.statut_validation == "EN_ATTENTE"
     )
     results = session.exec(statement).all()
 

@@ -19,12 +19,15 @@
           <tr *ngFor="let p of patients">
             <td>
               <div class="patient-cell">
-                <div class="patient-avatar-sm">{{ p.id }}</div>
-                <span>Patient #{{ p.id }}</span>
+                <div class="patient-avatar-sm">{{ p.nom[0] }}{{ p.prenom[0] }}</div>
+                <div class="patient-info">
+                  <span class="patient-name">{{ p.nom }} {{ p.prenom }}</span>
+                  <span class="patient-email">{{ p.email }}</span>
+                </div>
               </div>
             </td>
-            <td><span class="badge badge-primary">{{ p.appointmentCount }}</span></td>
-            <td>{{ p.lastVisit }}</td>
+            <td><span class="badge badge-primary">{{ p.appointment_count }}</span></td>
+            <td>{{ p.last_visit }}</td>
           </tr>
         </tbody>
       </table>

@@ -34,10 +34,9 @@ export class PatientDashboardComponent implements OnInit {
   }
 
   loadAppointments(): void {
-    this.appointmentService.getAppointments().subscribe({
+    this.appointmentService.getMyAppointments().subscribe({
       next: (data) => {
-        const userId = this.auth.getUserId();
-        this.appointments = data.filter(a => a.patient_id === userId);
+        this.appointments = data;
         this.upcomingCount = this.appointments.filter(a => a.statut === 'PREVU').length;
         this.completedCount = this.appointments.filter(a => a.statut === 'TERMINE').length;
       }

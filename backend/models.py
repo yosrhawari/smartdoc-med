@@ -25,15 +25,15 @@ class Specialite(SQLModel, table=True):
 # PROFIL MEDECIN
 class ProfilMedecin(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="users.id")
-    specialite_id: Optional[int] = Field(default=None, foreign_key="specialite.id")
+    user_id: int = Field(foreign_key="users.id", ondelete="CASCADE")
+    specialite_id: Optional[int] = Field(default=None, foreign_key="specialite.id", ondelete="CASCADE")
     adresse: str
     nom: str
     prenom: str
     tarif: float
     biographie: Optional[str] = None
     diplome_path: Optional[str] = None
-    statut_validation: str = "en_attente"
+    statut_validation: str = "EN_ATTENTE"
     spec_nom_temp: Optional[str] = None  # cache temporaire pour spécialité
     image: Optional[str] = None  # chemin vers l'image de profil
 
@@ -41,17 +41,17 @@ class ProfilMedecin(SQLModel, table=True):
 # RENDEZ-VOUS
 class RendezVous(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    patient_id: int
-    medecin_id: int
+    patient_id: int = Field(foreign_key="users.id", ondelete="CASCADE")
+    medecin_id: int = Field(foreign_key="profilmedecin.id", ondelete="CASCADE")
     date_rdv: str
     heure: Optional[str] = None
-    statut: str = "prevu"
+    statut: str = "PREVU"
 
 
 # REVIEW
 class Review(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    rendezvous_id: int
+    rendezvous_id: int = Field(foreign_key="rendezvous.id", ondelete="CASCADE")
     note: int
     commentaire: str
     reponse_medecin: Optional[str] = None

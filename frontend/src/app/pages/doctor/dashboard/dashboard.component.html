@@ -37,8 +37,8 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Patient ID</th>
-              <th>Date</th>
+              <th>Patient</th>
+              <th>Date & Time</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -46,8 +46,8 @@
           <tbody>
             <tr *ngFor="let apt of appointments">
               <td>#{{ apt.id }}</td>
-              <td>Patient #{{ apt.patient_id }}</td>
-              <td>{{ apt.date_rdv }}</td>
+              <td>{{ apt.patient_name }}</td>
+              <td>{{ apt.date_rdv }} at {{ apt.heure }}</td>
               <td><span class="badge" [ngClass]="getStatusClass(apt.statut)">{{ getStatusLabel(apt.statut) }}</span></td>
               <td>
                 <div class="action-btns" *ngIf="apt.statut === 'PREVU'">

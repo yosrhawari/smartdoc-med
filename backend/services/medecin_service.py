@@ -5,7 +5,9 @@ from models import ProfilMedecin, RendezVous, Review ,User
 
 def get_medecins_with_rating(session: Session):
 
-    medecins = session.exec(select(ProfilMedecin)).all()
+    medecins = session.exec(
+        select(ProfilMedecin).where(ProfilMedecin.statut_validation == "VALIDE")
+    ).all()
 
     result = []
 

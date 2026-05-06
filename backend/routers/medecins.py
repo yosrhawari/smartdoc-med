@@ -8,6 +8,7 @@ from services.medecin_service import get_medecins_with_rating
 from services.ai_service import detect_specialite
 from services.score_service import compute_score
 from utils.dependencies import get_current_user
+from utils.role_checker import *
 import shutil
 import os
 
@@ -15,6 +16,52 @@ router = APIRouter(prefix="/medecins", tags=["Medecins"])
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# =========================
+# GET MY PROFILE
+# =========================
+@router.get("/me")
+def get_my_profile(
+    session: Session = Depends(get_session),
+    user = Depends(require_role("MEDECIN"))
+):
+    profil = session.exec(
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["user_id"])
+    ).first()
+    return profil
+
+# =========================
+# UPDATE PROFILE
+# =========================
+@router.put("/profile")
+def update_profile(
+    data: dict,
+    session: Session = Depends(get_session),
+    user = Depends(require_role("MEDECIN"))
+):
+    profil = session.exec(
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["user_id"])
+    ).first()
+
+    if not profil:
+        raise HTTPException(status_code=404, detail="Profil introuvable")
+
+    profil.adresse = data.get("adresse", profil.adresse)
+    profil.tarif = data.get("tarif", profil.tarif)
+    profil.biographie = data.get("biographie", profil.biographie)
+
+    if "specialite_id" in data and data["specialite_id"]:
+        profil.specialite_id = data["specialite_id"]
+        profil.spec_nom_temp = None # Clear temp if ID is set
+    
+    if "new_specialite" in data and data["new_specialite"]:
+        profil.spec_nom_temp = data["new_specialite"]
+        profil.specialite_id = None
+        profil.statut_validation = "EN_ATTENTE"
+
+    session.add(profil)
+    session.commit()
+    return {"message": "Profil mis à jour"}
 
 # =========================
 # CREATE MEDECIN
@@ -65,7 +112,7 @@ def create_medecin(
         tarif=tarif,
         biographie=biographie,
         image=filename,
-        statut_validation="en_attente",
+        statut_validation="EN_ATTENTE",
         spec_nom_temp=specialite_nom
     )
 
@@ -184,7 +231,7 @@ def accepter_rdv(
         raise HTTPException(status_code=403, detail="Accès interdit")
 
     profil = session.exec(
-        select(ProfilMedecin).where(ProfilMedecin.user_id == user["id"])
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["user_id"])
     ).first()
 
     rdv = session.exec(
@@ -217,7 +264,7 @@ def refuser_rdv(
         raise HTTPException(status_code=403, detail="Accès interdit")
 
     profil = session.exec(
-        select(ProfilMedecin).where(ProfilMedecin.user_id == user["id"])
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["user_id"])
     ).first()
 
     rdv = session.exec(
@@ -243,25 +290,72 @@ def refuser_rdv(
 @router.get("/rdv")
 def get_mes_rdv(
     session: Session = Depends(get_session),
-    user = Depends(get_current_user)
+    user = Depends(require_role("MEDECIN"))
 ):
-    if user["role"] != "MEDECIN":
-        raise HTTPException(status_code=403, detail="Accès interdit")
-
     profil = session.exec(
-        select(ProfilMedecin).where(ProfilMedecin.user_id == user["id"])
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["user_id"])
     ).first()
 
-    rdvs = session.exec(
-        select(RendezVous).where(RendezVous.medecin_id == profil.id)
-    ).all()
+    if not profil:
+        raise HTTPException(status_code=404, detail="Profil medecin introuvable")
 
-    return rdvs
+    statement = select(RendezVous, User).join(
+        User, RendezVous.patient_id == User.id
+    ).where(RendezVous.medecin_id == profil.id)
+    
+    results = session.exec(statement).all()
+
+    return [
+        {
+            "id": rdv.id,
+            "date_rdv": rdv.date_rdv,
+            "heure": rdv.heure,
+            "statut": rdv.statut,
+            "patient_name": f"{u.nom} {u.prenom}",
+            "patient_id": rdv.patient_id
+        }
+        for rdv, u in results
+    ]
 
 
 # =========================
-# GET BY ID
+# GET MY PATIENTS
 # =========================
+@router.get("/my-patients")
+def get_my_patients(
+    session: Session = Depends(get_session),
+    user = Depends(require_role("MEDECIN"))
+):
+    profil = session.exec(
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["user_id"])
+    ).first()
+
+    if not profil:
+        raise HTTPException(status_code=404, detail="Profil medecin introuvable")
+
+    statement = select(User, RendezVous).join(
+        RendezVous, User.id == RendezVous.patient_id
+    ).where(RendezVous.medecin_id == profil.id)
+    
+    results = session.exec(statement).all()
+    
+    patient_stats = {}
+    for u, rdv in results:
+        if u.id not in patient_stats:
+            patient_stats[u.id] = {
+                "id": u.id,
+                "nom": u.nom,
+                "prenom": u.prenom,
+                "email": u.email,
+                "appointment_count": 0,
+                "last_visit": rdv.date_rdv
+            }
+        
+        patient_stats[u.id]["appointment_count"] += 1
+        if rdv.date_rdv > patient_stats[u.id]["last_visit"]:
+            patient_stats[u.id]["last_visit"] = rdv.date_rdv
+            
+    return list(patient_stats.values())
 @router.get("/{id}")
 def get_medecin_by_id(id: int, session: Session = Depends(get_session)):
 

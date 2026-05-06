@@ -88,10 +88,22 @@ export class DoctorService {
   registerDoctor(data: FormData): Observable<any> {
   return this.http.post(`${this.API}/medecins/create`, data);
 }
-getDoctorById(id: number) {
-  return this.http.get<any>(`http://localhost:8000/medecins/${id}`);
-}
-getAllDoctors(): Observable<any[]> {
-  return this.http.get<any[]>(`${this.API}/admin/pending`);
-}
+  getDoctorById(id: number) {
+    return this.http.get<any>(`http://localhost:8000/medecins/${id}`);
+  }
+  getAllDoctors(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API}/admin/pending`);
+  }
+
+  getMyProfile(): Observable<any> {
+    return this.http.get<any>(`${this.API}/medecins/me`);
+  }
+
+  updateProfile(data: any): Observable<any> {
+    return this.http.put<any>(`${this.API}/medecins/profile`, data);
+  }
+
+  getMyPatients(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API}/medecins/my-patients`);
+  }
 }

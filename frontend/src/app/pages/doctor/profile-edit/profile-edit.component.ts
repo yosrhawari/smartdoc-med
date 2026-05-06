@@ -47,12 +47,29 @@ export class DoctorProfileEditComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSpecialites();
+    this.loadProfile();
+  }
+
+  loadProfile() {
+    this.doctorService.getMyProfile().subscribe({
+      next: (data) => {
+        if (data) {
+          this.profile = {
+            adresse: data.adresse || '',
+            tarif: data.tarif || 0,
+            biographie: data.biographie || '',
+            specialite_id: data.specialite_id
+          };
+          this.selectedSpecialite = data.specialite_id || (data.spec_nom_temp ? 'autre' : '');
+          this.autreSpecialite = data.spec_nom_temp || '';
+        }
+      }
+    });
   }
 
   // load API
   loadSpecialites() {
     this.loadingSpecialites = true;
-
     this.doctorService.getSpecialites().subscribe({
       next: (data) => {
         this.specialites = data;
@@ -80,20 +97,18 @@ export class DoctorProfileEditComponent implements OnInit {
     this.success = '';
 
     const data: any = {
-      user_id: this.auth.getUserId(),
       adresse: this.profile.adresse,
       tarif: this.profile.tarif,
       biographie: this.profile.biographie
     };
 
-    // Validation spécialité
     if (this.selectedSpecialite === 'autre') {
       if (!this.autreSpecialite.trim()) {
         this.error = 'Veuillez entrer votre spécialité';
         this.loading = false;
         return;
       }
-      data.new_specialite = this.autreSpecialite; // clean backend
+      data.new_specialite = this.autreSpecialite;
     } else {
       if (!this.selectedSpecialite) {
         this.error = 'Veuillez choisir une spécialité';
@@ -103,19 +118,15 @@ export class DoctorProfileEditComponent implements OnInit {
       data.specialite_id = this.selectedSpecialite;
     }
 
-    error: (err : any) => {
-  this.loading = false;
-
-  console.log('FULL ERROR:', err); // Affiche l'erreur complète pour le débogage    
-
-  if (err.error?.detail?.msg) {
-    this.error = err.error.detail.msg;
-  } else if (Array.isArray(err.error?.detail)) {
-    this.error = err.error.detail[0]?.msg;
-  } else if (typeof err.error?.detail === 'string') {
-    this.error = err.error.detail;
-  } else {
-    this.error = 'Erreur inconnue';
+    this.doctorService.updateProfile(data).subscribe({
+      next: () => {
+        this.loading = false;
+        this.success = 'Profile mis à jour avec succès !';
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = err.error?.detail || 'Une erreur est survenue';
+      }
+    });
   }
 }
-  }}
