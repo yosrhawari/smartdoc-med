@@ -18,15 +18,16 @@ export interface Doctor {
 }
 
 export interface DoctorWithRating {
-  medecin_id: number;
+  id: number;
   adresse: string;
   note_moyenne: number;
   nom?: string;
   prenom?: string;
+  image?: string;
 }
 
 export interface SmartSearchResult {
-  medecin_id: number;
+  id: number;
   adresse: string;
   score_matching: number;
   note_moyenne: number;
@@ -61,6 +62,13 @@ export class DoctorService {
       { params :{ symptome: symptom } }
     );
   }
+  // Upload image
+  uploadImage(file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return this.http.post<any>('http://localhost:8000/medecins/upload-image', formData);
+}
 
   //  Rating
   getDoctorsWithRating(): Observable<DoctorWithRating[]> {
@@ -79,5 +87,11 @@ export class DoctorService {
   // REGISTER DOCTOR (AUTH + PROFILE)
   registerDoctor(data: FormData): Observable<any> {
   return this.http.post(`${this.API}/medecins/create`, data);
+}
+getDoctorById(id: number) {
+  return this.http.get<any>(`http://localhost:8000/medecins/${id}`);
+}
+getAllDoctors(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.API}/admin/pending`);
 }
 }

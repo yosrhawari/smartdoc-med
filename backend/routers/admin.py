@@ -8,60 +8,44 @@ from utils.role_checker import require_role
 from services.ai_service import clear_cache
 router = APIRouter(prefix="/admin", tags=["admin"])
 
-@router.put("/medecins/{email}/validate")
+@router.put("/medecins/{id}/validate")
 def validate_medecin(
-    email:str,
+    id: int,
     session: Session = Depends(get_session),
-    user = Depends(require_role("ADMIN"))
+    user_admin = Depends(require_role("ADMIN"))
 ):
-   # 🔹 1. récupérer user
-    db_user = session.exec(
-        select(User).where(User.email == email)
-    ).first()
 
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    if db_user.role != "MEDECIN":
-        raise HTTPException(status_code=400, detail="User is not a medecin")
-
-    # 🔹 2. récupérer profil medecin
-    med = session.exec(
-        select(ProfilMedecin).where(ProfilMedecin.user_id == db_user.id)
-    ).first()
+    med = session.get(ProfilMedecin, id)
 
     if not med:
-        raise HTTPException(status_code=404, detail="Profil medecin not found")
-    n_specialite=med.spec_nom_temp
+        raise HTTPException(status_code=404, detail="Medecin not found")
 
+    # njibo user
+    user = session.get(User, med.user_id)
 
+    if user:
+        med.nom = user.nom
+        med.prenom = user.prenom
 
-    # 🔹 3. vérifier / créer spécialité
+    n_specialite = med.spec_nom_temp
+
     specialite = session.exec(
         select(Specialite).where(Specialite.nom == n_specialite)
     ).first()
 
     if not specialite:
-        specialite = Specialite(
-            nom=n_specialite,
-            mots_cles=""
-        )
+        specialite = Specialite(nom=n_specialite, mots_cles="")
         session.add(specialite)
         session.commit()
         session.refresh(specialite)
 
-    # ✅ assigner spécialité
     med.specialite_id = specialite.id
     med.statut_validation = "VALIDE"
 
     session.add(med)
     session.commit()
 
-    # 🔥 clear cache IA
-    clear_cache()
-
-    return {"message": "Medecin validé avec spécialité"}
-
+    return {"message": "Medecin validé"}
 @router.get("/stats")
 def get_stats(
     session: Session = Depends(get_session),
@@ -78,7 +62,7 @@ def get_stats(
     ).all())
 
     medecins_attente = len(session.exec(
-        select(ProfilMedecin).where(ProfilMedecin.statut_validation == "EN_ATTENTE")
+        select(ProfilMedecin).where(ProfilMedecin.statut_validation == "en_attente")
     ).all())
 
     # RDV
@@ -102,15 +86,38 @@ def get_all_users(
     session: Session = Depends(get_session),
     admin = Depends(require_role("ADMIN"))
 ):
-    users = session.exec(
-        select(User).where(
-            (User.role == "PATIENT")
-        )
-    ).all()
+    users = session.exec(select(User)).all()
+
     return [
         {
+            "id": u.id,
             "email": u.email,
-            "role": u.role
+            "role": u.role,
+            "nom": u.nom,
+            "prenom": u.prenom
         }
         for u in users
     ]
+from sqlmodel import select
+
+@router.get("/pending")
+def get_pending_medecins(session: Session = Depends(get_session)):
+    # join f blast loop 
+    statement = select(ProfilMedecin, User).join(User, ProfilMedecin.user_id == User.id).where(
+        ProfilMedecin.statut_validation == "en_attente"
+    )
+    results = session.exec(statement).all()
+
+    final_result = []
+    for med, user in results:
+        final_result.append({
+            "id": med.id,
+            "nom": user.nom,
+            "prenom": user.prenom,
+            "adresse": med.adresse,
+            "tarif": med.tarif,
+            "image": med.image,
+            "specialite": med.spec_nom_temp
+        })
+
+    return final_result

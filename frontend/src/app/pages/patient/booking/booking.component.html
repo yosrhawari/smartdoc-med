@@ -9,7 +9,7 @@
     <div *ngIf="!booked" class="booking-layout">
       <div class="booking-card">
         <h2 id="booking-title">Book an Appointment</h2>
-        <p class="booking-subtitle">Doctor #{{ doctorId }} — Select a date and time</p>
+        <p class="booking-subtitle">Dr. {{ doctor?.nom }} {{ doctor?.prenom }} — Select a date and time</p>
 
         <!-- Calendar -->
         <div class="calendar" id="booking-calendar">
@@ -66,7 +66,7 @@
         <h3>Booking Summary</h3>
         <div class="summary-item">
           <span class="summary-label">Doctor</span>
-          <span class="summary-value">Doctor #{{ doctorId }}</span>
+          <span class="summary-value">Dr. {{ doctor?.nom }} {{ doctor?.prenom }}</span>
         </div>
         <div class="summary-item">
           <span class="summary-label">Date</span>
@@ -90,7 +90,7 @@
       <div class="confirm-details">
         <div class="confirm-row">
           <span>Doctor</span>
-          <strong>Doctor #{{ doctorId }}</strong>
+          <strong>Dr. {{ doctor?.nom }} {{ doctor?.prenom  }}</strong>
         </div>
         <div class="confirm-row">
           <span>Date</span>

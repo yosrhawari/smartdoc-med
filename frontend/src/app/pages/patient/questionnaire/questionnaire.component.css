@@ -334,3 +334,60 @@
     display: none;
   }
 }
+
+
+
+
+
+.doctor-meta h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #1e293b;
+}
+
+.location {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.detail-value.highlight {
+  color: #3b82f6;
+  font-weight: 600;
+  background: #eff6ff;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+/* --- Fix Image Display --- */
+
+/* --- Fix Doctor Avatar Results --- */
+
+.doctor-avatar-container {
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  max-width: 60px;
+  border-radius: 50%; /* Dwayra kima fel sora */
+  overflow: hidden;
+  margin-right: 15px;
+  border: 2px solid #e2e8f0;
+  background-color: #f1f5f9; /* Ken el taswira ma t-loadi-ch, el blasa ma tabqach fergha jemla */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-img-round {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Beche el wejh ma y-ji-ch mejbed */
+  display: block;
+}
+
+/* Fix structure mta' el header bech el esm i-ji bjnab el taswira */
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}

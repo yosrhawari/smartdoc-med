@@ -25,9 +25,13 @@ export interface User {
   providedIn: 'root'
 })
 export class AdminService {
+  
   private API = 'http://localhost:8000';
 
   constructor(private http: HttpClient) {}
+   getAllDoctors(): Observable<any[]> {
+     return this.http.get<any[]>(`${this.API}/admin/pending`);
+}
 
   getStats(): Observable<PlatformStats> {
     return this.http.get<PlatformStats>(`${this.API}/admin/stats`);
@@ -38,6 +42,16 @@ export class AdminService {
   }
 
   getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.API}/users/`);
+    const token = localStorage.getItem('token');
+    return this.http.get<User[]>(`${this.API}/admin/users`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
   }
+
+  getPendingDoctors(): Observable<any> {
+    return this.http.get<any>(`${this.API}/admin/get_pending_medecins`);
+  }
+  
 }

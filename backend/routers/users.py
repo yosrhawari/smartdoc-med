@@ -1,3 +1,5 @@
+from fileinput import filename
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from database import get_session
@@ -11,52 +13,46 @@ router = APIRouter(prefix="/users", tags=["Users"])
 # CREATE USER
 @router.post("/register")
 def register(user: UserCreate, session: Session = Depends(get_session)):
+    # 1. Email check... (Keep as is)
 
-    # 1. Vérifier si l'email existe
-    existing_user = session.exec(
-        select(User).where(User.email == user.email)
-    ).first()
-
-    if existing_user:
-        # Si tu veux que ça marche pour tes tests, supprime l'utilisateur en DB
-        # ou utilise un email différent comme medecin2@gmail.com
-        raise HTTPException(status_code=400, detail="Email already exists")
-
-    # 2. Hashage
     hashed_pw = hash_password(user.password)
 
     try:
-        # 3. Créer l'objet User (SANS COMMIT TOUT DE SUITE)
         db_user = User(
+            nom=user.nom,
+            prenom=user.prenom,
             email=user.email,
             password=hashed_pw,
             role=user.role.upper()
         )
         session.add(db_user)
-        session.flush() # Récupère l'ID de l'user sans fermer la transaction
+        session.flush() 
 
-        # 4. Logique spécifique Médecin
         if db_user.role == "MEDECIN":
-            if not user.specialite_nom:
+            if not user.spec_nom_temp:
                 raise HTTPException(status_code=400, detail="Specialite obligatoire")
 
             profil = ProfilMedecin(
                 user_id=db_user.id,
+                nom=db_user.nom,          # Add this
+                prenom=db_user.prenom,    # Add this
                 adresse=user.adresse or "",
                 tarif=user.tarif or 0,
                 biographie=user.biographie or "",
                 diplome_path=user.diplome_path or "",
                 statut_validation="en_attente",
-                spec_nom_temp=user.specialite_nom
+                image=None,               # Set to None or a real string, not the imported 'filename'
+                spec_nom_temp=user.spec_nom_temp
             )
             session.add(profil)
 
-        # 5. UN SEUL COMMIT POUR TOUT
         session.commit()
         return {"message": f"{db_user.role} créé avec succès"}
 
     except Exception as e:
         session.rollback()
+        # This will now print the actual error to your terminal so you can see it!
+        print(f"DATABASE ERROR: {e}") 
         raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
 # LOGIN
 @router.post("/login")

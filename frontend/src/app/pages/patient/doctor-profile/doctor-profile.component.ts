@@ -27,20 +27,29 @@ export class DoctorProfileComponent implements OnInit {
     private appointmentService: AppointmentService
   ) {}
 
-  ngOnInit(): void {
-    this.doctorId = Number(this.route.snapshot.paramMap.get('id'));
-    this.loadDoctor();
-    this.loadReviews();
-  }
+ ngOnInit(): void {
+  this.doctorId = Number(this.route.snapshot.paramMap.get('id'));
 
-  loadDoctor(): void {
-    this.doctorService.getDoctors().subscribe({
-      next: (doctors) => {
-        this.doctor = doctors.find(d => d.id === this.doctorId) || null;
-        this.loading = false;
-      },
-      error: () => { this.loading = false; }
-    });
+  this.doctorService.getDoctors().subscribe({
+    next: (doctors) => {
+      this.doctor = doctors.find(d => Number(d.id) === this.doctorId) || null;
+      this.loading = false;
+    },
+    error: () => { this.loading = false; }
+  });
+}
+
+ loadDoctor(): void {
+  this.doctorService.getDoctorById(this.doctorId).subscribe({
+    next: (doctor) => {
+      this.doctor = doctor;
+      this.loading = false;
+    },
+    error: () => {
+      this.loading = false;
+    }
+  });
+
   }
 
   loadReviews(): void {

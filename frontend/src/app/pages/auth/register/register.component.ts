@@ -14,27 +14,25 @@ import { DoctorService } from '../../../core/services/doctor.service';
 })
 export class RegisterComponent implements OnInit {
 
-  // AUTH
+  // --- CHAMPS COMMUNS ---
+  nom = '';
+  prenom = '';
   email = '';
   password = '';
   confirmPassword = '';
-  role = 'PATIENT';
+  role = 'PATIENT'; // Par défaut
 
-  // DOCTOR PROFILE
-  selectedSpecialite: string | 'autre' | '' = '';
+  // --- CHAMPS MÉDECIN ---
+  selectedSpecialite = '';
   autreSpecialite = '';
   adresse = '';
-  tarif = 0;
+  tarif: number = 0;
   biographie = '';
-
-  // 📸 IMAGE
-  selectedFile!: File;
+  selectedFile: File | null = null;
   imagePreview: string | ArrayBuffer | null = null;
 
-  // DATA
+  // --- DATA & UI ---
   specialites: any[] = [];
-
-  // UI
   error = '';
   success = '';
   loading = false;
@@ -55,19 +53,17 @@ export class RegisterComponent implements OnInit {
 
   selectRole(role: string): void {
     this.role = role;
+    this.error = ''; // Reset error quand on change de rôle
   }
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
 
-  // 📸 IMAGE SELECT
   onFileSelected(event: any): void {
     const file = event.target.files[0];
-
     if (file) {
       this.selectedFile = file;
-
       const reader = new FileReader();
       reader.onload = () => {
         this.imagePreview = reader.result;
@@ -77,80 +73,56 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit(): void {
-    this.error = '';
-    this.success = '';
+  this.error = '';
+  this.loading = true;
 
-    // VALIDATION
-    if (!this.email || !this.password || !this.confirmPassword) {
-      this.error = 'Please fill all fields';
+  if (this.role === 'MEDECIN') {
+    // 1. Thabbet elli el image mawjouda
+    if (!this.selectedFile) {
+      this.error = "L'image est obligatoire";
+      this.loading = false;
       return;
     }
 
-    if (this.password !== this.confirmPassword) {
-      this.error = 'Passwords do not match';
-      return;
-    }
+    // 2. 3abbi el FormData b-kol chay (Auth + Profil)
+    const formData = new FormData();
+    
+    // DATA AUTH (lezem el backend ya9rahom bech yasna3 el User)
+    formData.append('nom', this.nom);
+    formData.append('prenom', this.prenom);
+    formData.append('email', this.email);
+    formData.append('password', this.password);
+    formData.append('role', 'MEDECIN');
 
-    if (this.password.length < 6) {
-      this.error = 'Password must be at least 6 characters';
-      return;
-    }
+    // DATA PROFIL
+    formData.append('adresse', this.adresse);
+    formData.append('tarif', this.tarif.toString());
+    formData.append('biographie', this.biographie);
+    formData.append('specialite_nom', this.selectedSpecialite === 'autre' ? this.autreSpecialite : this.selectedSpecialite);
+    
+    // IMAGE
+    formData.append('image', this.selectedFile);
 
-    this.loading = true;
-
-    // ===================== MEDECIN =====================
-    if (this.role === 'MEDECIN') {
-
-      if (!this.selectedFile) {
-        this.error = "Image obligatoire";
+    // 3. APPEL WEHED BARKA (One-Shot)
+    this.doctorService.registerDoctor(formData).subscribe({
+      next: () => {
         this.loading = false;
-        return;
-      }
-
-      if (
-        this.selectedSpecialite === 'autre' &&
-        !this.autreSpecialite.trim()
-      ) {
-        this.error = "Veuillez saisir votre spécialité";
+        this.success = 'Compte créé avec succès !';
+        setTimeout(() => this.router.navigate(['/login']), 2000);
+      },
+      error: (err) => {
+        console.error(err);
         this.loading = false;
-        return;
+        // Houni i9ollek "User not found" ken el Backend ma yasna3ch User
+        this.error = err.error?.detail || 'Erreur lors de la création';
       }
-
-      const payload = {
-        email: this.email,
-        password: this.password,
-        role: "MEDECIN",
-
-        specialite_nom:
-          this.selectedSpecialite === 'autre'
-            ? this.autreSpecialite.trim()
-            : String(this.selectedSpecialite).trim(),
-
-        adresse: this.adresse,
-        tarif: this.tarif,
-        biographie: this.biographie
-      };
-
-      console.log("PAYLOAD =", payload);
-
-      this.authService.register(payload).subscribe({
-        next: () => {
-          this.loading = false;
-          this.success = 'Doctor created successfully!';
-          this.router.navigate(['/login']);
-        },
-        error: (err) => {
-          console.log(err);
-          this.loading = false;
-          this.error = err.error?.detail || 'Doctor creation failed';
-        }
-      });
-    }
-
-    // ===================== PATIENT =====================
+    });
+  } 
+    // 3. CAS PATIENT : Envoi JSON simple
     else {
-
       const payload = {
+        nom: this.nom,
+        prenom: this.prenom,
         email: this.email,
         password: this.password,
         role: "PATIENT"
@@ -159,13 +131,13 @@ export class RegisterComponent implements OnInit {
       this.authService.register(payload).subscribe({
         next: () => {
           this.loading = false;
-          this.success = 'Account created!';
-          this.router.navigate(['/login']);
+          this.success = 'Compte patient créé avec succès !';
+          setTimeout(() => this.router.navigate(['/login']), 2000);
         },
         error: (err) => {
-          console.log(err);
+          console.error(err);
           this.loading = false;
-          this.error = err.error?.detail || 'Registration failed';
+          this.error = err.error?.detail || 'L\'inscription a échoué';
         }
       });
     }

@@ -1,106 +1,142 @@
-from fastapi import APIRouter, Depends,HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlmodel import Session, select
+from utils.security import hash_password
 from database import get_session
-from models import ProfilMedecin,Specialite,RendezVous, User
-from schemas import MedecinCreate
-from services.matching_service import find_medecins_by_symptome
+from models import ProfilMedecin, Specialite, RendezVous, User
+from services.matching_service import find_medecins_by_symptome, find_medecins_advanced
 from services.medecin_service import get_medecins_with_rating
-from services.matching_service import find_medecins_advanced
 from services.ai_service import detect_specialite
 from services.score_service import compute_score
 from utils.dependencies import get_current_user
-from fastapi import UploadFile, File, Form
 import shutil
 import os
 
-
 router = APIRouter(prefix="/medecins", tags=["Medecins"])
 
-# CREATE MEDECIN
-from models import Specialite
-from sqlmodel import select
-
-#partie image 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-
+# =========================
+# CREATE MEDECIN
+# =========================
 @router.post("/create")
 def create_medecin(
-    user_id: int = Form(...),
+    nom: str = Form(...),
+    prenom: str = Form(...),
+    email: str = Form(...),      
+    password: str = Form(...), # <--- Ajoute le mot de passe ici
     adresse: str = Form(...),
     tarif: float = Form(...),
+    biographie: str = Form(...),
     specialite_nom: str = Form(...),
-    image: UploadFile = File(...),  # 🔥 obligatoire
+    image: UploadFile = File(...),
     session: Session = Depends(get_session)
 ):
+    # 1. Vérifier si l'utilisateur existe déjà
+    user = session.exec(select(User).where(User.email == email)).first()
 
-    # 📸 sauvegarde image
+    if not user:
+        # 2. S'il n'existe pas, on le crée fard marra
+        # Assure-toi d'importer pwd_context ou ta méthode de hashage si nécessaire
+        user = User(
+            nom=nom,
+            prenom=prenom,
+            email=email,
+            password=hash_password(password), # Idéalement hashé
+            role="MEDECIN"
+        )
+        session.add(user)
+        session.flush() # Pour récupérer l'ID sans commiter tout de suite
+
+    user_id = user.id 
+
+    # 3. Sauvegarder l'image
     filename = f"{user_id}_{image.filename}"
     file_path = os.path.join(UPLOAD_DIR, filename)
-
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(image.file, buffer)
 
-    specialite_nom = specialite_nom
-
-    # chercher si spécialité existe
-    specialite = session.exec(
-        select(Specialite).where(Specialite.nom == specialite_nom)
-    ).first()
-
-    #  ne pas créer maintenant → attendre validation admin
+    # 4. Créer le profil
     med = ProfilMedecin(
+        nom=nom,
+        prenom=prenom,
         user_id=user_id,
         adresse=adresse,
         tarif=tarif,
-        specialite_id=None,  # sera ajouté plus tard
-        image=filename  # 🔥 ajout image
+        biographie=biographie,
+        image=filename,
+        statut_validation="en_attente",
+        spec_nom_temp=specialite_nom
     )
-
-    #  stocker temporairement dans mémoire (ou payload)
-    med._specialite_nom = specialite_nom  #  hack temporaire
 
     session.add(med)
     session.commit()
+    session.refresh(med)
 
     return med
+@router.post("/upload-image")
+def upload_image(file: UploadFile = File(...)):
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
 
-# GET ALL MEDECINS (VALIDES SEULEMENT)
+    with open(file_path, "wb") as f:
+        f.write(file.file.read())
+
+    return {"filename": file.filename}
+# =========================
+# GET MEDECINS VALIDES
+# =========================
 @router.get("/")
 def get_medecins(session: Session = Depends(get_session)):
-    statement = select(ProfilMedecin).where(
+    statement = select(ProfilMedecin, User).join(User).where(
         ProfilMedecin.statut_validation == "VALIDE"
     )
-    return session.exec(statement).all()
 
-#find medecin by symptome
+    # N-rajj3ou el data b-asmawet s7i7a l-lfront
+    return [{
+        "id": med.id,
+        "nom": user.nom,
+        "prenom": user.prenom,
+        "adresse": med.adresse,
+        "tarif": med.tarif if med.tarif else 0, # Hatha lezem dima numrou
+        "image": med.image,
+        "specialite": med.spec_nom_temp
+    } for med, user in session.exec(statement).all()]
+# =========================
+# SEARCH SIMPLE
+# =========================
 @router.get("/search")
 def search_medecins(symptome: str, session: Session = Depends(get_session)):
     return find_medecins_by_symptome(symptome, session)
 
-#get medecinsz with rating
+
+# =========================
+# WITH RATING
+# =========================
 @router.get("/with-rating")
 def medecins_with_rating(session: Session = Depends(get_session)):
     return get_medecins_with_rating(session)
 
+
+# =========================
+# SMART SEARCH
+# =========================
 @router.get("/smart-search")
 def smart_search(symptome: str, session: Session = Depends(get_session)):
     return find_medecins_advanced(symptome, session)
 
 
+# =========================
+# AI SEARCH
+# =========================
 @router.get("/ai-smart-search")
 def ai_smart_search(symptome: str, session: Session = Depends(get_session)):
 
-    # 1️⃣ IA → détecter spécialité
     specialite_nom = detect_specialite(symptome, session)
 
-    # 2️⃣ récupérer spécialité DB
     specialite = session.exec(
         select(Specialite).where(Specialite.nom == specialite_nom)
     ).first()
 
-    # 🔥 fallback si spécialité introuvable
     if not specialite:
         specialite = session.exec(
             select(Specialite).where(Specialite.nom == "Médecin généraliste")
@@ -109,7 +145,6 @@ def ai_smart_search(symptome: str, session: Session = Depends(get_session)):
         if not specialite:
             return {"message": "Aucune spécialité trouvée"}
 
-    # 3️⃣ récupérer médecins validés
     medecins = session.exec(
         select(ProfilMedecin).where(
             ProfilMedecin.specialite_id == specialite.id,
@@ -117,7 +152,6 @@ def ai_smart_search(symptome: str, session: Session = Depends(get_session)):
         )
     ).all()
 
-    # 4️⃣ scoring
     results = []
 
     for med in medecins:
@@ -129,7 +163,6 @@ def ai_smart_search(symptome: str, session: Session = Depends(get_session)):
             "note": note
         })
 
-    # 5️⃣ tri
     results.sort(key=lambda x: x["note"], reverse=True)
 
     return {
@@ -137,51 +170,49 @@ def ai_smart_search(symptome: str, session: Session = Depends(get_session)):
         "medecins": results
     }
 
+
+# =========================
+# ACCEPT RDV
+# =========================
 @router.put("/rdv/{rdv_id}/accept")
 def accepter_rdv(
     rdv_id: int,
     session: Session = Depends(get_session),
     user = Depends(get_current_user)
 ):
-
-    # 🔹 vérifier rôle
     if user["role"] != "MEDECIN":
         raise HTTPException(status_code=403, detail="Accès interdit")
 
-    # 🔹 récupérer profil médecin
     profil = session.exec(
         select(ProfilMedecin).where(ProfilMedecin.user_id == user["id"])
     ).first()
 
-    if not profil:
-        raise HTTPException(status_code=404, detail="Profil médecin introuvable")
-
-    # 🔹 récupérer rdv
     rdv = session.exec(
         select(RendezVous).where(RendezVous.id == rdv_id)
     ).first()
 
-    if not rdv:
-        raise HTTPException(status_code=404, detail="Rendez-vous introuvable")
+    if not rdv or not profil:
+        raise HTTPException(status_code=404, detail="Introuvable")
 
-    # 🔹 vérifier que ce rdv appartient au médecin
     if rdv.medecin_id != profil.id:
         raise HTTPException(status_code=403, detail="Non autorisé")
 
-    # 🔥 update statut
     rdv.statut = "ACCEPTE"
     session.add(rdv)
     session.commit()
 
     return {"message": "Rendez-vous accepté"}
 
+
+# =========================
+# REFUSE RDV
+# =========================
 @router.put("/rdv/{rdv_id}/refuse")
 def refuser_rdv(
     rdv_id: int,
     session: Session = Depends(get_session),
     user = Depends(get_current_user)
 ):
-
     if user["role"] != "MEDECIN":
         raise HTTPException(status_code=403, detail="Accès interdit")
 
@@ -205,12 +236,15 @@ def refuser_rdv(
 
     return {"message": "Rendez-vous refusé"}
 
+
+# =========================
+# GET RDV MEDECIN
+# =========================
 @router.get("/rdv")
 def get_mes_rdv(
     session: Session = Depends(get_session),
     user = Depends(get_current_user)
 ):
-
     if user["role"] != "MEDECIN":
         raise HTTPException(status_code=403, detail="Accès interdit")
 
@@ -224,6 +258,10 @@ def get_mes_rdv(
 
     return rdvs
 
+
+# =========================
+# GET BY ID
+# =========================
 @router.get("/{id}")
 def get_medecin_by_id(id: int, session: Session = Depends(get_session)):
 
@@ -241,5 +279,5 @@ def get_medecin_by_id(id: int, session: Session = Depends(get_session)):
         "adresse": med.adresse,
         "tarif": med.tarif,
         "biographie": med.biographie,
-        "image": med.image  # 🔥 ajout image
+        "image": med.image
     }

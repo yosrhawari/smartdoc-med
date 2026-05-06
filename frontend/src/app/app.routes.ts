@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { DoctorProfileComponent } from './pages/patient/doctor-profile/doctor-profile.component';
 
 export const routes: Routes = [
   // Landing
@@ -89,6 +90,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/admin/doctors/doctors.component').then(m => m.AdminDoctorsComponent),
     canActivate: [authGuard, roleGuard],
     data: { role: 'ADMIN' }
+  },
+
+  {
+    path: 'admin/doctor/:id',
+    component: DoctorProfileComponent
   },
 
   // Fallback

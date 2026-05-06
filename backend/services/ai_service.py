@@ -21,15 +21,15 @@ def detect_specialite(symptome: str, session: Session):
         print("Cache utilisé")
         return cache[symptome]
     # ❤️ Cardiologie
-    if "coeur" in symptome or "cardiaque" in symptome or "poitrine" in symptome or "palpitations" in symptome:
-        return "Cardiologie"
+    if "heart" in symptome or "cardiaque" in symptome or "poitrine" in symptome or "palpitations" in symptome:
+        return "cardiologue"
 
     # 🧴 Dermatologie
-    if "peau" in symptome or "acné" in symptome or "bouton" in symptome or "eczéma" in symptome or "démangeaison" in symptome:
+    if "skin" in symptome or "acne" in symptome or "pimple" in symptome or "eczema" in symptome or "itching" in symptome:
         return "Dermatologie"
 
     # 🧠 Neurologie
-    if "tête" in symptome or "migraine" in symptome or "vertige" in symptome or "nerf" in symptome or "paralysie" in symptome:
+    if "head" in symptome or "migraine" in symptome or "dizziness" in symptome or "nerve" in symptome or "paralysis" in symptome:
         return "Neurologie"
 
     # 🧘 Psychiatrie

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
 import { DoctorService, SmartSearchResult } from '../../../core/services/doctor.service';
+import { AiService } from '../../../core/services/ai.service';  
 
 @Component({
   selector: 'app-questionnaire',
@@ -19,7 +20,7 @@ export class QuestionnaireComponent {
   // Step 1 - Symptom category
   categories = [
     { id: 'general', label: 'General Health', icon: '🏥', keywords: 'fatigue fever pain' },
-    { id: 'cardio', label: 'Heart & Cardio', icon: '❤️', keywords: 'chest pain heart palpitations' },
+    { id: 'cardio', label: 'Heart & Cardio', icon: '❤️', keywords: 'heart chest pain palpitations' },
     { id: 'derma', label: 'Skin Issues', icon: '🩹', keywords: 'rash skin allergy itching' },
     { id: 'neuro', label: 'Neurological', icon: '🧠', keywords: 'headache migraine dizziness' },
     { id: 'ortho', label: 'Bones & Joints', icon: '🦴', keywords: 'back pain joint fracture' },
@@ -32,7 +33,8 @@ export class QuestionnaireComponent {
   symptomDuration = '';
 
   // Step 3 - Results
-  results: SmartSearchResult[] = [];
+  results: any[] = []; // List mtaa el medecins jaya mel Backend
+  aiAnalysis: any = null; // Resultat mtaa el IA (specialite)
   searching = false;
 
   sidebarItems = [
@@ -41,7 +43,10 @@ export class QuestionnaireComponent {
     { label: 'Doctors', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>', route: '/patient/doctors' }
   ];
 
-  constructor(private doctorService: DoctorService, private router: Router) {}
+  constructor(
+    private aiService: AiService, 
+    private router: Router
+  ) {}
 
   selectCategory(id: string): void {
     this.selectedCategory = id;
@@ -51,7 +56,7 @@ export class QuestionnaireComponent {
     if (this.currentStep < this.totalSteps) {
       this.currentStep++;
       if (this.currentStep === 3) {
-        this.searchDoctors();
+        this.runAiPrediction();
       }
     }
   }
@@ -59,6 +64,11 @@ export class QuestionnaireComponent {
   prevStep(): void {
     if (this.currentStep > 1) {
       this.currentStep--;
+      // Reset results if going back from Step 3
+      if (this.currentStep < 3) {
+        this.results = [];
+        this.aiAnalysis = null;
+      }
     }
   }
 
@@ -70,17 +80,26 @@ export class QuestionnaireComponent {
     }
   }
 
-  searchDoctors(): void {
+  runAiPrediction(): void {
     this.searching = true;
+    
+    // IMPORTANT: El key lezem ykoun 'symptome' kima tistanna el FastAPI mteek
     const category = this.categories.find(c => c.id === this.selectedCategory);
-    const query = `${category?.keywords || ''} ${this.symptomText}`;
+    const fullSymptomDescription = `${category?.label}: ${this.symptomText}. Duration: ${this.symptomDuration}`;
 
-    this.doctorService.searchDoctors(query).subscribe({
-      next: (data) => {
-        this.results = data;
+    const payload = {
+      symptome: fullSymptomDescription
+    };
+
+    this.aiService.analyzeResults(payload).subscribe({
+      next: (res) => {
+        // res hna fih { "symptome": "...", "specialite": "...", "medecins": [...] }
+        this.aiAnalysis = res;
+        this.results = res.medecins;
         this.searching = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error("Erreur lors de la prédiction IA:", err);
         this.searching = false;
       }
     });
@@ -90,7 +109,7 @@ export class QuestionnaireComponent {
     this.router.navigate(['/patient/book', doctorId]);
   }
 
-  getStarArray(rating: number): boolean[] {
+  getStarArray(rating: number = 5): boolean[] {
     return Array.from({ length: 5 }, (_, i) => i < Math.round(rating));
   }
 }

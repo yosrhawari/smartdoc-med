@@ -30,11 +30,14 @@ def get_medecins_with_rating(session: Session):
         moyenne = sum(notes) / len(notes) if notes else 0
 
         result.append({
-            "medecin_id": med.id,
-            "nom": med.nom ,
-            "prenom": med.prenom ,
+            "id": med.id,
+            "nom": user.nom ,
+            "prenom": user.prenom ,
             "adresse": med.adresse,
-            "note_moyenne": round(moyenne, 2)
+            "note_moyenne": round(moyenne, 2),
+            "image": med.image,
+            "specialite": med.spec_nom_temp ,
+            "statut_validation": med.statut_validation   
         })
         
     return result
