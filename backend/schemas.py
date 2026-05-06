@@ -27,7 +27,7 @@ class MedecinCreate(BaseModel):
 
 
 class RendezVousCreate(BaseModel):
-    patient_id: int
+    patient_id: Optional[int] = None
     medecin_id: int
     date_rdv: str
 

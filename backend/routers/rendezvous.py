@@ -10,15 +10,24 @@ router = APIRouter(prefix="/rendezvous", tags=["RendezVous"])
 # CREATE RDV
 @router.post("/")
 def create_rdv(
-    data: RendezVous,
+    data: RendezVousCreate,
     session: Session = Depends(get_session),
     user = Depends(require_role("PATIENT"))
 ):
-    data.patient_id = user.id
-    session.add(data)
+    # Correction : user est un dict (payload JWT), on utilise .get("user_id")
+    patient_id = user.get("user_id")
+    
+    new_rdv = RendezVous(
+        patient_id=patient_id,
+        medecin_id=data.medecin_id,
+        date_rdv=data.date_rdv,
+        statut="prevu"
+    )
+    
+    session.add(new_rdv)
     session.commit()
-    session.refresh(data)
-    return data
+    session.refresh(new_rdv)
+    return new_rdv
 
 @router.put("/{id}/status")
 def update_status(
