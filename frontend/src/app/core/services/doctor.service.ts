@@ -14,7 +14,11 @@ export interface Doctor {
   biographie?: string;
   diplome_path?: string;
   statut_validation: string;
- 
+  nom?: string;
+  prenom?: string;
+  image?: string;
+  score?: string;
+  specialite?: string;
 }
 
 export interface DoctorWithRating {
@@ -105,5 +109,9 @@ export class DoctorService {
 
   getMyPatients(): Observable<any[]> {
     return this.http.get<any[]>(`${this.API}/medecins/my-patients`);
+  }
+
+  getPatientHistory(patientId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API}/medecins/patient/${patientId}/history`);
   }
 }

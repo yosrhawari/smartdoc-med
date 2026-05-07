@@ -1,31 +1,191 @@
-.dashboard-layout { display: flex; min-height: calc(100vh - 70px); }
-.dashboard-main { flex: 1; padding: 32px; }
-.page-header { margin-bottom: 32px; }
-.page-header h1 { font-size: 1.8rem; letter-spacing: -0.5px; }
-.subtitle { color: var(--text-muted); margin-top: 4px; }
-
-.profile-form-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-xl); padding: 32px; max-width: 600px;
+.dashboard-layout {
+  display: flex;
+  min-height: calc(100vh - 72px);
+  background-color: var(--muted);
 }
 
-.textarea { resize: vertical; min-height: 100px; }
-
-.alert {
-  padding: 12px 16px; border-radius: var(--radius-md);
-  font-size: 0.85rem; margin-bottom: 16px;
+.dashboard-main {
+  flex: 1;
+  padding: 2.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
-.alert-error { background: var(--danger-light); color: var(--danger); }
-.alert-success { background: var(--success-light); color: var(--accent); }
 
-.spinner {
-  display: inline-block; width: 20px; height: 20px;
-  border: 2px solid rgba(255,255,255,.3); border-top-color: white;
-  border-radius: 50%; animation: spin 0.6s linear infinite;
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+
+.header-main h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--muted-foreground);
+  font-size: 1rem;
+}
+
+.grid-profile {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.profile-image-upload {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+}
+
+.image-preview {
+  width: 100%;
+  height: 100%;
+  background: var(--muted);
+  border-radius: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid white;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.placeholder-icon {
+  width: 3rem;
+  height: 3rem;
+  color: var(--muted-foreground);
+}
+
+.btn-upload-overlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+}
+
+.btn-upload-overlay:hover {
+  transform: scale(1.1);
+  background: #2563eb;
+}
+
+.verification-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.section-title-sm {
+  font-size: 1.125rem;
+  font-weight: 600;
+  position: relative;
+  padding-left: 1rem;
+}
+
+.section-title-sm::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 1.25rem;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon i {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: var(--muted-foreground);
+}
+
+.input-with-icon .form-control {
+  padding-left: 2.75rem;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.alert-error-modern, .alert-success-modern {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.alert-error-modern {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--destructive);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.alert-success-modern {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--secondary);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 1024px) {
+  .grid-profile {
+    grid-template-columns: 1fr;
+  }
+}
 
 @media (max-width: 768px) {
-  .dashboard-main { padding: 20px 16px; }
-  .profile-form-card { padding: 24px; }
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
 }

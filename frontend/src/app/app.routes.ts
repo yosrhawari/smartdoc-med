@@ -59,6 +59,14 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { role: 'MEDECIN' }
   },
+
+  {
+    path: 'doctor/complete-profile',
+    loadComponent: () => import('./pages/doctor/complete-profile/complete-profile.component').then(m => m.CompleteProfileComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { role: 'MEDECIN' }
+  },
+
   {
     path: 'doctor/patients',
     loadComponent: () => import('./pages/doctor/patients/patients.component').then(m => m.DoctorPatientsComponent),
@@ -68,6 +76,12 @@ export const routes: Routes = [
   {
     path: 'doctor/profile',
     loadComponent: () => import('./pages/doctor/profile-edit/profile-edit.component').then(m => m.DoctorProfileEditComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { role: 'MEDECIN' }
+  },
+  {
+    path: 'doctor/reviews',
+    loadComponent: () => import('./pages/doctor/reviews/reviews.component').then(m => m.DoctorReviewsComponent),
     canActivate: [authGuard, roleGuard],
     data: { role: 'MEDECIN' }
   },
@@ -95,6 +109,13 @@ export const routes: Routes = [
   {
     path: 'admin/doctor/:id',
     component: DoctorProfileComponent
+  },
+
+  // Shared Settings
+  {
+    path: 'settings',
+    loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent),
+    canActivate: [authGuard]
   },
 
   // Fallback

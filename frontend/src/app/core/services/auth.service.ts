@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, map } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
 // Représente la réponse du login contenant le token
@@ -12,6 +12,9 @@ export interface LoginResponse {
 export interface UserInfo {
   id: number;
   role: string;
+  prenom?: string;
+  nom?: string;
+  email?: string;
 }
 @Injectable({
   providedIn: 'root'// Permet d’injecter ce service dans toute l’application
@@ -23,6 +26,7 @@ export class AuthService {
 
   private currentUserSubject = new BehaviorSubject<UserInfo | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();
+  isLoggedIn$ = this.currentUserSubject.asObservable().pipe(map(user => !!user));
 
   constructor(private http: HttpClient, private router: Router) {
     this.loadUser();
@@ -35,9 +39,12 @@ export class AuthService {
       try {
         // Décodage du token JWT pour récupérer les informations
         const payload = JSON.parse(atob(token.split('.')[1]));// Met à jour les informations de l’utilisateur connecté
-        this.currentUserSubject.next({// Stocke l’identifiant et le rôle de l’utilisateur
+        this.currentUserSubject.next({
           id: payload.user_id,
-          role: payload.role
+          role: payload.role,
+          prenom: payload.prenom || '',
+          nom: payload.nom || '',
+          email: payload.email || ''
         });
       } catch {
         // En cas d’erreur, déconnecte l’utilisateur
@@ -89,4 +96,20 @@ export class AuthService {
   getUserId(): number | null {
     return this.currentUserSubject.value?.id || null;
   }
-}
+
+  getUser(): UserInfo | null {
+    return this.currentUserSubject.value;
+  }
+
+  getDashboardRoute(): string {
+    const role = this.getRole();
+    if (!role) return '/';
+    
+    switch (role) {
+      case 'ADMIN': return '/admin/dashboard';
+      case 'MEDECIN': return '/doctor/dashboard';
+      case 'PATIENT': return '/patient/dashboard';
+      default: return '/';
+    }
+  }
+}

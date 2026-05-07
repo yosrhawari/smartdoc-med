@@ -1,106 +1,189 @@
-<div class="dashboard-layout">
-  <app-sidebar [items]="sidebarItems" title="Patient"></app-sidebar>
-
-  <main class="dashboard-main">
+<div class="dashboard-container">
+  <main class="dashboard-content">
     <!-- Header -->
-    <div class="dashboard-header animate-fade-in-up">
-      <div>
-        <h1 id="patient-dashboard-title">Welcome Back! 👋</h1>
-        <p class="subtitle">Here's an overview of your healthcare activity</p>
+    <header class="dashboard-header animate-fade-in-up">
+      <div class="header-left">
+        <h1>Welcome back, {{ auth.getUser()?.prenom }}</h1>
+        <p class="subtitle">Manage your health journey and upcoming appointments</p>
       </div>
-      <a routerLink="/patient/questionnaire" class="btn btn-primary" id="btn-find-doctor">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        Find a Doctor
+    </header>
+
+    <!-- Quick Action Cards -->
+    <div class="action-grid animate-fade-in-up">
+      <a routerLink="/patient/questionnaire" class="action-card">
+        <div class="icon-box bg-blue">
+          <i data-lucide="search"></i>
+        </div>
+        <div class="action-info">
+          <h3>Find a Doctor</h3>
+          <p>Get smart recommendations based on your symptoms.</p>
+        </div>
+      </a>
+
+      <a routerLink="/patient/doctors" class="action-card">
+        <div class="icon-box bg-green">
+          <i data-lucide="calendar"></i>
+        </div>
+        <div class="action-info">
+          <h3>Book Appointment</h3>
+          <p>Schedule a visit with your preferred healthcare provider.</p>
+        </div>
+      </a>
+
+      <a class="action-card">
+        <div class="icon-box bg-yellow">
+          <i data-lucide="file-text"></i>
+        </div>
+        <div class="action-info">
+          <h3>Medical Records</h3>
+          <p>Securely access your health history and prescriptions.</p>
+        </div>
       </a>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="stats-grid animate-fade-in-up">
-      <div class="stat-card stat-blue">
-        <div class="stat-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <!-- Main Content Split Layout -->
+    <div class="split-layout animate-fade-in-up delay-100">
+      
+      <!-- Left Column: Upcoming Appointments -->
+      <section class="upcoming-section">
+        <div class="section-header">
+          <h2>Upcoming Appointments</h2>
+          <button class="btn-primary" routerLink="/patient/doctors">Book New</button>
         </div>
-        <div class="stat-info">
-          <span class="stat-number">{{ upcomingCount }}</span>
-          <span class="stat-label">Upcoming</span>
-        </div>
-      </div>
 
-      <div class="stat-card stat-green">
-        <div class="stat-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <div class="appointment-list" *ngIf="upcomingAppointments.length > 0">
+          <div class="appointment-item card" *ngFor="let apt of upcomingAppointments">
+            <div class="date-badge">
+              <span class="month">{{ formatDate(apt.date_rdv).month }}</span>
+              <span class="day">{{ formatDate(apt.date_rdv).day }}</span>
+            </div>
+            <div class="appointment-info">
+              <div class="doctor-details">
+                <span class="doctor-name">{{ apt.doctor_name || 'Dr. Najib Mahmoudi' }}</span>
+                <span class="specialty"><i data-lucide="tag"></i> {{ apt.specialite || 'Dentiste' }}</span>
+              </div>
+              <div class="appointment-meta">
+                <span><i data-lucide="clock"></i> {{ apt.date_rdv }} {{ apt.heure }}</span>
+                <span><i data-lucide="map-pin"></i> Sousse</span>
+              </div>
+              <div class="appointment-actions">
+                <span class="status-pill" [ngClass]="getStatusClass(apt.statut)">{{ apt.statut }}</span>
+                <button class="btn-cancel"><i data-lucide="x-circle"></i> Cancel</button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="stat-info">
-          <span class="stat-number">{{ completedCount }}</span>
-          <span class="stat-label">Completed</span>
-        </div>
-      </div>
 
-      <div class="stat-card stat-purple">
-        <div class="stat-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        <div class="empty-state-card card" *ngIf="upcomingAppointments.length === 0">
+          <i data-lucide="calendar-x"></i>
+          <p>No upcoming appointments</p>
         </div>
-        <div class="stat-info">
-          <span class="stat-number">{{ appointments.length }}</span>
-          <span class="stat-label">Total Visits</span>
-        </div>
-      </div>
-    </div>
+      </section>
 
-    <!-- Quick Actions -->
-    <div class="section animate-fade-in-up">
-      <h2 class="section-title">Quick Actions</h2>
-      <div class="quick-actions">
-        <a routerLink="/patient/questionnaire" class="action-card" id="action-questionnaire">
-          <div class="action-icon icon-blue">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          </div>
-          <div class="action-text">
-            <h4>Medical Questionnaire</h4>
-            <p>Describe your symptoms</p>
-          </div>
-        </a>
-        <a routerLink="/patient/doctors" class="action-card" id="action-browse-doctors">
-          <div class="action-icon icon-green">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-          </div>
-          <div class="action-text">
-            <h4>Browse Doctors</h4>
-            <p>View all available doctors</p>
-          </div>
-        </a>
-      </div>
-    </div>
-
-    <!-- Appointments Table -->
-    <div class="section animate-fade-in-up">
-      <h2 class="section-title">Recent Appointments</h2>
-      <div class="table-wrapper">
-        <table class="data-table" *ngIf="appointments.length > 0" id="appointments-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Doctor</th>
-              <th>Date & Time</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let apt of appointments">
-              <td>#{{ apt.id }}</td>
-              <td>{{ apt.doctor_name }}</td>
-              <td>{{ apt.date_rdv }} at {{ apt.heure }}</td>
-              <td><span class="badge" [ngClass]="getStatusClass(apt.statut)">{{ getStatusLabel(apt.statut) }}</span></td>
-            </tr>
-          </tbody>
-        </table>
-        <div *ngIf="appointments.length === 0" class="empty-state">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="empty-icon"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <h3>No Appointments Yet</h3>
-          <p>Start by finding a doctor and booking your first appointment</p>
-          <a routerLink="/patient/questionnaire" class="btn btn-primary btn-sm">Find a Doctor</a>
+      <!-- Right Column: Medical Hub -->
+      <section class="medical-hub-section">
+        <div class="section-header">
+          <h2>Medical Hub</h2>
+          <span class="badge-hub">Prescriptions & Advice</span>
         </div>
-      </div>
+
+        <div class="records-list" *ngIf="medicalRecords.length > 0">
+          <div class="record-card card" *ngFor="let rec of medicalRecords.slice(0, 1)">
+            <div class="record-header">
+              <div class="doctor-avatar">
+                {{ rec.doctor_name?.charAt(4) }}
+              </div>
+              <div class="record-doctor-info">
+                <h4>{{ rec.doctor_name }}</h4>
+                <p>{{ rec.specialite || 'General' }}</p>
+              </div>
+              <span class="record-date">{{ rec.date | date:'MMM dd, yyyy' | uppercase }}</span>
+            </div>
+            
+            <div class="record-content">
+              <div class="advice-box">
+                <div class="advice-header">
+                  <i data-lucide="message-square"></i>
+                  <span>DOCTOR'S ADVICE</span>
+                </div>
+                <p>{{ rec.notes || 'No clinical notes provided for this visit.' }}</p>
+              </div>
+            </div>
+
+            <div class="record-footer">
+              <div class="footer-left">
+                <!-- If not reviewed yet -->
+                <button *ngIf="!rec.review" class="btn-link" (click)="toggleReview(rec.rendezvous_id)">
+                  <i data-lucide="edit-3"></i> Leave a review for this visit
+                </button>
+                
+                <!-- If already reviewed (Saved state) -->
+                <div *ngIf="rec.review" class="review-saved-badge">
+                  <div class="mini-stars">
+                    <i data-lucide="star" *ngFor="let filled of getStarArray(rec.review.note)" 
+                       [class.filled]="filled" class="mini-star"></i>
+                  </div>
+                  <span class="saved-text">"Your review is saved"</span>
+                </div>
+              </div>
+
+              <button class="btn-link-primary">View Full History <i data-lucide="arrow-right"></i></button>
+            </div>
+
+            <!-- Expanding Review Form -->
+            <div class="review-form-overlay" *ngIf="expandedRecordId === rec.rendezvous_id">
+              <div class="review-form-container animate-fade-in">
+                <div class="form-divider"></div>
+                
+                <div class="rating-section">
+                  <label>YOUR RATING</label>
+                  <div class="star-rating">
+                    <button *ngFor="let star of [1,2,3,4,5]" 
+                            type="button"
+                            class="star-item"
+                            [class.filled]="reviewNote >= star"
+                            (click)="setRating(star)">
+                      <i data-lucide="star"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="comment-section">
+                  <label for="reviewComment">YOUR COMMENT</label>
+                  <textarea 
+                    id="reviewComment" 
+                    [(ngModel)]="reviewComment" 
+                    placeholder="How was your experience?"
+                    class="form-control">
+                  </textarea>
+                </div>
+
+                <!-- Messages -->
+                <div *ngIf="reviewError" class="error-msg animate-fade-in">
+                  <i data-lucide="alert-circle"></i> {{ reviewError }}
+                </div>
+                <div *ngIf="reviewSuccess" class="success-msg animate-fade-in">
+                  <i data-lucide="check-circle"></i> {{ reviewSuccess }}
+                </div>
+
+                <button 
+                  class="btn-submit-feedback" 
+                  [disabled]="submittingReview"
+                  (click)="submitReview(rec.rendezvous_id)">
+                  <span *ngIf="!submittingReview">Submit Feedback</span>
+                  <i data-lucide="loader-2" *ngIf="submittingReview" class="animate-spin"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-state-card card" *ngIf="medicalRecords.length === 0">
+          <i data-lucide="file-warning"></i>
+          <p>No medical records found</p>
+        </div>
+      </section>
+
     </div>
   </main>
 </div>

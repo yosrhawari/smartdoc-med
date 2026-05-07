@@ -1,5 +1,6 @@
-from typing import Optional
+from typing import Optional, List
 from sqlmodel import SQLModel, Field
+from datetime import datetime
 
 
 # USERS
@@ -55,4 +56,14 @@ class Review(SQLModel, table=True):
     note: int
     commentaire: str
     reponse_medecin: Optional[str] = None
+
+
+# MEDICAL RECORD
+class MedicalRecord(SQLModel, table=True):
+    __tablename__ = "medical_records"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    notes: str
+    prescription: str
+    rendezvous_id: int = Field(foreign_key="rendezvous.id", ondelete="CASCADE")
+    created_at: datetime = Field(default_factory=datetime.now)
 

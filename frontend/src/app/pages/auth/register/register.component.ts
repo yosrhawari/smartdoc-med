@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { DoctorService } from '../../../core/services/doctor.service';
+import { DoctorService, Specialite } from '../../../core/services/doctor.service';
+
+declare var lucide: any;
 
 @Component({
   selector: 'app-register',
@@ -13,133 +15,104 @@ import { DoctorService } from '../../../core/services/doctor.service';
   styleUrl: './register.component.css'
 })
 export class RegisterComponent implements OnInit {
-
-  // --- CHAMPS COMMUNS ---
+  // Fields for Step 1
   nom = '';
   prenom = '';
   email = '';
   password = '';
   confirmPassword = '';
-  role = 'PATIENT'; // Par défaut
+  role = 'PATIENT'; // Default
+  agreeToTerms = false;
 
-  // --- CHAMPS MÉDECIN ---
-  selectedSpecialite = '';
-  autreSpecialite = '';
-  adresse = '';
-  tarif: number = 0;
-  biographie = '';
-  selectedFile: File | null = null;
-  imagePreview: string | ArrayBuffer | null = null;
+  // Fields for Step 2 (Doctor only)
+  step = 1;
+  address = '';
+  fee: number | null = null;
+  selectedSpecialty = '';
+  specialites: Specialite[] = [];
 
-  // --- DATA & UI ---
-  specialites: any[] = [];
   error = '';
   success = '';
   loading = false;
-  showPassword = false;
 
   constructor(
-    private authService: AuthService,
+    public authService: AuthService,
     private doctorService: DoctorService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.doctorService.getSpecialites().subscribe({
-      next: (data) => this.specialites = data,
-      error: () => console.error('Failed to load specialites')
+    this.doctorService.getSpecialites().subscribe(data => {
+      this.specialites = data;
+      this.refreshIcons();
     });
   }
 
   selectRole(role: string): void {
     this.role = role;
-    this.error = ''; // Reset error quand on change de rôle
-  }
-
-  togglePassword(): void {
-    this.showPassword = !this.showPassword;
-  }
-
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.imagePreview = reader.result;
-      };
-      reader.readAsDataURL(file);
-    }
+    this.error = '';
   }
 
   onSubmit(): void {
-  this.error = '';
-  this.loading = true;
-
-  if (this.role === 'MEDECIN') {
-    // 1. Thabbet elli el image mawjouda
-    if (!this.selectedFile) {
-      this.error = "L'image est obligatoire";
-      this.loading = false;
+    this.error = '';
+    
+    if (this.password !== this.confirmPassword) {
+      this.error = 'Passwords do not match';
       return;
     }
 
-    // 2. 3abbi el FormData b-kol chay (Auth + Profil)
-    const formData = new FormData();
-    
-    // DATA AUTH (lezem el backend ya9rahom bech yasna3 el User)
-    formData.append('nom', this.nom);
-    formData.append('prenom', this.prenom);
-    formData.append('email', this.email);
-    formData.append('password', this.password);
-    formData.append('role', 'MEDECIN');
+    // Step transition for Doctors
+    if (this.role === 'MEDECIN' && this.step === 1) {
+      this.step = 2;
+      this.refreshIcons();
+      return;
+    }
 
-    // DATA PROFIL
-    formData.append('adresse', this.adresse);
-    formData.append('tarif', this.tarif.toString());
-    formData.append('biographie', this.biographie);
-    formData.append('specialite_nom', this.selectedSpecialite === 'autre' ? this.autreSpecialite : this.selectedSpecialite);
-    
-    // IMAGE
-    formData.append('image', this.selectedFile);
+    // Final Validation for Step 2
+    if (this.role === 'MEDECIN' && this.step === 2) {
+      if (!this.address || !this.fee || !this.selectedSpecialty) {
+        this.error = 'Please fill in all medical practice details';
+        return;
+      }
+    }
 
-    // 3. APPEL WEHED BARKA (One-Shot)
-    this.doctorService.registerDoctor(formData).subscribe({
+    this.loading = true;
+
+    const payload = {
+      nom: this.nom,
+      prenom: this.prenom,
+      email: this.email,
+      password: this.password,
+      role: this.role,
+      // Optional fields for Doctor
+      adresse: this.address,
+      tarif: this.fee,
+      specialite_id: this.selectedSpecialty ? parseInt(this.selectedSpecialty) : null
+    };
+
+    this.authService.register(payload).subscribe({
       next: () => {
         this.loading = false;
-        this.success = 'Compte créé avec succès !';
+        this.success = 'Account created successfully!';
         setTimeout(() => this.router.navigate(['/login']), 2000);
       },
       error: (err) => {
-        console.error(err);
         this.loading = false;
-        // Houni i9ollek "User not found" ken el Backend ma yasna3ch User
-        this.error = err.error?.detail || 'Erreur lors de la création';
+        this.error = err.error?.detail || 'Registration failed. Please try again.';
       }
     });
-  } 
-    // 3. CAS PATIENT : Envoi JSON simple
-    else {
-      const payload = {
-        nom: this.nom,
-        prenom: this.prenom,
-        email: this.email,
-        password: this.password,
-        role: "PATIENT"
-      };
+  }
 
-      this.authService.register(payload).subscribe({
-        next: () => {
-          this.loading = false;
-          this.success = 'Compte patient créé avec succès !';
-          setTimeout(() => this.router.navigate(['/login']), 2000);
-        },
-        error: (err) => {
-          console.error(err);
-          this.loading = false;
-          this.error = err.error?.detail || 'L\'inscription a échoué';
-        }
-      });
-    }
+  prevStep(): void {
+    this.step = 1;
+    this.refreshIcons();
+  }
+
+  private refreshIcons(): void {
+    setTimeout(() => {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }, 0);
   }
 }

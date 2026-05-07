@@ -1,6 +1,7 @@
 
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime
 from sqlmodel import SQLModel, Field
 
 class UserCreate(SQLModel):
@@ -42,5 +43,23 @@ class LoginSchema(BaseModel):
     email: str
     password: str
 class SymptomeInput(BaseModel):
-    symptome: str
-    
+    patient_info: dict
+    symptoms: str
+    area: str
+    severity: int
+    duration: str
+
+class MedicalRecordCreate(BaseModel):
+    notes: str
+    prescription: str
+    rendezvous_id: int
+
+class MedicalRecordOut(BaseModel):
+    id: int
+    notes: str
+    prescription: str
+    rendezvous_id: int
+    created_at: datetime
+
+class ReviewReply(BaseModel):
+    reponse: str

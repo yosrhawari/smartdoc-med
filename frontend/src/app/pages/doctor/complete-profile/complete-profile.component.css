@@ -11,9 +11,9 @@
 .auth-container {
   background: white;
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   border-radius: 1.25rem;
-  padding: 3rem;
+  padding: 4rem;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
 }
@@ -25,24 +25,23 @@
 }
 
 .logo-box {
-  width: 3.5rem;
-  height: 3.5rem;
-  background: #2563eb;
-  color: white;
-  border-radius: 1rem;
+  width: 4rem;
+  height: 4rem;
+  background: #eff6ff;
+  color: #2563eb;
+  border-radius: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
 }
 
 .auth-header {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 3rem;
 }
 
 .auth-header h1 {
-  font-size: 2rem;
+  font-size: 2.25rem;
   font-weight: 800;
   color: #0f172a;
   margin-bottom: 0.5rem;
@@ -57,15 +56,15 @@
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .form-group label {
   display: block;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 700;
-  color: #334155;
-  margin-bottom: 0.5rem;
+  color: #1e293b;
+  margin-bottom: 0.75rem;
 }
 
 .input-container {
@@ -76,7 +75,7 @@
 
 .input-icon {
   position: absolute;
-  left: 1rem;
+  left: 1.25rem;
   color: #94a3b8;
   width: 1.25rem;
   height: 1.25rem;
@@ -84,11 +83,11 @@
 
 .form-control {
   width: 100%;
-  padding: 0.75rem 1rem 0.75rem 3rem;
-  border: 1.5px solid #f1f5f9;
+  padding: 0.875rem 1.25rem 0.875rem 3.5rem;
+  border: 1.5px solid #f8fafc;
   border-radius: 0.75rem;
   font-family: inherit;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   color: #1e293b;
   background: #f8fafc;
   transition: all 0.2s;
@@ -101,31 +100,23 @@
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 
-.btn-toggle-pass {
-  position: absolute;
-  right: 1rem;
-  background: none;
-  border: none;
-  color: #94a3b8;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  padding: 0;
-}
-
-.btn-toggle-pass:hover {
-  color: #64748b;
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.25rem center;
+  background-size: 1.25rem;
 }
 
 .btn-auth-submit {
   width: 100%;
-  padding: 1rem;
+  padding: 1.125rem;
   background: #2563eb;
   color: white;
   border: none;
   border-radius: 0.75rem;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.0625rem;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
@@ -150,45 +141,13 @@
   background: #fef2f2;
   border: 1px solid #fee2e2;
   color: #b91c1c;
-  padding: 0.75rem 1rem;
+  padding: 1rem;
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 600;
-}
-
-.auth-footer {
-  text-align: center;
-  margin-top: 1.5rem;
-}
-
-.auth-footer p {
-  color: #64748b;
-  font-size: 0.875rem;
-}
-
-.auth-footer a {
-  color: #2563eb;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.secure-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 3rem;
-  color: #94a3b8;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.secure-badge i {
-  width: 0.875rem;
-  height: 0.875rem;
 }
 
 /* Animations */

@@ -1,197 +1,144 @@
 <div class="auth-page">
   <div class="auth-container animate-fade-in-up">
+    <!-- LOGO -->
+    <div class="auth-logo-section">
+      <div class="logo-box">
+        <i data-lucide="activity"></i>
+      </div>
+    </div>
 
     <!-- HEADER -->
     <div class="auth-header">
-      <a routerLink="/" class="auth-logo">
-        <svg width="40" height="40" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="8" fill="#2563EB"/>
-          <path d="M16 7V25M7 16H25" stroke="white" stroke-width="3"/>
-        </svg>
-      </a>
       <h1>Create Account</h1>
       <p>Join SmartDoc Med today</p>
     </div>
 
     <!-- FORM -->
     <form (ngSubmit)="onSubmit()" class="auth-form">
-
-      <!-- ROLE -->
-      <label>I am a</label>
-      <div class="role-selector">
-
-        <div class="role-option"
-             [class.selected]="role === 'PATIENT'"
-             (click)="selectRole('PATIENT')">
-          <div>🏥 Patient</div>
-        </div>
-
-        <div class="role-option"
-             [class.selected]="role === 'MEDECIN'"
-             (click)="selectRole('MEDECIN')">
-          <div>🩺 Doctor</div>
-        </div>
-
-      </div>
-      <div class ="form-group">
-        <label>Nom</label>
-        <input type="text"
-               [(ngModel)]="nom"
-               name="nom"
-               class="form-control"
-               required>
-      </div>
-      <div class ="form-group">
-        <label>Prénom</label>
-        <input type="text"
-               [(ngModel)]="prenom"
-               name="prenom"
-               class="form-control"
-               required>
-      </div>
-
       
-
-      <!-- EMAIL -->
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email"
-               [(ngModel)]="email"
-               name="email"
-               class="form-control"
-               required>
-      </div>
-
-      <!-- PASSWORD -->
-      <div class="form-group">
-        <label>Password</label>
-        <input [type]="showPassword ? 'text' : 'password'"
-               [(ngModel)]="password"
-               name="password"
-               class="form-control"
-               required>
-      </div>
-
-      <!-- CONFIRM -->
-      <div class="form-group">
-        <label>Confirm Password</label>
-        <input [type]="showPassword ? 'text' : 'password'"
-               [(ngModel)]="confirmPassword"
-               name="confirmPassword"
-               class="form-control"
-               required>
-      </div>
-
-      <!-- ================= DOCTOR SECTION ================= -->
-      <div *ngIf="role === 'MEDECIN'">
-
-        <h3>Doctor Profile</h3>
-
-        <!-- IMAGE -->
+      <!-- STEP 1: BASIC INFO -->
+      <div *ngIf="step === 1" class="animate-fade-in">
+        <!-- ROLE SELECTION -->
         <div class="form-group">
-          <label>Photo de profil</label>
-
-          <input type="file"
-                 name="image"
-                 (change)="onFileSelected($event)"
-                 class="form-control"
-                 accept="image/*"
-                 required>
+          <label class="section-label">I am a...</label>
+          <div class="role-grid">
+            <div class="role-card" 
+                 [class.selected]="role === 'PATIENT'"
+                 (click)="selectRole('PATIENT')">
+              <div class="role-icon">
+                <i data-lucide="user"></i>
+              </div>
+              <div class="role-info">
+                <span class="role-title">Patient</span>
+                <span class="role-desc">Find and book doctors</span>
+              </div>
+            </div>
+            <div class="role-card" 
+                 [class.selected]="role === 'MEDECIN'"
+                 (click)="selectRole('MEDECIN')">
+              <div class="role-icon">
+                <i data-lucide="stethoscope"></i>
+              </div>
+              <div class="role-info">
+                <span class="role-title">Doctor</span>
+                <span class="role-desc">Manage appointments</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- PREVIEW -->
-        <div *ngIf="imagePreview" class="form-group">
-          <img [src]="imagePreview"
-               alt="Preview"
-               width="120"
-               style="border-radius: 10px; margin-top: 10px;">
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="prenom">First Name</label>
+            <input type="text" id="prenom" [(ngModel)]="prenom" name="prenom" class="form-control" placeholder="John" required>
+          </div>
+          <div class="form-group">
+            <label for="nom">Last Name</label>
+            <input type="text" id="nom" [(ngModel)]="nom" name="nom" class="form-control" placeholder="Doe" required>
+          </div>
         </div>
 
-        <!-- FILE NAME -->
-        <div *ngIf="selectedFile" class="form-group">
-          <small>Selected: {{ selectedFile.name }}</small>
-        </div>
-
-        <!-- SPECIALITE -->
         <div class="form-group">
-          <label>Spécialité</label>
-
-          <select [(ngModel)]="selectedSpecialite"
-                  name="selectedSpecialite"
-                  class="form-control"> 
-            <option value="">-- Choisir --</option>
-
-            <option *ngFor="let sp of specialites" [value]="sp.nom">
-              {{ sp.nom }}
-            </option>
-
-            <option value="autre">Autre</option>
-
-          </select>
+          <label for="email">Email</label>
+          <input type="email" id="email" [(ngModel)]="email" name="email" class="form-control" placeholder="your@email.com" required>
         </div>
 
-        <!-- AUTRE -->
-        <div *ngIf="selectedSpecialite === 'autre'" class="form-group">
-          <label>Votre spécialité</label>
-
-          <input type="text"
-                 [(ngModel)]="autreSpecialite"
-                 name="autreSpecialite"
-                 class="form-control"
-                 required>
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" [(ngModel)]="password" name="password" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" [(ngModel)]="confirmPassword" name="confirmPassword" class="form-control" required>
+          </div>
         </div>
 
-        <!-- ADRESSE -->
-        <div class="form-group">
-          <label>Adresse</label>
-          <input type="text"
-                 [(ngModel)]="adresse"
-                 name="adresse"
-                 class="form-control"
-                 required>
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="terms" [(ngModel)]="agreeToTerms" name="terms" required>
+          <label for="terms">I agree to the <a href="#">Terms</a></label>
         </div>
-
-        <!-- TARIF -->
-        <div class="form-group">
-          <label>Tarif</label>
-          <input type="number"
-                 [(ngModel)]="tarif"
-                 name="tarif"
-                 class="form-control"
-                 required>
-        </div>
-
-        <!-- BIO -->
-        <div class="form-group">
-          <label>Bio</label>
-          <textarea [(ngModel)]="biographie"
-                    name="biographie"
-                    class="form-control"></textarea>
-        </div>
-
       </div>
 
-      <!-- ERROR -->
-      <div *ngIf="error" class="alert alert-error">
-        {{ error }}
+      <!-- STEP 2: DOCTOR DETAILS (ONLY FOR MEDECIN) -->
+      <div *ngIf="step === 2 && role === 'MEDECIN'" class="animate-fade-in">
+        <div class="step-header">
+          <button type="button" class="btn-back" (click)="prevStep()">
+            <i data-lucide="arrow-left"></i> Back
+          </button>
+          <span class="step-title">Practice Details</span>
+        </div>
+
+        <div class="form-group">
+          <label for="address">Office Address</label>
+          <div class="input-container">
+            <i data-lucide="map-pin" class="input-icon"></i>
+            <input type="text" id="address" [(ngModel)]="address" name="address" class="form-control" placeholder="e.g., Rue de la Liberté, Tunis" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="fee">Consultation Fee (DT)</label>
+          <div class="input-container">
+            <i data-lucide="banknote" class="input-icon"></i>
+            <input type="number" id="fee" [(ngModel)]="fee" name="fee" class="form-control" placeholder="50" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="specialty">Medical Specialty</label>
+          <div class="input-container">
+            <i data-lucide="activity" class="input-icon"></i>
+            <select id="specialty" [(ngModel)]="selectedSpecialty" name="selectedSpecialty" class="form-control" required>
+              <option value="" disabled selected>Select a specialty</option>
+              <option *ngFor="let sp of specialites" [value]="sp.id">{{ sp.nom }}</option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <!-- SUCCESS -->
-      <div *ngIf="success" class="alert alert-success">
-        {{ success }}
+      <!-- MESSAGES -->
+      <div *ngIf="error" class="error-box animate-fade-in">
+        <i data-lucide="alert-circle"></i>
+        <span>{{ error }}</span>
       </div>
 
-      <!-- BUTTON -->
-      <button type="submit" class="btn btn-primary">
-        {{ loading ? 'Loading...' : 'Create Account' }}
+      <div *ngIf="success" class="success-box animate-fade-in">
+        <i data-lucide="check-circle"></i>
+        <span>{{ success }}</span>
+      </div>
+
+
+      <button type="submit" class="btn-auth-submit" [disabled]="loading">
+        <span *ngIf="!loading">
+          {{ (role === 'MEDECIN' && step === 1) ? 'Continue' : 'Create Account' }}
+        </span>
+        <i data-lucide="loader-2" *ngIf="loading" class="animate-spin"></i>
       </button>
-
     </form>
 
-    <!-- FOOTER -->
     <div class="auth-footer">
-      <p>Already have account? <a routerLink="/login">Login</a></p>
+      <p>Already have an account? <a routerLink="/login">Sign in</a></p>
     </div>
-
   </div>
 </div>

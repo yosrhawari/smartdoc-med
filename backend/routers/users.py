@@ -29,20 +29,18 @@ def register(user: UserCreate, session: Session = Depends(get_session)):
         session.flush() 
 
         if db_user.role == "MEDECIN":
-            if not user.spec_nom_temp:
-                raise HTTPException(status_code=400, detail="Specialite obligatoire")
-
+            # Profile can be completed later in the dedicated step
             profil = ProfilMedecin(
                 user_id=db_user.id,
-                nom=db_user.nom,          # Add this
-                prenom=db_user.prenom,    # Add this
+                nom=db_user.nom,
+                prenom=db_user.prenom,
                 adresse=user.adresse or "",
                 tarif=user.tarif or 0,
                 biographie=user.biographie or "",
                 diplome_path=user.diplome_path or "",
-                statut_validation="en_attente",
-                image=None,               # Set to None or a real string, not the imported 'filename'
-                spec_nom_temp=user.spec_nom_temp
+                statut_validation="EN_ATTENTE",
+                image=None,
+                spec_nom_temp=user.spec_nom_temp or "A compléter"
             )
             session.add(profil)
 

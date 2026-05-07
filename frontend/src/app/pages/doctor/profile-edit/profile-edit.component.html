@@ -2,81 +2,133 @@
   <app-sidebar [items]="sidebarItems" title="Doctor"></app-sidebar>
 
   <main class="dashboard-main">
-    <div class="page-header animate-fade-in-up">
-      <h1 id="profile-edit-title">Edit Profile</h1>
-      <p class="subtitle">Update your professional information</p>
+    <div class="dashboard-header animate-fade-in-up">
+      <div class="header-main">
+        <h1>Profile Management</h1>
+        <p class="subtitle">Customize your professional profile and practice details</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary btn-sm" form="doctor-profile-form" [disabled]="loading">
+          <i data-lucide="save" class="mr-2"></i> Save Changes
+        </button>
+      </div>
     </div>
 
-    <div class="profile-form-card animate-fade-in-up">
-      <form (ngSubmit)="onSubmit()" id="doctor-profile-form">
+    <div class="grid-profile animate-fade-in-up">
+      <!-- Profile Preview / Sidebar -->
+      <div class="profile-preview-column">
+        <div class="card p-6 text-center">
+          <div class="profile-image-upload">
+            <div class="image-preview">
+              <i data-lucide="user" class="placeholder-icon"></i>
+            </div>
+            <button class="btn-upload-overlay">
+              <i data-lucide="camera"></i>
+            </button>
+          </div>
+          <h3 class="mt-4 font-semibold">Dr. {{ auth.getUser()?.prenom }} {{ auth.getUser()?.nom }}</h3>
+          <p class="text-xs text-muted-foreground">{{ auth.getUser()?.email }}</p>
+          
+          <div class="verification-status-pill mt-4">
+            <i data-lucide="shield-check"></i>
+            <span>Verified Account</span>
+          </div>
+        </div>
+      </div>
 
-        <!-- SPECIALITE -->
-        <div class="form-group">
-          <label for="specialite">Spécialité</label>
-
-          <select id="specialite" class="form-control"
+      <!-- Main Form -->
+      <div class="profile-form-column">
+        <div class="card p-8">
+          <form (ngSubmit)="onSubmit()" id="doctor-profile-form">
+            <div class="section-title-sm mb-6">Professional Details</div>
+            
+            <div class="grid-2 mb-6">
+              <div class="form-group">
+                <label>Medical Specialty</label>
+                <select 
+                  class="form-control"
                   [(ngModel)]="selectedSpecialite"
                   name="specialite"
-                  (change)="onSpecialiteChange()">
+                  (change)="onSpecialiteChange()"
+                >
+                  <option value="">-- Select Specialty --</option>
+                  <option *ngFor="let sp of specialites" [value]="sp.id">
+                    {{ sp.nom }}
+                  </option>
+                  <option value="autre">Other / Custom</option>
+                </select>
+              </div>
 
-            <option value="">-- Choisir une spécialité --</option>
+              <div class="form-group" *ngIf="selectedSpecialite === 'autre'">
+                <label>Specify Specialty</label>
+                <input 
+                  type="text" 
+                  class="form-control"
+                  [(ngModel)]="autreSpecialite"
+                  name="autreSpecialite"
+                  placeholder="Enter your specialty"
+                >
+              </div>
 
-            <option *ngFor="let sp of specialites" [value]="sp.id">
-              {{ sp.nom }}
-            </option>
+              <div class="form-group">
+                <label>Consultation Fee (DT)</label>
+                <div class="input-with-icon">
+                  <i data-lucide="banknote"></i>
+                  <input 
+                    type="number" 
+                    class="form-control"
+                    [(ngModel)]="profile.tarif" 
+                    name="tarif"
+                    placeholder="200"
+                  >
+                </div>
+              </div>
+            </div>
 
-            <option value="autre">Autre</option>
-          </select>
+            <div class="form-group mb-6">
+              <label>Clinic Address</label>
+              <div class="input-with-icon">
+                <i data-lucide="map-pin"></i>
+                <input 
+                  type="text" 
+                  class="form-control"
+                  [(ngModel)]="profile.adresse" 
+                  name="adresse"
+                  placeholder="e.g. 123 Health St, Tunis"
+                >
+              </div>
+            </div>
+
+            <div class="form-group mb-8">
+              <label>Biography & Experience</label>
+              <textarea 
+                class="form-control textarea"
+                [(ngModel)]="profile.biographie" 
+                name="biographie"
+                placeholder="Write a brief professional biography for your patients..."
+                rows="6"
+              ></textarea>
+            </div>
+
+            <div *ngIf="error" class="alert-error-modern mb-4">
+              <i data-lucide="alert-circle"></i>
+              <span>{{ error }}</span>
+            </div>
+
+            <div *ngIf="success" class="alert-success-modern mb-4">
+              <i data-lucide="check-circle"></i>
+              <span>{{ success }}</span>
+            </div>
+
+            <div class="form-footer">
+              <button type="submit" class="btn btn-primary btn-lg" [disabled]="loading">
+                <span *ngIf="!loading">Update Professional Profile</span>
+                <i data-lucide="loader-2" class="animate-spin ml-2" *ngIf="loading"></i>
+              </button>
+            </div>
+          </form>
         </div>
-
-        <!-- AUTRE SPECIALITE -->
-        <div class="form-group" *ngIf="selectedSpecialite === 'autre'">
-          <label>Votre spécialité</label>
-          <input type="text" class="form-control"
-                 [(ngModel)]="autreSpecialite"
-                 name="autreSpecialite"
-                 placeholder="Entrez votre spécialité">
-        </div>
-
-        <!-- ADDRESS -->
-        <div class="form-group">
-          <label for="adresse">Address</label>
-          <input type="text" id="adresse" class="form-control"
-                 [(ngModel)]="profile.adresse" name="adresse"
-                 placeholder="Your clinic address">
-        </div>
-
-        <!-- TARIF -->
-        <div class="form-group">
-          <label for="tarif">Consultation Fee (DT)</label>
-          <input type="number" id="tarif" class="form-control"
-                 [(ngModel)]="profile.tarif" name="tarif"
-                 placeholder="e.g., 200" min="0">
-        </div>
-
-        <!-- BIO -->
-        <div class="form-group">
-          <label for="bio">Biography</label>
-          <textarea id="bio" class="form-control textarea"
-                    [(ngModel)]="profile.biographie" name="biographie"
-                    placeholder="Tell patients about your experience..."
-                    rows="4"></textarea>
-        </div>
-
-        <!-- ALERTS -->
-        <div *ngIf="error" class="alert alert-error">{{ error }}</div>
-        <div *ngIf="success" class="alert alert-success">{{ success }}</div>
-
-        <!-- BUTTON -->
-        <button type="submit" class="btn btn-primary"
-                [disabled]="loading"
-                id="btn-save-profile">
-
-          <span *ngIf="!loading">Save Profile</span>
-          <span *ngIf="loading" class="spinner"></span>
-        </button>
-
-      </form>
+      </div>
     </div>
   </main>
 </div>

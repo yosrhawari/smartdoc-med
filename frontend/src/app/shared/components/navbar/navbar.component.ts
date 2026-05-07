@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+
+declare var lucide: any;
 
 @Component({
   selector: 'app-navbar',
@@ -10,22 +12,23 @@ import { AuthService } from '../../../core/services/auth.service';
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
-export class NavbarComponent {
+export class NavbarComponent implements AfterViewInit {
   mobileMenuOpen = false;
 
   constructor(public auth: AuthService) {}
 
-  toggleMenu(): void {
-    this.mobileMenuOpen = !this.mobileMenuOpen;
+  ngAfterViewInit(): void {
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
   }
 
-  getDashboardLink(): string {
-    const role = this.auth.getRole();
-    switch(role) {
-      case 'PATIENT': return '/patient/dashboard';
-      case 'MEDECIN': return '/doctor/dashboard';
-      case 'ADMIN': return '/admin/dashboard';
-      default: return '/';
-    }
+  toggleMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+    setTimeout(() => {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }, 0);
   }
 }

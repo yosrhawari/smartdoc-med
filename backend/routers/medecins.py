@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlmodel import Session, select
 from utils.security import hash_password
 from database import get_session
-from models import ProfilMedecin, Specialite, RendezVous, User
+from models import ProfilMedecin, Specialite, RendezVous, User, MedicalRecord
 from services.matching_service import find_medecins_by_symptome, find_medecins_advanced
 from services.medecin_service import get_medecins_with_rating
-from services.ai_service import detect_specialite
+from services.ai_service import ai_service
 from services.score_service import compute_score
 from utils.dependencies import get_current_user
 from utils.role_checker import *
@@ -178,11 +178,19 @@ def smart_search(symptome: str, session: Session = Depends(get_session)):
 @router.get("/ai-smart-search")
 def ai_smart_search(symptome: str, session: Session = Depends(get_session)):
 
-    specialite_nom = detect_specialite(symptome, session)
+    # Fetch all specialties for AI context
+    specialties = session.exec(select(Specialite)).all()
+    
+    # Use the new AI service (providing minimal data for legacy search)
+    specialty_id = ai_service.recommend_specialty({"symptoms": symptome}, specialties)
+    
+    if specialty_id:
+        specialite = session.get(Specialite, specialty_id)
+    else:
+        specialite = None
 
-    specialite = session.exec(
-        select(Specialite).where(Specialite.nom == specialite_nom)
-    ).first()
+
+
 
     if not specialite:
         specialite = session.exec(
@@ -191,6 +199,9 @@ def ai_smart_search(symptome: str, session: Session = Depends(get_session)):
 
         if not specialite:
             return {"message": "Aucune spécialité trouvée"}
+
+    specialite_nom = specialite.nom
+
 
     medecins = session.exec(
         select(ProfilMedecin).where(
@@ -356,6 +367,43 @@ def get_my_patients(
             patient_stats[u.id]["last_visit"] = rdv.date_rdv
             
     return list(patient_stats.values())
+    
+# =========================
+# GET PATIENT HISTORY
+# =========================
+@router.get("/patient/{patient_id}/history")
+def get_patient_history(
+    patient_id: int,
+    session: Session = Depends(get_session),
+    user = Depends(require_role("MEDECIN"))
+):
+    profil = session.exec(
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["user_id"])
+    ).first()
+
+    if not profil:
+        raise HTTPException(status_code=404, detail="Profil medecin introuvable")
+
+    # Join RendezVous with MedicalRecord (outer join to show rdv even without record)
+    statement = select(RendezVous, MedicalRecord).join(
+        MedicalRecord, RendezVous.id == MedicalRecord.rendezvous_id, isouter=True
+    ).where(
+        RendezVous.patient_id == patient_id,
+        RendezVous.medecin_id == profil.id
+    ).order_by(RendezVous.date_rdv.desc())
+    
+    results = session.exec(statement).all()
+    
+    return [
+        {
+            "id": rdv.id,
+            "date": f"{rdv.date_rdv} {rdv.heure}" if rdv.heure else rdv.date_rdv,
+            "statut": rdv.statut,
+            "notes": rec.notes if rec else "No notes",
+            "prescription": rec.prescription if rec else "No prescription"
+        }
+        for rdv, rec in results
+    ]
 @router.get("/{id}")
 def get_medecin_by_id(id: int, session: Session = Depends(get_session)):
 

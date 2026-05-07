@@ -1,39 +1,96 @@
 <div class="dashboard-layout">
   <app-sidebar [items]="sidebarItems" title="Doctor"></app-sidebar>
   <main class="dashboard-main">
-    <div class="page-header animate-fade-in-up">
+    <!-- PATIENT LIST VIEW -->
+    <div *ngIf="currentView === 'list'" class="page-header animate-fade-in-up">
       <h1 id="patients-title">My Patients</h1>
       <p class="subtitle">All patients who have booked appointments with you</p>
     </div>
 
-    <div class="table-wrapper animate-fade-in-up">
-      <table class="data-table" *ngIf="patients.length > 0" id="patients-table">
+    <!-- PATIENT HISTORY VIEW HEADER -->
+    <div *ngIf="currentView === 'history'" class="page-header history-header animate-fade-in-up">
+      <button class="btn-back" (click)="goBack()">
+        <i data-lucide="arrow-left"></i>
+      </button>
+      <div>
+        <h1>Patient History</h1>
+        <p class="subtitle">Detailed history for <strong>{{ selectedPatient?.nom }} {{ selectedPatient?.prenom }}</strong></p>
+      </div>
+    </div>
+
+    <div class="table-card animate-fade-in-up">
+      <!-- LIST TABLE -->
+      <table class="premium-table" *ngIf="currentView === 'list' && patients.length > 0" id="patients-table">
         <thead>
           <tr>
-            <th>Patient</th>
-            <th>Appointments</th>
-            <th>Last Visit</th>
+            <th>PATIENT NAME</th>
+            <th>PATIENT ID</th>
+            <th>TOTAL CASES</th>
+            <th class="text-right">ACTION</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let p of patients">
             <td>
               <div class="patient-cell">
-                <div class="patient-avatar-sm">{{ p.nom[0] }}{{ p.prenom[0] }}</div>
-                <div class="patient-info">
-                  <span class="patient-name">{{ p.nom }} {{ p.prenom }}</span>
-                  <span class="patient-email">{{ p.email }}</span>
-                </div>
+                <div class="patient-avatar">{{ p.nom[0] | uppercase }}</div>
+                <span class="patient-name">{{ p.nom }} {{ p.prenom }}</span>
               </div>
             </td>
-            <td><span class="badge badge-primary">{{ p.appointment_count }}</span></td>
-            <td>{{ p.last_visit }}</td>
+            <td class="patient-id">#{{ p.id }}</td>
+            <td>
+              <span class="badge-cases">
+                {{ p.appointment_count }} appointments
+              </span>
+            </td>
+            <td class="text-right">
+              <button class="btn-history" (click)="viewHistory(p)">View History</button>
+            </td>
           </tr>
         </tbody>
       </table>
-      <div *ngIf="patients.length === 0" class="empty-state">
+
+      <!-- HISTORY TABLE -->
+      <table class="premium-table" *ngIf="currentView === 'history' && !loading" id="history-table">
+        <thead>
+          <tr>
+            <th>DATE</th>
+            <th>STATUS</th>
+            <th>NOTES</th>
+            <th>PRESCRIPTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let h of patientHistory">
+            <td class="date-cell">
+              <i data-lucide="calendar" class="icon-sm"></i>
+              {{ h.date }}
+            </td>
+            <td>
+              <span class="status-pill" [ngClass]="h.statut.toLowerCase()">
+                {{ h.statut }}
+              </span>
+            </td>
+            <td class="text-muted">{{ h.notes }}</td>
+            <td class="text-muted">{{ h.prescription }}</td>
+          </tr>
+          <tr *ngIf="patientHistory.length === 0">
+            <td colspan="4" class="text-center py-8 text-muted">No past appointments found.</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div *ngIf="currentView === 'list' && patients.length === 0 && !loading" class="empty-state">
+        <div class="empty-icon">
+          <i data-lucide="users"></i>
+        </div>
         <h3>No Patients Yet</h3>
         <p>Patients will appear here after they book appointments</p>
+      </div>
+
+      <div *ngIf="loading" class="empty-state">
+        <div class="spinner"></div>
+        <p>Loading data...</p>
       </div>
     </div>
   </main>

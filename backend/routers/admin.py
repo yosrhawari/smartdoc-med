@@ -5,7 +5,7 @@ from database import get_session
 from models import ProfilMedecin, User,ProfilMedecin, RendezVous, Review,Specialite
 
 from utils.role_checker import require_role
-from services.ai_service import clear_cache
+
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 @router.put("/medecins/{id}/validate")

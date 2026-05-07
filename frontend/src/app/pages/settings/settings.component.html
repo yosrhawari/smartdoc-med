@@ -1,0 +1,85 @@
+<div class="dashboard-layout">
+  <app-sidebar [items]="sidebarItems" title="Account"></app-sidebar>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header animate-fade-in-up">
+      <div class="header-main">
+        <h1>Account Settings</h1>
+        <p class="subtitle">Manage your preferences and security</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary btn-sm" (click)="saveSettings()">
+          <i data-lucide="save" class="mr-2"></i> Save Changes
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-grid animate-fade-in-up delay-100">
+      <!-- General Preferences -->
+      <div class="card p-8">
+        <h3 class="section-title-sm mb-6">General Preferences</h3>
+        
+        <div class="form-group mb-6">
+          <label>Platform Language</label>
+          <select class="form-control" [(ngModel)]="settings.language">
+            <option value="english">English</option>
+            <option value="french">French</option>
+            <option value="arabic">Arabic</option>
+          </select>
+        </div>
+
+        <div class="setting-toggle-item mb-4">
+          <div class="setting-info">
+            <div class="setting-label">Public Profile</div>
+            <div class="setting-desc">Allow others to find you in search results</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" [(ngModel)]="settings.publicProfile">
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="card p-8">
+        <h3 class="section-title-sm mb-6">Notification Settings</h3>
+        
+        <div class="setting-toggle-item mb-4">
+          <div class="setting-info">
+            <div class="setting-label">Email Notifications</div>
+            <div class="setting-desc">Receive appointment updates via email</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" [(ngModel)]="settings.emailNotifications">
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="setting-toggle-item mb-4">
+          <div class="setting-info">
+            <div class="setting-label">SMS Alerts</div>
+            <div class="setting-desc">Get text reminders for upcoming visits</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" [(ngModel)]="settings.smsNotifications">
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Security -->
+      <div class="card p-8">
+        <h3 class="section-title-sm mb-6">Security</h3>
+        <div class="form-group mb-4">
+          <label>Update Password</label>
+          <button class="btn btn-outline w-full justify-start">
+            <i data-lucide="lock" class="mr-2"></i> Change Password...
+          </button>
+        </div>
+        <div class="text-xs text-muted-foreground">
+          Last changed 3 months ago
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

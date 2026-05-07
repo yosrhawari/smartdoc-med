@@ -1,63 +1,170 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { AppointmentService, Appointment } from '../../../core/services/appointment.service';
+import { MedicalRecordService } from '../../../core/services/medical-record.service';
+import { ReviewService } from '../../../core/services/review.service';
+import { FormsModule } from '@angular/forms';
+
+declare var lucide: any;
 
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, SidebarComponent],
+  imports: [CommonModule, RouterModule, SidebarComponent, FormsModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
-export class PatientDashboardComponent implements OnInit {
+export class PatientDashboardComponent implements OnInit, AfterViewInit {
   appointments: Appointment[] = [];
-  upcomingCount = 0;
-  completedCount = 0;
+  upcomingAppointments: Appointment[] = [];
+  medicalRecords: any[] = [];
+  loading = false;
+
+  // Review Flow State
+  expandedRecordId: number | null = null;
+  reviewNote = 0;
+  reviewComment = '';
+  submittingReview = false;
+  reviewSuccess = '';
+  reviewError = '';
 
   sidebarItems = [
-    { label: 'Dashboard', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>', route: '/patient/dashboard' },
-    { label: 'Find Doctor', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>', route: '/patient/questionnaire' },
-    { label: 'Doctors', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>', route: '/patient/doctors' },
-    { label: 'My Bookings', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>', route: '/patient/dashboard' }
+    { label: 'Dashboard', icon: 'layout-dashboard', route: '/patient/dashboard' },
+    { label: 'Find Doctor', icon: 'search', route: '/patient/questionnaire' },
+    { label: 'Doctors', icon: 'users', route: '/patient/doctors' },
+    { label: 'Settings', icon: 'settings', route: '/settings' }
   ];
 
   constructor(
     public auth: AuthService,
-    private appointmentService: AppointmentService
+    private appointmentService: AppointmentService,
+    private recordService: MedicalRecordService,
+    private reviewService: ReviewService
   ) {}
 
   ngOnInit(): void {
-    this.loadAppointments();
+    this.loadData();
   }
 
-  loadAppointments(): void {
+  ngAfterViewInit(): void {
+    this.refreshIcons();
+  }
+
+  loadData(): void {
+    this.loading = true;
+    
+    // Load Appointments
     this.appointmentService.getMyAppointments().subscribe({
       next: (data) => {
         this.appointments = data;
-        this.upcomingCount = this.appointments.filter(a => a.statut === 'PREVU').length;
-        this.completedCount = this.appointments.filter(a => a.statut === 'TERMINE').length;
+        this.upcomingAppointments = data.filter(a => 
+          a.statut.toUpperCase() === 'PENDING' || a.statut.toUpperCase() === 'PREVU' || a.statut.toUpperCase() === 'CONFIRMED'
+        ).slice(0, 3);
+        this.refreshIcons();
+      }
+    });
+
+    // Load Medical Records
+    this.recordService.getMyRecords().subscribe({
+      next: (data) => {
+        this.medicalRecords = data;
+        this.loading = false;
+        this.refreshIcons();
       }
     });
   }
 
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'PREVU': return 'badge-primary';
-      case 'TERMINE': return 'badge-success';
-      case 'ANNULE': return 'badge-danger';
-      default: return 'badge-warning';
+  private refreshIcons(): void {
+    setTimeout(() => {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }, 0);
+  }
+
+  formatDate(dateStr: string): { day: string, month: string } {
+    try {
+      const date = new Date(dateStr);
+      const months = ['JAN', 'FEV', 'MAR', 'AVR', 'MAI', 'JUIN', 'JUIL', 'AOUT', 'SEPT', 'OCT', 'NOV', 'DEC'];
+      return {
+        day: date.getDate().toString().padStart(2, '0'),
+        month: months[date.getMonth()]
+      };
+    } catch (e) {
+      return { day: '--', month: '---' };
     }
   }
 
-  getStatusLabel(status: string): string {
-    switch (status) {
-      case 'PREVU': return 'Scheduled';
-      case 'TERMINE': return 'Completed';
-      case 'ANNULE': return 'Cancelled';
-      default: return status;
+  getStatusClass(status: string): string {
+    const s = status.toUpperCase();
+    if (s === 'PREVU' || s === 'PENDING') return 'status-pending';
+    if (s === 'CONFIRME' || s === 'CONFIRMED') return 'status-confirmed';
+    if (s === 'TERMINE' || s === 'COMPLETED') return 'status-completed';
+    return 'status-cancelled';
+  }
+
+  getStarArray(rating: number): boolean[] {
+    return Array(5).fill(false).map((_, i) => i < rating);
+  }
+
+  // Review Methods
+  toggleReview(rdvId: number): void {
+    if (this.expandedRecordId === rdvId) {
+      this.expandedRecordId = null;
+    } else {
+      this.expandedRecordId = rdvId;
+      this.reviewNote = 0;
+      this.reviewComment = '';
+      this.reviewSuccess = '';
+      this.reviewError = '';
     }
+    this.refreshIcons();
+  }
+
+  setRating(note: number): void {
+    this.reviewNote = note;
+    this.refreshIcons();
+  }
+
+  submitReview(rdvId: number): void {
+    if (this.reviewNote === 0) {
+      this.reviewError = 'Please select a rating';
+      return;
+    }
+
+    this.submittingReview = true;
+    this.reviewError = '';
+
+    const payload = {
+      rendezvous_id: rdvId,
+      note: this.reviewNote,
+      commentaire: this.reviewComment
+    };
+
+    this.reviewService.createReview(payload).subscribe({
+      next: () => {
+        this.submittingReview = false;
+        this.reviewSuccess = 'Thank you for your feedback!';
+        
+        // Update local state to show "Saved" state
+        const record = this.medicalRecords.find(r => r.rendezvous_id === rdvId);
+        if (record) {
+          record.review = { note: this.reviewNote, commentaire: this.reviewComment };
+        }
+        this.refreshIcons();
+
+        setTimeout(() => {
+          this.expandedRecordId = null;
+          this.reviewSuccess = '';
+        }, 1500);
+      },
+      error: (err) => {
+        this.submittingReview = false;
+        this.reviewError = err.error?.detail || 'Failed to submit review. Have you already reviewed this visit?';
+      }
+    });
   }
 }

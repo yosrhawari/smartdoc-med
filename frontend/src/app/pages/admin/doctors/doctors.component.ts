@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
 import { AdminService } from '../../../core/services/admin.service';
 import { DoctorService } from '../../../core/services/doctor.service';
-import { Observable } from 'rxjs';
+
+declare var lucide: any;
 
 @Component({
   selector: 'app-admin-doctors',
@@ -13,10 +14,17 @@ import { Observable } from 'rxjs';
   templateUrl: './doctors.component.html',
   styleUrl: './doctors.component.css'
 })
-export class AdminDoctorsComponent implements OnInit {
-
+export class AdminDoctorsComponent implements OnInit, AfterViewInit {
   allDoctors: any[] = [];
   loading = true;
+  selectedDoctor: any = null;
+
+  sidebarItems = [
+    { label: 'Dashboard', icon: 'layout-dashboard', route: '/admin/dashboard' },
+    { label: 'Users', icon: 'users', route: '/admin/users' },
+    { label: 'Verification', icon: 'shield-check', route: '/admin/doctors' },
+    { label: 'Settings', icon: 'settings', route: '/settings' }
+  ];
 
   constructor(
     private adminService: AdminService,
@@ -24,56 +32,58 @@ export class AdminDoctorsComponent implements OnInit {
     private router: Router
   ) {}
 
-  sidebarItems = [
-    { label: 'Dashboard', icon: '', route: '/admin/dashboard' },
-    { label: 'Users', icon: '', route: '/admin/users' },
-    { label: 'Verification', icon: '', route: '/admin/doctors' }
-  ];
-
   ngOnInit(): void {
-   this.adminService.getAllDoctors().subscribe({
-    next: (data: any[]) => {
-      console.log("DATA =", data); 
-      this.allDoctors = data;
-      this.loading = false;
-    },
-    error: (err: any) => {
-      console.error("ERROR =", err);
-      this.loading = false;
-    }
-  });
+    this.loadDoctors();
   }
 
-  
+  ngAfterViewInit(): void {
+    this.refreshIcons();
+  }
+
+  loadDoctors(): void {
+    this.adminService.getAllDoctors().subscribe({
+      next: (data: any[]) => {
+        this.allDoctors = data;
+        this.loading = false;
+        this.refreshIcons();
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
+  }
 
   validateDoctor(id: number): void {
     this.adminService.validateDoctor(id).subscribe({
       next: () => {
         const doc = this.allDoctors.find(d => d.id === id);
         if (doc) doc.statut_validation = 'VALIDE';
+        this.refreshIcons();
       }
     });
   }
 
-  goToDoctor(id: number) {
-    this.router.navigate(['/admin/doctor', id]);
-  }
-
   getStatusClass(status: string): string {
-    return status === 'VALIDE' ? 'badge-success' : 'badge-warning';
+    switch (status) {
+      case 'VALIDE': return 'badge-success';
+      case 'EN_ATTENTE': return 'badge-warning';
+      default: return 'badge-secondary';
+    }
   }
 
   getStatusLabel(status: string): string {
-    return status === 'VALIDE' ? 'Verified' : 'Pending';
+    switch (status) {
+      case 'VALIDE': return 'Verified';
+      case 'EN_ATTENTE': return 'Pending';
+      default: return status;
+    }
   }
 
-  selectedDoctor: any = null;
-
-  viewDoctorDetails(doctor: any) {
-    this.selectedDoctor = doctor;
-  }
-
-  closeDetails() {
-    this.selectedDoctor = null;
+  private refreshIcons(): void {
+    setTimeout(() => {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }, 0);
   }
 }

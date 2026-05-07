@@ -1,53 +1,56 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { DoctorService } from '../../../core/services/doctor.service';
 
+declare var lucide: any;
+
 @Component({
-  selector: 'app-profile-edit',
+  selector: 'app-doctor-profile-edit',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, SidebarComponent],
   templateUrl: './profile-edit.component.html',
   styleUrl: './profile-edit.component.css'
 })
-export class DoctorProfileEditComponent implements OnInit {
-
+export class DoctorProfileEditComponent implements OnInit, AfterViewInit {
   profile = {
-    specialite_id: null as any,
     adresse: '',
     tarif: 0,
-    biographie: ''
+    biographie: '',
+    specialite_id: null as any
   };
 
-  //  spécialités njiboha API
   specialites: any[] = [];
-  loadingSpecialites = false;
-
-  //  spécialité select
   selectedSpecialite: any = '';
   autreSpecialite: string = '';
-
+  loading = false;
   success = '';
   error = '';
-  loading = false;
 
   sidebarItems = [
-    { label: 'Dashboard', icon: '<svg width="18" height="18" ...></svg>', route: '/doctor/dashboard' },
-    { label: 'Patients', icon: '<svg width="18" height="18" ...></svg>', route: '/doctor/patients' },
-    { label: 'My Profile', icon: '<svg width="18" height="18" ...></svg>', route: '/doctor/profile' }
+    { label: 'Appointments', icon: 'calendar', route: '/doctor/dashboard' },
+    { label: 'My Patients', icon: 'users', route: '/doctor/patients' },
+    { label: 'My Profile', icon: 'user-cog', route: '/doctor/profile' },
+    { label: 'Reviews', icon: 'star', route: '/doctor/reviews' },
+    { label: 'Settings', icon: 'settings', route: '/settings' }
   ];
 
   constructor(
-    private auth: AuthService,
-    private doctorService: DoctorService
+    public auth: AuthService,
+    private doctorService: DoctorService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadSpecialites();
     this.loadProfile();
+  }
+
+  ngAfterViewInit(): void {
+    this.refreshIcons();
   }
 
   loadProfile() {
@@ -62,35 +65,28 @@ export class DoctorProfileEditComponent implements OnInit {
           };
           this.selectedSpecialite = data.specialite_id || (data.spec_nom_temp ? 'autre' : '');
           this.autreSpecialite = data.spec_nom_temp || '';
+          this.refreshIcons();
         }
       }
     });
   }
 
-  // load API
   loadSpecialites() {
-    this.loadingSpecialites = true;
     this.doctorService.getSpecialites().subscribe({
       next: (data) => {
         this.specialites = data;
-        this.loadingSpecialites = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.error = 'Failed to load specialties';
-        this.loadingSpecialites = false;
+        this.refreshIcons();
       }
     });
   }
 
-  // change handler
   onSpecialiteChange() {
     if (this.selectedSpecialite !== 'autre') {
       this.autreSpecialite = '';
     }
+    this.refreshIcons();
   }
 
-  // submit handler
   onSubmit(): void {
     this.loading = true;
     this.error = '';
@@ -103,30 +99,28 @@ export class DoctorProfileEditComponent implements OnInit {
     };
 
     if (this.selectedSpecialite === 'autre') {
-      if (!this.autreSpecialite.trim()) {
-        this.error = 'Veuillez entrer votre spécialité';
-        this.loading = false;
-        return;
-      }
       data.new_specialite = this.autreSpecialite;
     } else {
-      if (!this.selectedSpecialite) {
-        this.error = 'Veuillez choisir une spécialité';
-        this.loading = false;
-        return;
-      }
       data.specialite_id = this.selectedSpecialite;
     }
 
     this.doctorService.updateProfile(data).subscribe({
       next: () => {
         this.loading = false;
-        this.success = 'Profile mis à jour avec succès !';
+        this.success = 'Profile updated successfully!';
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.detail || 'Une erreur est survenue';
+        this.error = err.error?.detail || 'Failed to update profile.';
       }
     });
+  }
+
+  private refreshIcons(): void {
+    setTimeout(() => {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }, 0);
   }
 }

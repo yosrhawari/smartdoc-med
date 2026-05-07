@@ -26,4 +26,12 @@ export class ReviewService {
   createReview(data: { rendezvous_id: number; note: number; commentaire: string }): Observable<Review> {
     return this.http.post<Review>(`${this.API}/reviews/`, data);
   }
+
+  getMyReviews(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API}/reviews/me`);
+  }
+
+  replyToReview(reviewId: number, reponse: string): Observable<any> {
+    return this.http.put(`${this.API}/reviews/${reviewId}/reply`, { reponse });
+  }
 }

@@ -11,6 +11,7 @@ export interface Appointment {
   heure?: string;
   patient_name?: string;
   doctor_name?: string;
+  specialite?: string;
   statut: string;
 }
 
