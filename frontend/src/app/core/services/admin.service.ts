@@ -19,6 +19,8 @@ export interface User {
   id: number;
   email: string;
   role: string;
+  nom?: string;
+  prenom?: string;
 }
 
 @Injectable({
@@ -31,7 +33,11 @@ export class AdminService {
   constructor(private http: HttpClient) {}
    getAllDoctors(): Observable<any[]> {
      return this.http.get<any[]>(`${this.API}/admin/pending`);
-}
+   }
+
+   getAllProviders(): Observable<any[]> {
+     return this.http.get<any[]>(`${this.API}/admin/medecins`);
+   }
 
   getStats(): Observable<PlatformStats> {
     return this.http.get<PlatformStats>(`${this.API}/admin/stats`);
@@ -42,7 +48,7 @@ export class AdminService {
   }
 
   getUsers(): Observable<User[]> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('smartdoc_token');
     return this.http.get<User[]>(`${this.API}/admin/users`, {
       headers: {
         Authorization: `Bearer ${token}`
@@ -52,6 +58,14 @@ export class AdminService {
 
   getPendingDoctors(): Observable<any> {
     return this.http.get<any>(`${this.API}/admin/get_pending_medecins`);
+  }
+
+  updateUser(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.API}/admin/users/${id}`, data);
+  }
+
+  deleteUser(id: number): Observable<any> {
+    return this.http.delete(`${this.API}/admin/users/${id}`);
   }
   
 }

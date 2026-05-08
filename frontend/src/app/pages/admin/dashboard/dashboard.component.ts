@@ -21,7 +21,8 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   sidebarItems = [
     { label: 'Dashboard', icon: 'layout-dashboard', route: '/admin/dashboard' },
     { label: 'Users', icon: 'users', route: '/admin/users' },
-    { label: 'Verification', icon: 'shield-check', route: '/admin/doctors' },
+    { label: 'Medical Providers', icon: 'stethoscope', route: '/admin/doctors' },
+    { label: 'Verification', icon: 'shield-check', route: '/admin/verification' },
     { label: 'Settings', icon: 'settings', route: '/settings' }
   ];
 

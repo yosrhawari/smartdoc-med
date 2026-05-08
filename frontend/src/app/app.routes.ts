@@ -66,6 +66,12 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { role: 'MEDECIN' }
   },
+  {
+    path: 'doctor/pending-approval',
+    loadComponent: () => import('./pages/doctor/pending-approval/pending-approval.component').then(m => m.PendingApprovalComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { role: 'MEDECIN' }
+  },
 
   {
     path: 'doctor/patients',
@@ -102,7 +108,13 @@ export const routes: Routes = [
   {
     path: 'admin/doctors',
     loadComponent: () => import('./pages/admin/doctors/doctors.component').then(m => m.AdminDoctorsComponent),
-    canActivate: [authGuard, roleGuard],
+    canActivate: [roleGuard],
+    data: { role: 'ADMIN' }
+  },
+  {
+    path: 'admin/verification',
+    loadComponent: () => import('./pages/admin/verification/verification.component').then(m => m.AdminVerificationComponent),
+    canActivate: [roleGuard],
     data: { role: 'ADMIN' }
   },
 

@@ -20,7 +20,8 @@ export class DoctorProfileEditComponent implements OnInit, AfterViewInit {
     adresse: '',
     tarif: 0,
     biographie: '',
-    specialite_id: null as any
+    specialite_id: null as any,
+    image: null as string | null
   };
 
   specialites: any[] = [];
@@ -61,7 +62,8 @@ export class DoctorProfileEditComponent implements OnInit, AfterViewInit {
             adresse: data.adresse || '',
             tarif: data.tarif || 0,
             biographie: data.biographie || '',
-            specialite_id: data.specialite_id
+            specialite_id: data.specialite_id,
+            image: data.image
           };
           this.selectedSpecialite = data.specialite_id || (data.spec_nom_temp ? 'autre' : '');
           this.autreSpecialite = data.spec_nom_temp || '';
@@ -78,6 +80,25 @@ export class DoctorProfileEditComponent implements OnInit, AfterViewInit {
         this.refreshIcons();
       }
     });
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.loading = true;
+      this.doctorService.uploadProfileImage(file).subscribe({
+        next: (res) => {
+          this.profile.image = res.filename;
+          this.loading = false;
+          this.success = 'Profile image updated!';
+          this.refreshIcons();
+        },
+        error: () => {
+          this.loading = false;
+          this.error = 'Failed to upload image';
+        }
+      });
+    }
   }
 
   onSpecialiteChange() {

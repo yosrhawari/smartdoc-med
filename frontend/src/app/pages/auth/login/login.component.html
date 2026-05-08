@@ -3,7 +3,7 @@
     <!-- LOGO -->
     <div class="auth-logo-section">
       <div class="logo-box">
-        <i data-lucide="activity"></i>
+        <i data-lucide="pulse"></i>
       </div>
     </div>
 
@@ -14,44 +14,44 @@
     </div>
 
     <!-- FORM -->
-    <form (ngSubmit)="onSubmit()" class="auth-form">
-      <div class="form-group">
-        <label for="email">Email</label>
-        <div class="input-container">
-          <i data-lucide="mail" class="input-icon"></i>
-          <input type="email" id="email" [(ngModel)]="email" name="email" class="form-control" placeholder="your@email.com" required>
+    <div class="auth-card">
+      <form (ngSubmit)="onSubmit()" class="auth-form">
+        <div class="form-group">
+          <label>Email</label>
+          <div class="input-with-icon">
+            <i data-lucide="mail"></i>
+            <input type="email" [(ngModel)]="email" name="email" class="form-control" placeholder="your@email.com" required>
+          </div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <div class="input-container">
-          <i data-lucide="lock" class="input-icon"></i>
-          <input [type]="showPassword ? 'text' : 'password'" id="password" [(ngModel)]="password" name="password" class="form-control" placeholder="••••••••" required>
-          <button type="button" class="btn-toggle-pass" (click)="togglePassword()">
-            <i [attr.data-lucide]="showPassword ? 'eye-off' : 'eye'"></i>
-
-          </button>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-with-icon">
+            <i data-lucide="lock"></i>
+            <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" name="password" class="form-control" placeholder="••••••••" required>
+            <button type="button" class="password-toggle" (click)="togglePassword()">
+              <i [attr.data-lucide]="showPassword ? 'eye-off' : 'eye'"></i>
+            </button>
+          </div>
         </div>
+
+        <button type="submit" class="btn-auth-submit" [disabled]="loading">
+          <span *ngIf="!loading">Sign In</span>
+          <i data-lucide="loader-2" *ngIf="loading" class="animate-spin"></i>
+        </button>
+
+        <div *ngIf="error" class="error-box animate-fade-in">
+          <i data-lucide="alert-circle"></i>
+          <span>{{ error }}</span>
+        </div>
+      </form>
+
+      <div class="auth-footer">
+        <p>Don't have an account? <a routerLink="/register">Sign up</a></p>
       </div>
-
-      <!-- MESSAGES -->
-      <div *ngIf="error" class="error-box">
-        <i data-lucide="alert-circle"></i>
-        <span>{{ error }}</span>
-      </div>
-
-      <button type="submit" class="btn-auth-submit" [disabled]="loading">
-        <span *ngIf="!loading">Sign In</span>
-        <i data-lucide="loader-2" *ngIf="loading" class="animate-spin"></i>
-      </button>
-    </form>
-
-    <div class="auth-footer">
-      <p>Don't have an account? <a routerLink="/register">Sign up</a></p>
     </div>
 
-    <div class="secure-badge">
+    <div class="ssl-notice">
       <i data-lucide="shield-check"></i>
       <span>Secure 256-bit SSL encrypted connection</span>
     </div>

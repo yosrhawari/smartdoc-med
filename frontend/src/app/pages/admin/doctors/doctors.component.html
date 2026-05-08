@@ -4,124 +4,67 @@
   <main class="dashboard-main">
     <div class="dashboard-header animate-fade-in-up">
       <div class="header-main">
-        <h1>Doctor Verification</h1>
-        <p class="subtitle">Review and approve medical professional registrations</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn btn-outline btn-sm">
-          <i data-lucide="filter" class="mr-2"></i> Filter
-        </button>
+        <h1>Medical Providers</h1>
+        <p class="subtitle">Detailed list of registered medical experts</p>
       </div>
     </div>
 
-    <!-- LOADING -->
-    <div *ngIf="loading" class="loading-state">
-      <div class="loader-wrapper">
-        <i data-lucide="loader-2" class="animate-spin"></i>
+    <!-- SEARCH & TABLE -->
+    <div *ngIf="!loading" class="animate-fade-in-up">
+      <div class="search-container-modern">
+        <div class="search-input-wrapper">
+          <i data-lucide="search"></i>
+          <input 
+            type="text" 
+            [(ngModel)]="searchQuery" 
+            (input)="onSearch()" 
+            placeholder="Search providers..."
+          >
+        </div>
       </div>
-      <p>Loading applications...</p>
-    </div>
 
-    <div *ngIf="!loading" class="grid-2-1 animate-fade-in-up">
-      <!-- DOCTORS LIST -->
-      <div class="doctors-list-container">
-        <div *ngFor="let doc of allDoctors"
-             class="card verification-card-modern"
-             [class.active]="selectedDoctor?.id === doc.id"
-             (click)="selectedDoctor = doc">
-          
-          <div class="card-body">
-            <div class="doc-header-compact">
-              <div class="doc-avatar-sm">
-                <img *ngIf="doc?.image" [src]="'http://localhost:8000/uploads/' + doc.image" class="avatar-img" />
-                <div *ngIf="!doc?.image" class="avatar-placeholder">
-                  <i data-lucide="user"></i>
-                </div>
-              </div>
-              <div class="doc-info-compact">
-                <h3>Dr. {{ doc.nom }} {{ doc.prenom }}</h3>
-                <span class="specialty-badge">{{ doc.specialite }}</span>
-              </div>
-              <div class="status-indicator">
-                <span class="badge" [ngClass]="getStatusClass(doc.statut_validation)">
-                  {{ getStatusLabel(doc.statut_validation) }}
-                </span>
-              </div>
-            </div>
-          </div>
+      <div class="card overflow-hidden">
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Provider</th>
+                <th>Specialty</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let doc of filteredDoctors" (click)="selectedDoctor = doc">
+                <td>
+                  <div class="provider-cell">
+                    <div class="provider-avatar">
+                      {{ doc.nom.charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="provider-info">
+                      <h4>Dr. {{ doc.nom }} {{ doc.prenom }}</h4>
+                      <p>{{ doc.email }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="specialty-text">{{ doc.specialite }}</span>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="getStatusClass(doc.statut_validation)">
+                    {{ getStatusLabel(doc.statut_validation) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        <div *ngIf="allDoctors.length === 0" class="empty-state card">
+        <div *ngIf="filteredDoctors.length === 0" class="empty-state">
           <div class="empty-icon-wrapper">
-            <i data-lucide="check-circle-2"></i>
+            <i data-lucide="users"></i>
           </div>
-          <h3>All caught up!</h3>
-          <p>No pending doctor verifications at the moment.</p>
-        </div>
-      </div>
-
-      <!-- DETAILS PANEL -->
-      <div class="details-panel-container">
-        <div *ngIf="selectedDoctor" class="card profile-review-card animate-fade-in">
-          <div class="review-header">
-            <div class="review-avatar-large">
-              <img *ngIf="selectedDoctor?.image" [src]="'http://localhost:8000/uploads/' + selectedDoctor.image" class="avatar-img" />
-              <div *ngIf="!selectedDoctor?.image" class="avatar-placeholder">
-                <i data-lucide="user"></i>
-              </div>
-            </div>
-            <div class="review-meta">
-              <h2>Dr. {{ selectedDoctor.nom }} {{ selectedDoctor.prenom }}</h2>
-              <p class="location"><i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> {{ selectedDoctor.adresse }}</p>
-            </div>
-          </div>
-
-          <div class="review-body">
-            <div class="info-section">
-              <label>Professional Information</label>
-              <div class="info-grid">
-                <div class="info-item">
-                  <span>Specialty</span>
-                  <p>{{ selectedDoctor.specialite }}</p>
-                </div>
-                <div class="info-item">
-                  <span>Consultation Fee</span>
-                  <p>{{ selectedDoctor.tarif }} DT</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="info-section">
-              <label>Biography</label>
-              <p class="bio-text">{{ selectedDoctor.biographie || 'No biography provided.' }}</p>
-            </div>
-
-            <div class="info-section">
-              <label>Documentation</label>
-              <div class="doc-link">
-                <i data-lucide="file-text"></i>
-                <span>Medical_License_Proof.pdf</span>
-                <i data-lucide="download" class="download-icon"></i>
-              </div>
-            </div>
-          </div>
-
-          <div class="review-footer">
-            <button class="btn btn-outline btn-sm" (click)="selectedDoctor = null">Dismiss</button>
-            <button *ngIf="selectedDoctor.statut_validation !== 'VALIDE'" 
-                    class="btn btn-primary btn-sm" 
-                    (click)="validateDoctor(selectedDoctor.id!)">
-              <i data-lucide="check" class="mr-2"></i> Approve Account
-            </button>
-            <div *ngIf="selectedDoctor.statut_validation === 'VALIDE'" class="verified-status">
-              <i data-lucide="verified" class="mr-2"></i> Verified Professional
-            </div>
-          </div>
-        </div>
-
-        <div *ngIf="!selectedDoctor && allDoctors.length > 0" class="selection-placeholder card">
-          <i data-lucide="mouse-pointer-click"></i>
-          <p>Select a doctor from the list to review their profile</p>
+          <h3>No providers found</h3>
+          <p>We couldn't find any medical experts matching your search.</p>
         </div>
       </div>
     </div>

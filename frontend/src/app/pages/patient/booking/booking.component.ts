@@ -4,6 +4,8 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { AppointmentService } from '../../../core/services/appointment.service';
 import { DoctorService } from '../../../core/services/doctor.service';
 
+declare var lucide: any;
+
 @Component({
   selector: 'app-booking',
   standalone: true,
@@ -30,7 +32,7 @@ export class BookingComponent implements OnInit {
     '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
   ];
 
-  weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  weekDays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
   constructor(
     private route: ActivatedRoute,
@@ -40,17 +42,10 @@ export class BookingComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // 
     this.doctorId = Number(this.route.snapshot.paramMap.get('id'));
-
-    console.log("doctorId =", this.doctorId);
-
-    // 
     this.doctorService.getDoctorById(this.doctorId).subscribe({
       next: (res) => {
-        console.log("doctor =", res);
         this.doctor = res;
-        
       },
       error: () => {
         this.error = "Doctor not found";
@@ -60,10 +55,27 @@ export class BookingComponent implements OnInit {
     this.generateCalendar();
   }
 
+  ngAfterViewInit(): void {
+    this.refreshIcons();
+  }
+
+  private refreshIcons(): void {
+    setTimeout(() => {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }, 100);
+  }
+
   generateCalendar(): void {
     const year = this.currentMonth.getFullYear();
     const month = this.currentMonth.getMonth();
-    const firstDay = new Date(year, month, 1).getDay();
+    
+    // Get first day of month (0 = Sun, 1 = Mon...)
+    let firstDay = new Date(year, month, 1).getDay();
+    // Adjust to Monday = 0
+    firstDay = firstDay === 0 ? 6 : firstDay - 1;
+
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
     this.calendarDays = [];
@@ -75,6 +87,13 @@ export class BookingComponent implements OnInit {
     for (let day = 1; day <= daysInMonth; day++) {
       this.calendarDays.push(day);
     }
+    this.refreshIcons();
+  }
+
+  getSlotsLeft(day: number): number {
+    // Generate a consistent "random" number based on the date
+    const seed = (this.currentMonth.getFullYear() + this.currentMonth.getMonth() + day) % 5;
+    return 7 + seed; // Returns 7-11
   }
 
   prevMonth(): void {

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlmodel import Session, select
 from utils.security import hash_password
 from database import get_session
-from models import ProfilMedecin, Specialite, RendezVous, User, MedicalRecord
+from models import ProfilMedecin, Specialite, RendezVous, User, MedicalRecord, Review
 from services.matching_service import find_medecins_by_symptome, find_medecins_advanced
 from services.medecin_service import get_medecins_with_rating
 from services.ai_service import ai_service
@@ -121,6 +121,33 @@ def create_medecin(
     session.refresh(med)
 
     return med
+
+@router.post("/profile/image")
+def upload_profile_image(
+    file: UploadFile = File(...),
+    session: Session = Depends(get_session),
+    user = Depends(require_role("MEDECIN"))
+):
+    profil = session.exec(
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["user_id"])
+    ).first()
+
+    if not profil:
+        raise HTTPException(status_code=404, detail="Profil introuvable")
+
+    # Generate unique filename
+    ext = os.path.splitext(file.filename)[1]
+    filename = f"profile_{user['user_id']}{ext}"
+    file_path = os.path.join(UPLOAD_DIR, filename)
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    profil.image = filename
+    session.add(profil)
+    session.commit()
+
+    return {"filename": filename}
 @router.post("/upload-image")
 def upload_image(file: UploadFile = File(...)):
     file_path = os.path.join(UPLOAD_DIR, file.filename)
@@ -414,12 +441,32 @@ def get_medecin_by_id(id: int, session: Session = Depends(get_session)):
 
     user = session.get(User, med.user_id)
 
+    # Get ratings
+    rdvs = session.exec(select(RendezVous).where(RendezVous.medecin_id == id)).all()
+    notes = []
+    for rdv in rdvs:
+        review = session.exec(select(Review).where(Review.rendezvous_id == rdv.id)).first()
+        if review:
+            notes.append(review.note)
+    
+    moyenne = sum(notes) / len(notes) if notes else 0
+
+    # Fetch specialty name
+    specialite_nom = med.spec_nom_temp
+    if med.specialite_id:
+        spec = session.get(Specialite, med.specialite_id)
+        if spec:
+            specialite_nom = spec.nom
+
     return {
         "id": med.id,
         "nom": user.nom if user else None,
         "prenom": user.prenom if user else None,
         "adresse": med.adresse,
-        "tarif": med.tarif,
+        "tarif": med.tarif if med.tarif else 0,
         "biographie": med.biographie,
-        "image": med.image
+        "image": med.image,
+        "specialite": specialite_nom,
+        "note_moyenne": round(moyenne, 2),
+        "nombre_reviews": len(notes)
     }

@@ -54,8 +54,9 @@ def get_my_medical_records(
     session: Session = Depends(get_session),
     user = Depends(get_current_user)
 ):
+    from models import Specialite
     # Get all rendezvous for this patient
-    statement = select(MedicalRecord, RendezVous, User, Review).join(
+    statement = select(MedicalRecord, RendezVous, User, Review, ProfilMedecin, Specialite).join(
         RendezVous, MedicalRecord.rendezvous_id == RendezVous.id
     ).join(
         ProfilMedecin, RendezVous.medecin_id == ProfilMedecin.id
@@ -63,6 +64,8 @@ def get_my_medical_records(
         User, ProfilMedecin.user_id == User.id
     ).outerjoin(
         Review, Review.rendezvous_id == RendezVous.id
+    ).outerjoin(
+        Specialite, ProfilMedecin.specialite_id == Specialite.id
     ).where(RendezVous.patient_id == user["user_id"]).order_by(MedicalRecord.id.desc())
     
     results = session.exec(statement).all()
@@ -75,8 +78,9 @@ def get_my_medical_records(
             "prescription": rec.prescription,
             "date": rdv.date_rdv,
             "doctor_name": f"Dr. {u.nom} {u.prenom}",
-            "specialite": "Généraliste",
+            "doctor_image": prof.image,
+            "specialite": spec.nom if spec else (prof.spec_nom_temp or "Généraliste"),
             "review": { "note": rev.note, "commentaire": rev.commentaire } if rev else None
         }
-        for rec, rdv, u, rev in results
+        for rec, rdv, u, rev, prof, spec in results
     ]

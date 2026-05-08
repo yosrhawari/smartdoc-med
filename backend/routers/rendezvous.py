@@ -67,6 +67,8 @@ def get_my_appointments(
     
     results = session.exec(statement).all()
     
+    from models import Specialite
+
     return [
         {
             "id": rdv.id,
@@ -74,6 +76,8 @@ def get_my_appointments(
             "heure": rdv.heure,
             "statut": rdv.statut,
             "doctor_name": f"Dr. {u.nom} {u.prenom}",
+            "specialite": session.get(Specialite, pm.specialite_id).nom if pm.specialite_id else pm.spec_nom_temp,
+            "adresse": pm.adresse,
             "medecin_id": rdv.medecin_id
         }
         for rdv, pm, u in results

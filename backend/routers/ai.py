@@ -40,18 +40,25 @@ def predict(data: SymptomeInput, session: Session = Depends(get_session)):
         )
     ).all()
 
+    from services.medecin_service import get_rating_for_medecin
+
     # 4. Format response
     result = []
     for m in medecins:
         user = session.get(User, m.user_id)
+        rating_info = get_rating_for_medecin(m.id, session)
         result.append({
             "id": m.id,
             "nom": m.nom,
             "prenom": m.prenom,
             "email": user.email if user else None,
             "adresse": m.adresse,
-            "tarif": m.tarif,
-            "biographie": m.biographie
+            "tarif": m.tarif if m.tarif else 0,
+            "biographie": m.biographie,
+            "image": m.image,
+            "specialite": specialty_nom,
+            "note_moyenne": rating_info["moyenne"],
+            "nombre_reviews": rating_info["count"]
         })
 
     return {

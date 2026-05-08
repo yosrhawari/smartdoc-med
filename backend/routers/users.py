@@ -34,13 +34,13 @@ def register(user: UserCreate, session: Session = Depends(get_session)):
                 user_id=db_user.id,
                 nom=db_user.nom,
                 prenom=db_user.prenom,
-                adresse=user.adresse or "",
-                tarif=user.tarif or 0,
-                biographie=user.biographie or "",
-                diplome_path=user.diplome_path or "",
+                adresse=None,
+                tarif=0,
+                biographie=None,
+                diplome_path=None,
                 statut_validation="EN_ATTENTE",
                 image=None,
-                spec_nom_temp=user.spec_nom_temp or "A compléter"
+                spec_nom_temp=None
             )
             session.add(profil)
 

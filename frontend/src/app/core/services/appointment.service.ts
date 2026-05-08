@@ -12,6 +12,7 @@ export interface Appointment {
   patient_name?: string;
   doctor_name?: string;
   specialite?: string;
+  adresse?: string;
   statut: string;
 }
 

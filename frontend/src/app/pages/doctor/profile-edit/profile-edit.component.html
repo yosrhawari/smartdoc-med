@@ -20,11 +20,13 @@
         <div class="card p-6 text-center">
           <div class="profile-image-upload">
             <div class="image-preview">
-              <i data-lucide="user" class="placeholder-icon"></i>
+              <img *ngIf="profile.image" [src]="'http://localhost:8000/uploads/' + profile.image" class="avatar-full">
+              <i *ngIf="!profile.image" data-lucide="user" class="placeholder-icon"></i>
             </div>
-            <button class="btn-upload-overlay">
+            <button class="btn-upload-overlay" (click)="fileInput.click()">
               <i data-lucide="camera"></i>
             </button>
+            <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none" accept="image/*">
           </div>
           <h3 class="mt-4 font-semibold">Dr. {{ auth.getUser()?.prenom }} {{ auth.getUser()?.nom }}</h3>
           <p class="text-xs text-muted-foreground">{{ auth.getUser()?.email }}</p>

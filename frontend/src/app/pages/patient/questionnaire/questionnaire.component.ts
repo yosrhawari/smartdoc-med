@@ -68,7 +68,7 @@ export class QuestionnaireComponent implements OnInit, AfterViewInit {
     { label: 'Settings', icon: 'settings', route: '/settings' }
   ];
 
-  results: Doctor[] = [];
+  results: any[] = [];
   aiAnalysis: any = null;
   searching = false;
 

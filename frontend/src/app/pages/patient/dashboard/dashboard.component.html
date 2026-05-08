@@ -52,24 +52,40 @@
         </div>
 
         <div class="appointment-list" *ngIf="upcomingAppointments.length > 0">
-          <div class="appointment-item card" *ngFor="let apt of upcomingAppointments">
-            <div class="date-badge">
-              <span class="month">{{ formatDate(apt.date_rdv).month }}</span>
-              <span class="day">{{ formatDate(apt.date_rdv).day }}</span>
+          <div class="appointment-item-premium card animate-fade-in-up" *ngFor="let apt of upcomingAppointments">
+            <div class="date-column">
+              <div class="date-badge-premium">
+                <span class="month">{{ formatDate(apt.date_rdv).month }}</span>
+                <span class="day">{{ formatDate(apt.date_rdv).day }}</span>
+              </div>
             </div>
-            <div class="appointment-info">
-              <div class="doctor-details">
-                <span class="doctor-name">{{ apt.doctor_name || 'Dr. Najib Mahmoudi' }}</span>
-                <span class="specialty"><i data-lucide="tag"></i> {{ apt.specialite || 'Dentiste' }}</span>
+
+            <div class="details-column">
+              <h3 class="doctor-name-premium">{{ apt.doctor_name }}</h3>
+              <div class="specialty-tag">
+                <i data-lucide="tag"></i>
+                <span>{{ apt.specialite || 'Generalist' }}</span>
               </div>
-              <div class="appointment-meta">
-                <span><i data-lucide="clock"></i> {{ apt.date_rdv }} {{ apt.heure }}</span>
-                <span><i data-lucide="map-pin"></i> Sousse</span>
+              <div class="meta-row">
+                <div class="meta-item">
+                  <i data-lucide="clock"></i>
+                  <span>{{ apt.date_rdv }} {{ apt.heure }}</span>
+                </div>
+                <div class="meta-item">
+                  <i data-lucide="map-pin"></i>
+                  <span>{{ apt.adresse || 'Tunis, Tunisie' }}</span>
+                </div>
               </div>
-              <div class="appointment-actions">
-                <span class="status-pill" [ngClass]="getStatusClass(apt.statut)">{{ apt.statut }}</span>
-                <button class="btn-cancel"><i data-lucide="x-circle"></i> Cancel</button>
+              <div class="status-row">
+                <span class="status-badge" [ngClass]="getStatusClass(apt.statut)">{{ apt.statut }}</span>
               </div>
+            </div>
+
+            <div class="actions-column">
+              <button class="btn-cancel-premium">
+                <i data-lucide="x-circle"></i>
+                <span>Cancel</span>
+              </button>
             </div>
           </div>
         </div>
@@ -88,10 +104,11 @@
         </div>
 
         <div class="records-list" *ngIf="medicalRecords.length > 0">
-          <div class="record-card card" *ngFor="let rec of medicalRecords.slice(0, 1)">
+          <div class="record-card card" *ngFor="let rec of medicalRecords">
             <div class="record-header">
               <div class="doctor-avatar">
-                {{ rec.doctor_name?.charAt(4) }}
+                <img *ngIf="rec.doctor_image" [src]="'http://localhost:8000/uploads/' + rec.doctor_image" class="avatar-img-hub">
+                <span *ngIf="!rec.doctor_image">{{ rec.doctor_name?.charAt(4) }}</span>
               </div>
               <div class="record-doctor-info">
                 <h4>{{ rec.doctor_name }}</h4>

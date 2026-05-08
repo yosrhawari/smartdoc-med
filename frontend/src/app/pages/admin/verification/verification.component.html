@@ -1,0 +1,116 @@
+<div class="dashboard-layout">
+  <app-sidebar [items]="sidebarItems" title="Admin"></app-sidebar>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header animate-fade-in-up">
+      <div class="header-main">
+        <h1>Doctor Verification</h1>
+        <p class="subtitle">Review and approve pending medical professional registrations</p>
+      </div>
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="loader-wrapper">
+        <i data-lucide="loader-2" class="animate-spin"></i>
+      </div>
+      <p>Loading applications...</p>
+    </div>
+
+    <div *ngIf="!loading" class="grid-2-1 animate-fade-in-up">
+      <!-- DOCTORS LIST -->
+      <div class="doctors-list-container">
+        <div *ngFor="let doc of pendingDoctors"
+             class="card verification-card-modern"
+             [class.active]="selectedDoctor?.id === doc.id"
+             (click)="selectedDoctor = doc">
+          
+          <div class="card-body">
+            <div class="doc-header-compact">
+              <div class="doc-avatar-sm">
+                <div class="avatar-placeholder">
+                  {{ doc.nom.charAt(0).toUpperCase() }}
+                </div>
+              </div>
+              <div class="doc-info-compact">
+                <h3>Dr. {{ doc.nom }} {{ doc.prenom }}</h3>
+                <p class="doc-specialty-compact">{{ doc.specialite }}</p>
+              </div>
+              <div class="status-indicator">
+                <span class="badge badge-warning">PENDING</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="pendingDoctors.length === 0" class="empty-state card">
+          <div class="empty-icon-wrapper">
+            <i data-lucide="check-circle-2"></i>
+          </div>
+          <h3>All caught up!</h3>
+          <p>No pending doctor verifications at the moment.</p>
+        </div>
+      </div>
+
+      <!-- DETAILS PANEL -->
+      <div class="details-panel-container">
+        <div *ngIf="selectedDoctor" class="card profile-review-card animate-fade-in">
+          <div class="review-header">
+            <div class="review-avatar-large">
+               <div class="avatar-placeholder">
+                  {{ selectedDoctor.nom.charAt(0).toUpperCase() }}
+                </div>
+            </div>
+            <div class="review-meta">
+              <h2>Dr. {{ selectedDoctor.nom }} {{ selectedDoctor.prenom }}</h2>
+              <p class="specialty-main">{{ selectedDoctor.specialite }}</p>
+              <p class="location"><i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> {{ selectedDoctor.adresse }}</p>
+            </div>
+          </div>
+
+          <div class="review-body">
+            <div class="info-section">
+              <label>Professional Information</label>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span>Specialty</span>
+                  <p class="info-value">{{ selectedDoctor.specialite || 'Not specified' }}</p>
+                </div>
+                <div class="info-item">
+                  <span>Consultation Fee</span>
+                  <p class="info-value">{{ selectedDoctor.tarif }} DT</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-section">
+              <label>Biography</label>
+              <p class="bio-text">{{ selectedDoctor.biographie || 'No biography provided.' }}</p>
+            </div>
+
+            <div class="info-section">
+              <label>Documentation</label>
+              <div class="doc-link">
+                <i data-lucide="file-text"></i>
+                <span>Medical_License_Proof.pdf</span>
+                <i data-lucide="download" class="download-icon"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-footer">
+            <button class="btn btn-outline btn-sm" (click)="selectedDoctor = null">Dismiss</button>
+            <button class="btn btn-primary btn-sm" (click)="validateDoctor(selectedDoctor.id!)">
+              <i data-lucide="check" class="mr-2"></i> Approve Account
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="!selectedDoctor && pendingDoctors.length > 0" class="selection-placeholder card">
+          <i data-lucide="mouse-pointer-click"></i>
+          <p>Select a doctor from the list to review their profile</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

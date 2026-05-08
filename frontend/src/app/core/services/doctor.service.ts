@@ -25,9 +25,13 @@ export interface DoctorWithRating {
   id: number;
   adresse: string;
   note_moyenne: number;
+  nombre_reviews: number;
   nom?: string;
   prenom?: string;
   image?: string;
+  specialite?: string;
+  tarif: number;
+  biographie?: string;
 }
 
 export interface SmartSearchResult {
@@ -66,13 +70,12 @@ export class DoctorService {
       { params :{ symptome: symptom } }
     );
   }
-  // Upload image
-  uploadImage(file: File) {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  return this.http.post<any>('http://localhost:8000/medecins/upload-image', formData);
-}
+  // Upload profile image
+  uploadProfileImage(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<any>(`${this.API}/medecins/profile/image`, formData);
+  }
 
   //  Rating
   getDoctorsWithRating(): Observable<DoctorWithRating[]> {

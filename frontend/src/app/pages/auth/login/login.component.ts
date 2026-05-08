@@ -21,10 +21,10 @@ export class LoginComponent {
   showPassword = false;
 
   constructor(
-    public authService: AuthService, 
+    public authService: AuthService,
     private doctorService: DoctorService,
     private router: Router
-  ) {}
+  ) { }
 
 
   togglePassword(): void {
@@ -46,18 +46,20 @@ export class LoginComponent {
         const role = this.authService.getRole();// Récupérer le rôle de l'utilisateur connecté à partir du service d'authentification
         switch (role) {
           case 'PATIENT': this.router.navigate(['/patient/dashboard']); break;
-          case 'MEDECIN': 
+          case 'MEDECIN':
             this.doctorService.getMyProfile().subscribe({
               next: (profile) => {
-                // If profile is incomplete, go to completion page
-                if (!profile?.specialite_id || profile?.spec_nom_temp === 'A compléter') {
+                // If profile is incomplete (missing specialty or address), go to completion page
+                if (!profile?.adresse || (!profile?.specialite_id && !profile?.spec_nom_temp)) {
                   this.router.navigate(['/doctor/complete-profile']);
+                } else if (profile.statut_validation === 'EN_ATTENTE') {
+                  this.router.navigate(['/doctor/pending-approval']);
                 } else {
                   this.router.navigate(['/doctor/dashboard']);
                 }
               },
               error: () => this.router.navigate(['/doctor/complete-profile'])
-            });
+            })
             break;
 
           case 'ADMIN': this.router.navigate(['/admin/dashboard']); break;

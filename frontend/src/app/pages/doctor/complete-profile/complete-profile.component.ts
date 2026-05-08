@@ -53,7 +53,7 @@ export class CompleteProfileComponent implements OnInit {
 
     this.doctorService.updateProfile(profileData).subscribe({
       next: () => {
-        this.router.navigate(['/doctor/dashboard']);
+        this.router.navigate(['/doctor/pending-approval']);
       },
       error: (err) => {
         this.loading = false;

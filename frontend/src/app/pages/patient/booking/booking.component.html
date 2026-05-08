@@ -5,60 +5,86 @@
       Back to Doctors
     </a>
 
-    <!-- Booking Form -->
+    <!-- Redesigned Booking Form -->
     <div *ngIf="!booked" class="booking-layout">
       <div class="booking-card">
-        <h2 id="booking-title">Book an Appointment</h2>
-        <p class="booking-subtitle">Dr. {{ doctor?.nom }} {{ doctor?.prenom }} — Select a date and time</p>
+        <div class="card-header-premium">
+          <div class="title-with-icon">
+            <div class="icon-circle">
+              <i data-lucide="calendar"></i>
+            </div>
+            <h2>Select Appointment Date</h2>
+          </div>
+        </div>
 
-        <!-- Calendar -->
-        <div class="calendar" id="booking-calendar">
-          <div class="calendar-header">
-            <button class="cal-nav" (click)="prevMonth()" id="cal-prev">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            <h3 class="cal-month">{{ getMonthName() }}</h3>
-            <button class="cal-nav" (click)="nextMonth()" id="cal-next">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
+        <div class="doctor-minimal-info">
+          <p>Booking with <strong>Dr. {{ doctor?.nom }} {{ doctor?.prenom }}</strong></p>
+        </div>
+
+        <!-- Modern Calendar -->
+        <div class="calendar-premium">
+          <div class="calendar-nav-row">
+            <h3 class="month-label">{{ getMonthName() }}</h3>
+            <div class="nav-buttons">
+              <button class="nav-btn" (click)="prevMonth()">
+                <i data-lucide="chevron-left"></i>
+              </button>
+              <button class="nav-btn" (click)="nextMonth()">
+                <i data-lucide="chevron-right"></i>
+              </button>
+            </div>
           </div>
 
-          <div class="calendar-grid">
-            <div *ngFor="let day of weekDays" class="cal-weekday">{{ day }}</div>
+          <div class="calendar-grid-premium">
+            <!-- Weekdays -->
+            <div *ngFor="let day of weekDays" class="weekday-label">{{ day }}</div>
+            
+            <!-- Days -->
             <div *ngFor="let day of calendarDays"
-                 class="cal-day"
+                 class="day-cell"
                  [class.empty]="day === null"
-                 [class.selected]="day !== null && isSelectedDay(day)"
-                 [class.today]="day !== null && isToday(day)"
                  [class.past]="day !== null && isPastDate(day)"
+                 [class.available]="day !== null && !isPastDate(day) && !isSelectedDay(day)"
+                 [class.selected]="day !== null && isSelectedDay(day)"
                  (click)="day !== null && selectDate(day)">
-              {{ day }}
+              
+              <ng-container *ngIf="day !== null">
+                <span class="day-num">{{ day }}</span>
+                <span class="slots-tag" *ngIf="!isPastDate(day)">{{ getSlotsLeft(day) }} LEFT</span>
+              </ng-container>
             </div>
           </div>
         </div>
 
-        <!-- Time Slots -->
-        <div class="time-section" *ngIf="selectedDate">
-          <h3>Select Time</h3>
+        <!-- Time Slots (Only shown when date selected) -->
+        <div class="time-section animate-fade-in" *ngIf="selectedDate">
+          <div class="section-title">
+            <i data-lucide="clock"></i>
+            <h3>Select Available Time</h3>
+          </div>
           <div class="time-grid">
             <button *ngFor="let time of timeSlots"
-                    class="time-slot"
-                    [class.selected]="selectedTime === time"
+                    class="time-slot-pill"
+                    [class.active]="selectedTime === time"
                     (click)="selectTime(time)">
               {{ time }}
             </button>
           </div>
         </div>
 
-        <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+        <div *ngIf="error" class="alert-error-premium">
+          <i data-lucide="alert-circle"></i>
+          {{ error }}
+        </div>
 
-        <button class="btn btn-primary btn-full"
-                [disabled]="!canBook() || loading"
-                (click)="bookAppointment()"
-                id="btn-confirm-booking">
-          <span *ngIf="!loading">Confirm Booking</span>
-          <span *ngIf="loading" class="spinner"></span>
-        </button>
+        <div class="action-footer">
+          <button class="btn-confirm-premium"
+                  [disabled]="!canBook() || loading"
+                  (click)="bookAppointment()">
+            <span *ngIf="!loading">Confirm Appointment</span>
+            <span *ngIf="loading" class="spinner"></span>
+          </button>
+        </div>
       </div>
 
       <!-- Summary Sidebar -->

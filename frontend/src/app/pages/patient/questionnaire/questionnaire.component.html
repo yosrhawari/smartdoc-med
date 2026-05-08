@@ -1,5 +1,4 @@
 <div class="assessment-container">
-  <!-- Top Bar -->
 
 
   <main class="assessment-main">
@@ -16,7 +15,7 @@
 
     <!-- Assessment Card -->
     <div class="assessment-card animate-fade-in-up" *ngIf="!showResults">
-      
+
       <!-- STEP 1: WHO IS THIS FOR? -->
       <div *ngIf="currentStep === 1" class="step-view">
         <div class="icon-header">
@@ -30,10 +29,8 @@
         <div class="selection-section">
           <label class="section-label">Age Group</label>
           <div class="age-grid">
-            <div *ngFor="let age of ageGroups" 
-                 class="age-card" 
-                 [class.selected]="patientInfo.ageGroup === age.id"
-                 (click)="patientInfo.ageGroup = age.id">
+            <div *ngFor="let age of ageGroups" class="age-card" [class.selected]="patientInfo.ageGroup === age.id"
+              (click)="patientInfo.ageGroup = age.id">
               <i [attr.data-lucide]="age.icon"></i>
               <span class="age-label">{{ age.label }}</span>
               <span class="age-range">{{ age.range }}</span>
@@ -44,10 +41,8 @@
         <div class="selection-section">
           <label class="section-label">Biological Gender</label>
           <div class="gender-grid">
-            <div *ngFor="let g of genders" 
-                 class="gender-card" 
-                 [class.selected]="patientInfo.gender === g.id"
-                 (click)="patientInfo.gender = g.id">
+            <div *ngFor="let g of genders" class="gender-card" [class.selected]="patientInfo.gender === g.id"
+              (click)="patientInfo.gender = g.id">
               <i [attr.data-lucide]="g.icon"></i>
               <span>{{ g.label }}</span>
             </div>
@@ -66,8 +61,7 @@
         <p class="step-subtitle">Describe what brings you here today in your own words.</p>
 
         <div class="symptom-input-box">
-          <textarea 
-            [(ngModel)]="symptomText" 
+          <textarea [(ngModel)]="symptomText"
             placeholder="E.g., I have a sharp pain in my lower back that radiates down my leg, and it started 3 days ago..."
             rows="8"></textarea>
         </div>
@@ -86,10 +80,8 @@
         <div class="selection-section">
           <label class="section-label">Primary Area Affected</label>
           <div class="area-grid">
-            <div *ngFor="let area of bodyAreas" 
-                 class="area-card" 
-                 [class.selected]="selectedArea === area.id"
-                 (click)="selectedArea = area.id">
+            <div *ngFor="let area of bodyAreas" class="area-card" [class.selected]="selectedArea === area.id"
+              (click)="selectedArea = area.id">
               <i [attr.data-lucide]="area.icon"></i>
               <span>{{ area.label }}</span>
             </div>
@@ -110,10 +102,8 @@
         <div class="selection-section">
           <label class="section-label">Duration</label>
           <div class="duration-grid">
-            <div *ngFor="let d of durations" 
-                 class="duration-card" 
-                 [class.selected]="symptomDuration === d.id"
-                 (click)="symptomDuration = d.id">
+            <div *ngFor="let d of durations" class="duration-card" [class.selected]="symptomDuration === d.id"
+              (click)="symptomDuration = d.id">
               {{ d.label }}
             </div>
           </div>
@@ -122,10 +112,8 @@
         <div class="selection-section">
           <label class="section-label">Severity (1-10)</label>
           <div class="severity-scale">
-            <button *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]" 
-                    class="sev-btn" 
-                    [class.active]="severity === i"
-                    (click)="severity = i">
+            <button *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]" class="sev-btn" [class.active]="severity === i"
+              (click)="severity = i">
               {{ i }}
             </button>
           </div>
@@ -141,10 +129,8 @@
         <button class="btn-back" (click)="prevStep()" [disabled]="currentStep === 1">
           <i data-lucide="arrow-left"></i> Back
         </button>
-        <button class="btn-continue" 
-                (click)="nextStep()" 
-                [disabled]="!canProceed()"
-                [class.btn-analyze]="currentStep === 4">
+        <button class="btn-continue" (click)="nextStep()" [disabled]="!canProceed()"
+          [class.btn-analyze]="currentStep === 4">
           <span *ngIf="currentStep < 4">Continue</span>
           <span *ngIf="currentStep === 4">Analyze Symptoms</span>
           <i [attr.data-lucide]="currentStep === 4 ? 'sparkles' : 'arrow-right'"></i>
@@ -160,7 +146,7 @@
         </div>
         <h1 class="step-title">Assessment Results</h1>
       </div>
-      
+
       <div *ngIf="searching" class="loader-view">
         <div class="spinner"></div>
         <p>Our AI is analyzing your symptoms...</p>
@@ -172,7 +158,8 @@
             <i data-lucide="info"></i>
             <h3>AI Insights</h3>
           </div>
-          <p>Based on your symptoms (<strong>{{ symptomText }}</strong>), our AI recommends consulting a <strong>{{ aiAnalysis?.specialite || 'General Practitioner' }}</strong>.</p>
+          <p>Based on your questionnaire our AI recommends consulting a <strong>{{
+              aiAnalysis?.specialite || 'General Practitioner' }}</strong>.</p>
           <div class="analysis-meta">
             <span><i data-lucide="activity"></i> Severity: {{ severity }}/10</span>
             <span><i data-lucide="clock"></i> Duration: {{ symptomDuration }}</span>
@@ -181,31 +168,41 @@
 
         <h2 class="results-subtitle">Recommended Specialists</h2>
         <div class="doctor-results-grid">
-          <div *ngFor="let doc of results" class="doctor-result-card card">
-            <div class="doc-header">
-              <div class="doc-avatar">
-                {{ doc.prenom?.charAt(0) }}{{ doc.nom?.charAt(0) }}
+          <div *ngFor="let doc of results" class="doctor-result-card-premium card animate-fade-in-up">
+            <div class="doc-card-top">
+              <div class="avatar-container">
+                <img *ngIf="doc.image" [src]="'http://localhost:8000/uploads/' + doc.image" class="avatar-image">
+                <div *ngIf="!doc.image" class="avatar-gradient" [style.background]="'linear-gradient(135deg, #3b82f6 0%, #10b981 100%)'">
+                  {{ (doc.prenom?.charAt(0) || doc.nom?.charAt(0) || 'D') | uppercase }}
+                </div>
               </div>
-              <div class="doc-main-info">
+              <div class="doc-basic-info">
                 <h3>Dr. {{ doc.prenom }} {{ doc.nom }}</h3>
-                <span class="specialty-badge">{{ aiAnalysis?.specialite || 'Medical Professional' }}</span>
+                <span class="specialty-link">{{ doc.specialite || aiAnalysis?.specialite || 'Generalist' }}</span>
+                <div class="rating-row">
+                  <div class="stars-mini">
+                    <i data-lucide="star" *ngFor="let filled of getStarArray(doc.note_moyenne || 0)" 
+                       [class.filled]="filled"></i>
+                  </div>
+                  <span class="rating-val">
+                    <strong>{{ doc.note_moyenne || 0 | number:'1.1-1' }}</strong> 
+                    ({{ doc.nombre_reviews || 0 }} reviews)
+                  </span>
+                </div>
+                <div class="location-row">
+                  <i data-lucide="map-pin"></i>
+                  <span>{{ doc.adresse || 'Tunis, Tunisie' }}</span>
+                </div>
+              </div>
+              <div class="price-badge-top">
+                <div class="price-val">{{ doc.tarif | number:'1.1-1' }} DT</div>
+                <div class="price-label">PER VISIT</div>
               </div>
             </div>
             
-            <div class="doc-details">
-              <div class="detail-item">
-                <i data-lucide="map-pin"></i>
-                <span>{{ doc.adresse }}</span>
-              </div>
-              <div class="detail-item">
-                <i data-lucide="star"></i>
-                <span>4.8 (120+ Reviews)</span>
-              </div>
+            <div class="doc-card-footer">
+              <button class="btn-view-book" (click)="bookDoctor(doc.id)">View Profile & Book</button>
             </div>
-
-            <button class="btn-book-action" (click)="bookDoctor(doc.id)">
-              Book Appointment <i data-lucide="calendar"></i>
-            </button>
           </div>
         </div>
 
