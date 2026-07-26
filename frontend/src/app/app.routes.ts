@@ -57,6 +57,20 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { role: 'MEDECIN' }
   },
+
+  {
+    path: 'doctor/complete-profile',
+    loadComponent: () => import('./pages/doctor/complete-profile/complete-profile.component').then(m => m.CompleteProfileComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { role: 'MEDECIN' }
+  },
+  {
+    path: 'doctor/pending-approval',
+    loadComponent: () => import('./pages/doctor/pending-approval/pending-approval.component').then(m => m.PendingApprovalComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { role: 'MEDECIN' }
+  },
+
   {
     path: 'doctor/patients',
     loadComponent: () => import('./pages/doctor/patients/patients.component').then(m => m.DoctorPatientsComponent),
@@ -66,6 +80,12 @@ export const routes: Routes = [
   {
     path: 'doctor/profile',
     loadComponent: () => import('./pages/doctor/profile-edit/profile-edit.component').then(m => m.DoctorProfileEditComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { role: 'MEDECIN' }
+  },
+  {
+    path: 'doctor/reviews',
+    loadComponent: () => import('./pages/doctor/reviews/reviews.component').then(m => m.DoctorReviewsComponent),
     canActivate: [authGuard, roleGuard],
     data: { role: 'MEDECIN' }
   },
@@ -86,7 +106,13 @@ export const routes: Routes = [
   {
     path: 'admin/doctors',
     loadComponent: () => import('./pages/admin/doctors/doctors.component').then(m => m.AdminDoctorsComponent),
-    canActivate: [authGuard, roleGuard],
+    canActivate: [roleGuard],
+    data: { role: 'ADMIN' }
+  },
+  {
+    path: 'admin/verification',
+    loadComponent: () => import('./pages/admin/verification/verification.component').then(m => m.AdminVerificationComponent),
+    canActivate: [roleGuard],
     data: { role: 'ADMIN' }
   },
   {
@@ -94,6 +120,13 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/patient/doctor-profile/doctor-profile.component').then(m => m.DoctorProfileComponent),
     canActivate: [authGuard, roleGuard],
     data: { role: 'ADMIN' }
+  },
+
+  // Shared Settings
+  {
+    path: 'settings',
+    loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent),
+    canActivate: [authGuard]
   },
 
   // Fallback

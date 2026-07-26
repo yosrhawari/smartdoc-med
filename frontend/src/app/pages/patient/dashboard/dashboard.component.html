@@ -1,84 +1,206 @@
-<div class="dashboard-layout">
-  <app-sidebar [items]="sidebarItems" title="Patient"></app-sidebar>
-
-  <main class="dashboard-main">
-    <!-- Header Greeting -->
-    <header class="dashboard-header animate-fade-in">
-      <h1 id="welcome-greeting">Welcome back, John</h1>
-      <p class="header-subtitle">Manage your appointments and health journey</p>
+<div class="dashboard-container">
+  <main class="dashboard-content">
+    <!-- Header -->
+    <header class="dashboard-header animate-fade-in-up">
+      <div class="header-left">
+        <h1>Welcome back, {{ auth.getUser()?.prenom }}</h1>
+        <p class="subtitle">Manage your health journey and upcoming appointments</p>
+      </div>
     </header>
 
     <!-- Quick Action Cards -->
-    <section class="action-grid animate-fade-in-up">
-      <a routerLink="/patient/questionnaire" class="action-card glass-card">
-        <div class="icon-box icon-blue">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <div class="action-grid animate-fade-in-up">
+      <a routerLink="/patient/questionnaire" class="action-card">
+        <div class="icon-box bg-blue">
+          <i data-lucide="search"></i>
         </div>
-        <h3>Find a Doctor</h3>
-        <p>Get AI-powered recommendations</p>
+        <div class="action-info">
+          <h3>Find a Doctor</h3>
+          <p>Get smart recommendations based on your symptoms.</p>
+        </div>
       </a>
 
-      <a routerLink="/patient/doctors" class="action-card glass-card">
-        <div class="icon-box icon-green">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <a routerLink="/patient/doctors" class="action-card">
+        <div class="icon-box bg-green">
+          <i data-lucide="calendar"></i>
         </div>
-        <h3>Book Appointment</h3>
-        <p>Schedule with your doctor</p>
+        <div class="action-info">
+          <h3>Book Appointment</h3>
+          <p>Schedule a visit with your preferred healthcare provider.</p>
+        </div>
       </a>
 
-      <div class="action-card glass-card muted">
-        <div class="icon-box icon-orange">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <a class="action-card">
+        <div class="icon-box bg-yellow">
+          <i data-lucide="file-text"></i>
         </div>
-        <h3>Medical Records</h3>
-        <p>View your health history</p>
-      </div>
-    </section>
+        <div class="action-info">
+          <h3>Medical Records</h3>
+          <p>Securely access your health history and prescriptions.</p>
+        </div>
+      </a>
+    </div>
 
-    <!-- Content Sections -->
-    <div class="content-split animate-fade-in-up">
-      <!-- Upcoming Appointments -->
-      <section class="appointments-section">
-        <h2 class="section-title">Upcoming Appointments</h2>
-        <div class="appointment-cards" *ngIf="appointments.length > 0">
-          <div *ngFor="let apt of appointments" class="apt-card" [class.hidden]="apt.statut !== 'PREVU'">
-            <div class="apt-info">
-              <div class="apt-doctor-avatar">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              </div>
-              <div class="apt-details">
-                <h4>Dr. {{ apt.medecin_id }}</h4>
-                <p class="apt-meta">Consultation</p>
-                <div class="apt-time-loc">
-                  <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> {{ apt.date_rdv }}</span>
-                  <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Heart Health Center</span>
-                </div>
+    <!-- Main Content Split Layout -->
+    <div class="split-layout animate-fade-in-up delay-100">
+      
+      <!-- Left Column: Upcoming Appointments -->
+      <section class="upcoming-section">
+        <div class="section-header">
+          <h2>Upcoming Appointments</h2>
+          <button class="btn-primary" routerLink="/patient/doctors">Book New</button>
+        </div>
+
+        <div class="appointment-list" *ngIf="upcomingAppointments.length > 0">
+          <div class="appointment-item-premium card animate-fade-in-up" *ngFor="let apt of upcomingAppointments">
+            <div class="date-column">
+              <div class="date-badge-premium">
+                <span class="month">{{ formatDate(apt.date_rdv).month }}</span>
+                <span class="day">{{ formatDate(apt.date_rdv).day }}</span>
               </div>
             </div>
-            <button class="btn btn-ghost btn-sm">Details</button>
+
+            <div class="details-column">
+              <h3 class="doctor-name-premium">{{ apt.doctor_name }}</h3>
+              <div class="specialty-tag">
+                <i data-lucide="tag"></i>
+                <span>{{ apt.specialite || 'Generalist' }}</span>
+              </div>
+              <div class="meta-row">
+                <div class="meta-item">
+                  <i data-lucide="clock"></i>
+                  <span>{{ apt.date_rdv }} {{ apt.heure }}</span>
+                </div>
+                <div class="meta-item">
+                  <i data-lucide="map-pin"></i>
+                  <span>{{ apt.adresse || 'Tunis, Tunisie' }}</span>
+                </div>
+              </div>
+              <div class="status-row">
+                <span class="status-badge" [ngClass]="getStatusClass(apt.statut)">{{ apt.statut }}</span>
+              </div>
+            </div>
+
+            <div class="actions-column">
+              <button class="btn-cancel-premium">
+                <i data-lucide="x-circle"></i>
+                <span>Cancel</span>
+              </button>
+            </div>
           </div>
         </div>
-        <div *ngIf="upcomingCount === 0" class="empty-notif">
+
+        <div class="empty-state-card card" *ngIf="upcomingAppointments.length === 0">
+          <i data-lucide="calendar-x"></i>
           <p>No upcoming appointments</p>
         </div>
       </section>
 
-      <!-- Recent History -->
-      <aside class="history-section">
-        <h2 class="section-title">Recent History</h2>
-        <div class="history-list">
-          <div *ngFor="let apt of appointments" class="history-item" [class.hidden]="apt.statut !== 'TERMINE'">
-            <div class="history-main">
-              <strong>Dr. {{ apt.medecin_id }}</strong>
-              <p>{{ apt.date_rdv }} • Consultation</p>
+      <!-- Right Column: Medical Hub -->
+      <section class="medical-hub-section">
+        <div class="section-header">
+          <h2>Medical Hub</h2>
+          <span class="badge-hub">Prescriptions & Advice</span>
+        </div>
+
+        <div class="records-list" *ngIf="medicalRecords.length > 0">
+          <div class="record-card card" *ngFor="let rec of medicalRecords">
+            <div class="record-header">
+              <div class="doctor-avatar">
+                <img *ngIf="rec.doctor_image" [src]="'http://localhost:8000/uploads/' + rec.doctor_image" class="avatar-img-hub">
+                <span *ngIf="!rec.doctor_image">{{ rec.doctor_name?.charAt(4) }}</span>
+              </div>
+              <div class="record-doctor-info">
+                <h4>{{ rec.doctor_name }}</h4>
+                <p>{{ rec.specialite || 'General' }}</p>
+              </div>
+              <span class="record-date">{{ rec.date | date:'MMM dd, yyyy' | uppercase }}</span>
             </div>
-            <button class="btn-link">View</button>
+            
+            <div class="record-content">
+              <div class="advice-box">
+                <div class="advice-header">
+                  <i data-lucide="message-square"></i>
+                  <span>DOCTOR'S ADVICE</span>
+                </div>
+                <p>{{ rec.notes || 'No clinical notes provided for this visit.' }}</p>
+              </div>
+            </div>
+
+            <div class="record-footer">
+              <div class="footer-left">
+                <!-- If not reviewed yet -->
+                <button *ngIf="!rec.review" class="btn-link" (click)="toggleReview(rec.rendezvous_id)">
+                  <i data-lucide="edit-3"></i> Leave a review for this visit
+                </button>
+                
+                <!-- If already reviewed (Saved state) -->
+                <div *ngIf="rec.review" class="review-saved-badge">
+                  <div class="mini-stars">
+                    <i data-lucide="star" *ngFor="let filled of getStarArray(rec.review.note)" 
+                       [class.filled]="filled" class="mini-star"></i>
+                  </div>
+                  <span class="saved-text">"Your review is saved"</span>
+                </div>
+              </div>
+
+              <button class="btn-link-primary">View Full History <i data-lucide="arrow-right"></i></button>
+            </div>
+
+            <!-- Expanding Review Form -->
+            <div class="review-form-overlay" *ngIf="expandedRecordId === rec.rendezvous_id">
+              <div class="review-form-container animate-fade-in">
+                <div class="form-divider"></div>
+                
+                <div class="rating-section">
+                  <label>YOUR RATING</label>
+                  <div class="star-rating">
+                    <button *ngFor="let star of [1,2,3,4,5]" 
+                            type="button"
+                            class="star-item"
+                            [class.filled]="reviewNote >= star"
+                            (click)="setRating(star)">
+                      <i data-lucide="star"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="comment-section">
+                  <label for="reviewComment">YOUR COMMENT</label>
+                  <textarea 
+                    id="reviewComment" 
+                    [(ngModel)]="reviewComment" 
+                    placeholder="How was your experience?"
+                    class="form-control">
+                  </textarea>
+                </div>
+
+                <!-- Messages -->
+                <div *ngIf="reviewError" class="error-msg animate-fade-in">
+                  <i data-lucide="alert-circle"></i> {{ reviewError }}
+                </div>
+                <div *ngIf="reviewSuccess" class="success-msg animate-fade-in">
+                  <i data-lucide="check-circle"></i> {{ reviewSuccess }}
+                </div>
+
+                <button 
+                  class="btn-submit-feedback" 
+                  [disabled]="submittingReview"
+                  (click)="submitReview(rec.rendezvous_id)">
+                  <span *ngIf="!submittingReview">Submit Feedback</span>
+                  <i data-lucide="loader-2" *ngIf="submittingReview" class="animate-spin"></i>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-        <div *ngIf="completedCount === 0" class="empty-notif">
-          <p>No recent activity</p>
+
+        <div class="empty-state-card card" *ngIf="medicalRecords.length === 0">
+          <i data-lucide="file-warning"></i>
+          <p>No medical records found</p>
         </div>
-      </aside>
+      </section>
+
     </div>
   </main>
 </div>

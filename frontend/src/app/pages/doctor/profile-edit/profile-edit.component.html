@@ -2,132 +2,135 @@
   <app-sidebar [items]="sidebarItems" title="Doctor"></app-sidebar>
 
   <main class="dashboard-main">
-
-    <!-- ── Header ─────────────────────────────────────────────────────── -->
-    <div class="page-header animate-fade-in-up">
-      <h1 id="profile-edit-title">Edit Profile</h1>
-      <p class="subtitle">Update your professional information</p>
-    </div>
-
-    <!-- ── Loading skeleton ──────────────────────────────────────────── -->
-    <div *ngIf="loadingProfile" class="loading-card animate-fade-in-up">
-      <div class="skeleton skeleton-avatar"></div>
-      <div class="skeleton-fields">
-        <div class="skeleton skeleton-line"></div>
-        <div class="skeleton skeleton-line short"></div>
-        <div class="skeleton skeleton-line"></div>
+    <div class="dashboard-header animate-fade-in-up">
+      <div class="header-main">
+        <h1>Profile Management</h1>
+        <p class="subtitle">Customize your professional profile and practice details</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary btn-sm" form="doctor-profile-form" [disabled]="loading">
+          <i data-lucide="save" class="mr-2"></i> Save Changes
+        </button>
       </div>
     </div>
 
-    <!-- ── Form card ─────────────────────────────────────────────────── -->
-    <div *ngIf="!loadingProfile" class="profile-form-card animate-fade-in-up">
-      <form (ngSubmit)="onSubmit()" id="doctor-profile-form">
-
-        <!-- Photo section -->
-        <div class="photo-section">
-          <div class="avatar-wrapper" (click)="triggerPhotoInput()" title="Change photo">
-            <img *ngIf="photoPreview" [src]="photoPreview" alt="Profile" class="avatar-img" />
-            <div *ngIf="!photoPreview" class="avatar-placeholder">
-              <span class="avatar-initials">{{ getInitials() }}</span>
+    <div class="grid-profile animate-fade-in-up">
+      <!-- Profile Preview / Sidebar -->
+      <div class="profile-preview-column">
+        <div class="card p-6 text-center">
+          <div class="profile-image-upload">
+            <div class="image-preview">
+              <img *ngIf="profile.image" [src]="'http://localhost:8000/uploads/' + profile.image" class="avatar-full">
+              <i *ngIf="!profile.image" data-lucide="user" class="placeholder-icon"></i>
             </div>
-            <div class="avatar-overlay">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
-                <circle cx="12" cy="13" r="4"/>
-              </svg>
-            </div>
-          </div>
-          <div class="photo-info">
-            <p class="photo-label">Profile Photo</p>
-            <button type="button" class="btn-change-photo" (click)="triggerPhotoInput()" id="btn-change-photo">
-              Change Photo
+            <button class="btn-upload-overlay" (click)="fileInput.click()">
+              <i data-lucide="camera"></i>
             </button>
+            <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none" accept="image/*">
           </div>
-          <input type="file" id="photo-input" accept="image/*" (change)="onPhotoChange($event)" hidden />
+          <h3 class="mt-4 font-semibold">Dr. {{ auth.getUser()?.prenom }} {{ auth.getUser()?.nom }}</h3>
+          <p class="text-xs text-muted-foreground">{{ auth.getUser()?.email }}</p>
+          
+          <div class="verification-status-pill mt-4">
+            <i data-lucide="shield-check"></i>
+            <span>Verified Account</span>
+          </div>
         </div>
+      </div>
 
-        <div class="divider"></div>
+      <!-- Main Form -->
+      <div class="profile-form-column">
+        <div class="card p-8">
+          <form (ngSubmit)="onSubmit()" id="doctor-profile-form">
+            <div class="section-title-sm mb-6">Professional Details</div>
+            
+            <div class="grid-2 mb-6">
+              <div class="form-group">
+                <label>Medical Specialty</label>
+                <select 
+                  class="form-control"
+                  [(ngModel)]="selectedSpecialite"
+                  name="specialite"
+                  (change)="onSpecialiteChange()"
+                >
+                  <option value="">-- Select Specialty --</option>
+                  <option *ngFor="let sp of specialites" [value]="sp.id">
+                    {{ sp.nom }}
+                  </option>
+                  <option value="autre">Other / Custom</option>
+                </select>
+              </div>
 
-        <!-- Row 1: Full Name + Email -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="prenom" class="form-label">Full Name</label>
-            <div class="input-row">
-              <input type="text" id="prenom" class="form-control"
-                     [(ngModel)]="profile.prenom" name="prenom"
-                     placeholder="First name" />
-              <input type="text" id="nom" class="form-control"
-                     [(ngModel)]="profile.nom" name="nom"
-                     placeholder="Last name" />
+              <div class="form-group" *ngIf="selectedSpecialite === 'autre'">
+                <label>Specify Specialty</label>
+                <input 
+                  type="text" 
+                  class="form-control"
+                  [(ngModel)]="autreSpecialite"
+                  name="autreSpecialite"
+                  placeholder="Enter your specialty"
+                >
+              </div>
+
+              <div class="form-group">
+                <label>Consultation Fee (DT)</label>
+                <div class="input-with-icon">
+                  <i data-lucide="banknote"></i>
+                  <input 
+                    type="number" 
+                    class="form-control"
+                    [(ngModel)]="profile.tarif" 
+                    name="tarif"
+                    placeholder="200"
+                  >
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" id="email" class="form-control readonly"
-                   [value]="profile.email" name="email"
-                   readonly />
-          </div>
+
+            <div class="form-group mb-6">
+              <label>Clinic Address</label>
+              <div class="input-with-icon">
+                <i data-lucide="map-pin"></i>
+                <input 
+                  type="text" 
+                  class="form-control"
+                  [(ngModel)]="profile.adresse" 
+                  name="adresse"
+                  placeholder="e.g. 123 Health St, Tunis"
+                >
+              </div>
+            </div>
+
+            <div class="form-group mb-8">
+              <label>Biography & Experience</label>
+              <textarea 
+                class="form-control textarea"
+                [(ngModel)]="profile.biographie" 
+                name="biographie"
+                placeholder="Write a brief professional biography for your patients..."
+                rows="6"
+              ></textarea>
+            </div>
+
+            <div *ngIf="error" class="alert-error-modern mb-4">
+              <i data-lucide="alert-circle"></i>
+              <span>{{ error }}</span>
+            </div>
+
+            <div *ngIf="success" class="alert-success-modern mb-4">
+              <i data-lucide="check-circle"></i>
+              <span>{{ success }}</span>
+            </div>
+
+            <div class="form-footer">
+              <button type="submit" class="btn btn-primary btn-lg" [disabled]="loading">
+                <span *ngIf="!loading">Update Professional Profile</span>
+                <i data-lucide="loader-2" class="animate-spin ml-2" *ngIf="loading"></i>
+              </button>
+            </div>
+          </form>
         </div>
-
-        <!-- Row 2: Specialty + Consultation Fee -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="specialite" class="form-label">Specialty</label>
-            <select id="specialite" class="form-control"
-                    [(ngModel)]="profile.specialite_id" name="specialite_id">
-              <option [ngValue]="null">-- Select a specialty --</option>
-              <option *ngFor="let sp of specialites" [ngValue]="sp.id">{{ sp.nom }}</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="tarif" class="form-label">Consultation Fee (DT)</label>
-            <input type="number" id="tarif" class="form-control"
-                   [(ngModel)]="profile.tarif" name="tarif"
-                   placeholder="e.g., 150" min="0" />
-          </div>
-        </div>
-
-        <!-- Practice Location (full width) -->
-        <div class="form-group full-width">
-          <label for="adresse" class="form-label">Practice Location</label>
-          <input type="text" id="adresse" class="form-control"
-                 [(ngModel)]="profile.adresse" name="adresse"
-                 placeholder="Your clinic address" />
-        </div>
-
-        <!-- Bio (full width) -->
-        <div class="form-group full-width">
-          <label for="bio" class="form-label">Bio</label>
-          <textarea id="bio" class="form-control textarea"
-                    [(ngModel)]="profile.biographie" name="biographie"
-                    placeholder="Tell patients about your experience and approach..."
-                    rows="5"></textarea>
-        </div>
-
-        <!-- Alerts -->
-        <div *ngIf="error"   class="alert alert-error"   id="profile-error">{{ error }}</div>
-        <div *ngIf="success" class="alert alert-success" id="profile-success">{{ success }}</div>
-
-        <!-- Actions -->
-        <div class="form-actions">
-          <button type="button" class="btn btn-cancel" (click)="onCancel()" id="btn-cancel">
-            Cancel
-          </button>
-          <button type="submit" class="btn btn-save" [disabled]="loading" id="btn-save-profile">
-            <span *ngIf="!loading">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
-                <polyline points="17 21 17 13 7 13 7 21"/>
-                <polyline points="7 3 7 8 15 8"/>
-              </svg>
-              Save Changes
-            </span>
-            <span *ngIf="loading" class="spinner"></span>
-          </button>
-        </div>
-
-      </form>
+      </div>
     </div>
-
   </main>
 </div>

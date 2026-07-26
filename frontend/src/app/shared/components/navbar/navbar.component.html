@@ -1,49 +1,57 @@
 <nav class="navbar" id="main-navbar">
   <div class="navbar-container">
     <!-- Logo -->
-    <a routerLink="/" class="navbar-brand" id="navbar-logo">
+    <a [routerLink]="auth.getDashboardRoute()" class="navbar-brand" id="navbar-logo">
       <div class="logo-icon">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="8" fill="#2563EB"/>
-          <path d="M16 7V25M7 16H25" stroke="white" stroke-width="3" stroke-linecap="round"/>
-          <circle cx="16" cy="16" r="12" stroke="white" stroke-width="1.5" opacity="0.3"/>
-        </svg>
+        <i data-lucide="activity"></i>
       </div>
-      <span class="brand-text">Smart<span class="brand-accent">Doc</span></span>
+      <span class="brand-text">SmartDoc <span class="brand-accent">Med</span></span>
     </a>
 
     <!-- Desktop Nav -->
     <div class="navbar-links" [class.mobile-open]="mobileMenuOpen">
-      <ng-container *ngIf="!auth.isLoggedIn()">
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link" id="nav-home">Home</a>
-        <a routerLink="/login" routerLinkActive="active" class="nav-link" id="nav-login">Login</a>
+      <!-- Unauthenticated -->
+      <ng-container *ngIf="(auth.currentUser$ | async) === null">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">Home</a>
+        <a routerLink="/login" class="nav-link" id="nav-login">Login</a>
         <a routerLink="/register" class="btn btn-primary btn-sm" id="nav-signup">Sign Up</a>
       </ng-container>
 
-      <ng-container *ngIf="auth.isLoggedIn()">
-        <a [routerLink]="getDashboardLink()" routerLinkActive="active" class="nav-link" id="nav-dashboard">Dashboard</a>
-        <ng-container *ngIf="auth.getRole() === 'PATIENT'">
-          <a routerLink="/patient/questionnaire" routerLinkActive="active" class="nav-link" id="nav-find-doctor">Find Doctor</a>
-          <a routerLink="/patient/doctors" routerLinkActive="active" class="nav-link" id="nav-doctors">Doctors</a>
+      <!-- Authenticated -->
+      <ng-container *ngIf="auth.currentUser$ | async as user">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">Home</a>
+        
+        <!-- Patient Links -->
+        <ng-container *ngIf="user.role === 'PATIENT'">
+          <a routerLink="/patient/dashboard" routerLinkActive="active" class="nav-link">Dashboard</a>
+          <a routerLink="/patient/questionnaire" routerLinkActive="active" class="nav-link">Find Doctor</a>
         </ng-container>
-        <ng-container *ngIf="auth.getRole() === 'ADMIN'">
-          <a routerLink="/admin/users" routerLinkActive="active" class="nav-link" id="nav-users">Users</a>
-          <a routerLink="/admin/doctors" routerLinkActive="active" class="nav-link" id="nav-verify">Verification</a>
+
+        <!-- Doctor Links -->
+        <ng-container *ngIf="user.role === 'MEDECIN'">
+          <a routerLink="/doctor/dashboard" routerLinkActive="active" class="nav-link">Medical Dashboard</a>
         </ng-container>
+
+        <!-- Admin Links -->
+        <ng-container *ngIf="user.role === 'ADMIN'">
+          <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-link">Admin Dashboard</a>
+        </ng-container>
+
         <div class="nav-profile">
           <div class="profile-avatar" id="user-avatar">
-            {{ auth.getRole()?.charAt(0) }}
+            {{ user.role.charAt(0) }}
           </div>
-          <button class="btn btn-ghost btn-sm" (click)="auth.logout()" id="btn-logout">Logout</button>
+          <button class="btn btn-ghost btn-sm" (click)="auth.logout()" id="btn-logout">
+            <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>Logout
+          </button>
         </div>
       </ng-container>
     </div>
 
     <!-- Mobile Toggle -->
     <button class="mobile-toggle" (click)="toggleMenu()" id="mobile-menu-toggle">
-      <span [class.open]="mobileMenuOpen"></span>
-      <span [class.open]="mobileMenuOpen"></span>
-      <span [class.open]="mobileMenuOpen"></span>
+      <i data-lucide="menu" *ngIf="!mobileMenuOpen"></i>
+      <i data-lucide="x" *ngIf="mobileMenuOpen"></i>
     </button>
   </div>
 </nav>

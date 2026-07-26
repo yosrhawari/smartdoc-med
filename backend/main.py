@@ -5,7 +5,7 @@ from database import engine
 from fastapi.staticfiles import StaticFiles
 
 # routers
-from routers import users, medecins, rendezvous, reviews,test,admin,specialite,ai
+from routers import users, medecins, rendezvous, reviews,test,admin,specialite,ai, medical_records
 
 app = FastAPI()
 
@@ -34,3 +34,4 @@ app.include_router(reviews.router)
 app.include_router(admin.router)
 app.include_router(ai.router)
 app.include_router(specialite.router)
+app.include_router(medical_records.router)

@@ -1,0 +1,57 @@
+<div class="auth-page">
+  <div class="auth-container animate-fade-in-up">
+    <div class="status-card-modern">
+      <!-- ICON -->
+      <div class="status-icon-container">
+        <div class="logo-box-rounded">
+          <i data-lucide="shield-alert"></i>
+        </div>
+      </div>
+
+      <!-- HEADER -->
+      <div class="status-header-modern">
+        <h1>Verification in Progress</h1>
+        <div class="badge-pending-modern">
+          <span class="dot"></span>
+          PENDING APPROVAL
+        </div>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="status-content-modern">
+        <p class="status-text-modern">
+          Hello Dr. <strong>{{ authService.getUser()?.prenom }}</strong>, welcome to SmartDoc. Our administrative team is currently reviewing your medical credentials. This process typically takes 24-48 hours.
+        </p>
+        
+        <div class="stepper-modern">
+          <div class="step completed">
+            <div class="step-circle"><i data-lucide="check"></i></div>
+            <span class="step-label">REGISTERED</span>
+          </div>
+          <div class="step-line filled"></div>
+          <div class="step active">
+            <div class="step-circle"><i data-lucide="search"></i></div>
+            <span class="step-label">REVIEWING</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step disabled">
+            <div class="step-circle"><i data-lucide="lock"></i></div>
+            <span class="step-label">ACCESS</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="status-actions-modern">
+        <button class="btn-outline-modern" (click)="authService.logout()">
+          <i data-lucide="log-out"></i>
+          Log Out
+        </button>
+        <button class="btn-primary-modern" (click)="checkStatus()" [disabled]="checking">
+          <i data-lucide="refresh-cw" [class.animate-spin]="checking"></i>
+          Check Status
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,215 +1,100 @@
 <div class="auth-page">
   <div class="auth-container animate-fade-in-up">
+    <!-- LOGO -->
+    <div class="auth-logo-section">
+      <div class="logo-box">
+        <i data-lucide="pulse"></i>
+      </div>
+    </div>
 
     <!-- HEADER -->
     <div class="auth-header">
-      <a routerLink="/" class="auth-logo">
-        <svg width="40" height="40" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="8" fill="#2563EB" />
-          <path d="M16 7V25M7 16H25" stroke="white" stroke-width="3" />
-        </svg>
-      </a>
       <h1>Create Account</h1>
       <p>Join SmartDoc Med today</p>
     </div>
 
-    <!-- FORM -->
-    <form (ngSubmit)="onSubmit()" class="auth-form">
-
-      <!-- ROLE -->
-      <label>I am a</label>
-      <div class="role-selector">
-
-        <div class="role-option" [class.selected]="role === 'PATIENT'" (click)="selectRole('PATIENT')">
-          <div>🏥 Patient</div>
+    <!-- ROLE SELECTION -->
+    <div class="role-selection-section">
+      <label class="section-label">I am a...</label>
+      <div class="role-grid">
+        <div class="role-card" 
+             [class.selected]="role === 'PATIENT'"
+             (click)="selectRole('PATIENT')">
+          <div class="role-icon">
+            <i data-lucide="user"></i>
+          </div>
+          <div class="role-info">
+            <span class="role-title">Patient</span>
+            <span class="role-desc">Find and book doctors</span>
+          </div>
         </div>
-
-        <div class="role-option" [class.selected]="role === 'MEDECIN'" (click)="selectRole('MEDECIN')">
-          <div>🩺 Doctor</div>
-        </div>
-
-      </div>
-      <div class ="form-group">
-        <label>Nom</label>
-        <input type="text"
-               [(ngModel)]="nom"
-               name="nom"
-               class="form-control"
-               required>
-      </div>
-      <div class ="form-group">
-        <label>Prénom</label>
-        <input type="text"
-               [(ngModel)]="prenom"
-               name="prenom"
-               class="form-control"
-               required>
-      </div>
-
-      
-
-      <!-- EMAIL -->
-      <div class="form-group">
-        <label for="email">Email</label>
-        <div class="input-wrapper">
-          <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-            <polyline points="22,6 12,13 2,6" />
-          </svg>
-          <input type="email" [(ngModel)]="email" name="email" placeholder="Enter your email" class="form-control"
-            required>
+        <div class="role-card" 
+             [class.selected]="role === 'MEDECIN'"
+             (click)="selectRole('MEDECIN')">
+          <div class="role-icon">
+            <i data-lucide="stethoscope"></i>
+          </div>
+          <div class="role-info">
+            <span class="role-title">Doctor</span>
+            <span class="role-desc">Manage appointments</span>
+          </div>
         </div>
       </div>
-
-      <!-- PASSWORD -->
-      <div class="form-group">
-        <label>Password</label>
-        <div class="input-wrapper">
-          <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-            <path d="M7 11V7a5 5 0 0110 0v4" />
-          </svg>
-          <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" name="password" class="form-control"
-            placeholder="Enter your password" required>
-          <button type="button" class="password-toggle" (click)="togglePassword()">
-            <svg *ngIf="!showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-            <svg *ngIf="showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2">
-              <path
-                d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
-              <line x1="1" y1="1" x2="23" y2="23" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- CONFIRM -->
-      <div class="form-group">
-        <label>Confirm Password</label>
-        <div class="input-wrapper">
-          <!-- Icône Cadenas -->
-          <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-            <path d="M7 11V7a5 5 0 0110 0v4" />
-          </svg>
-
-          <!-- Champ Input -->
-          <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="confirmPassword" name="confirmPassword"
-            class="form-control" placeholder="Confirm your password" required>
-
-          <!-- Bouton Toggle Visibilité -->
-          <button type="button" class="password-toggle" (click)="togglePassword()">
-            <!-- Icône Œil (Masqué) -->
-            <svg *ngIf="!showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-            <!-- Icône Œil Barré (Affiché) -->
-            <svg *ngIf="showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2">
-              <path
-                d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
-              <line x1="1" y1="1" x2="23" y2="23" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- ================= DOCTOR SECTION ================= -->
-      <div *ngIf="role === 'MEDECIN'">
-
-        <h3>Doctor Profile</h3>
-
-        <div class="form-group mb-3">
-          <label class="form-label">Photo de profil</label>
-
-          <!-- faux champ stylé -->
-          <label for="fileUpload" class="form-control"
-            style="cursor: pointer; border-radius: 15px; min-height: 50px; display: flex; align-items: center; color: #6c757d;">
-            Choisir une image
-          </label>
-
-          <!-- input caché -->
-          <input type="file" id="fileUpload" (change)="onFileSelected($event)" style="display: none;"
-            accept="image/*" />
-        </div>
-
-
-        <!-- SPECIALITE -->
-        <div class="form-group">
-          <label>Spécialité</label>
-
-          <select [(ngModel)]="selectedSpecialite" name="selectedSpecialite" class="form-control">
-            <option value="" disabled selected hidden>-- Choisir --</option>
-
-            <option *ngFor="let sp of specialites" [value]="sp.nom">
-              {{ sp.nom }}
-            </option>
-
-            <option value="autre">Autre</option>
-
-          </select>
-        </div>
-
-        <!-- AUTRE -->
-        <div *ngIf="selectedSpecialite === 'autre'" class="form-group">
-          <label>Votre spécialité</label>
-
-          <input type="text" [(ngModel)]="autreSpecialite" name="autreSpecialite" class="form-control" required>
-        </div>
-
-        <!-- ADRESSE -->
-        <div class="form-group">
-          <label>Adresse</label>
-          <input type="text" [(ngModel)]="adresse" name="adresse" placeholder="entrer votre adresse"
-            class="form-control" required>
-        </div>
-
-        <!-- TARIF -->
-        <div class="form-group">
-          <label>Tarif</label>
-          <input type="number" [(ngModel)]="tarif" name="tarif" placeholder="entrer votre tarif" class="form-control"
-            required>
-        </div>
-
-        <!-- BIO -->
-        <div class="form-group">
-          <label>Bio</label>
-          <textarea [(ngModel)]="biographie" placeholder="entrer votre biographie" name="biographie"
-            class="form-control"></textarea>
-        </div>
-
-      </div>
-
-      <!-- ERROR -->
-      <div *ngIf="error" class="alert alert-error">
-        {{ error }}
-      </div>
-
-      <!-- SUCCESS -->
-      <div *ngIf="success" class="alert alert-success">
-        {{ success }}
-      </div>
-
-      <!-- BUTTON -->
-      <button type="submit" class="btn btn-primary">
-        {{ loading ? 'Loading...' : 'Create Account' }}
-      </button>
-
-    </form>
-
-    <!-- FOOTER -->
-    <div class="auth-footer">
-      <p>Already have account? <a routerLink="/login">Login</a></p>
     </div>
 
+    <!-- FORM -->
+    <form (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="grid-2">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" [(ngModel)]="prenom" name="prenom" class="form-control" placeholder="John" required>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" [(ngModel)]="nom" name="nom" class="form-control" placeholder="Doe" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" [(ngModel)]="email" name="email" class="form-control" placeholder="your@email.com" required>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" [(ngModel)]="password" name="password" class="form-control" placeholder="••••••••" required>
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" class="form-control" placeholder="••••••••" required>
+        </div>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <input type="checkbox" id="terms" [(ngModel)]="agreeToTerms" name="terms" required>
+        <label for="terms">I agree to the <a href="#">Terms</a></label>
+      </div>
+
+      <!-- MESSAGES -->
+      <div *ngIf="error" class="error-box animate-fade-in">
+        <i data-lucide="alert-circle"></i>
+        <span>{{ error }}</span>
+      </div>
+
+      <div *ngIf="success" class="success-box animate-fade-in">
+        <i data-lucide="check-circle"></i>
+        <span>{{ success }}</span>
+      </div>
+
+      <button type="submit" class="btn-auth-submit" [disabled]="loading">
+        <span *ngIf="!loading">Create Account</span>
+        <i data-lucide="loader-2" *ngIf="loading" class="animate-spin"></i>
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a routerLink="/login">Sign in</a></p>
+    </div>
   </div>
 </div>

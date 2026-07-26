@@ -1,186 +1,196 @@
 .auth-page {
-  min-height: calc(100vh - 70px);
+  min-height: 100vh;
+  background-color: #f8fafc;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #EFF6FF 0%, #F8FAFC 50%, #F0FDF4 100%);
-  padding: 40px 20px;
+  padding: 2rem;
+  font-family: 'Inter', sans-serif;
 }
 
 .auth-container {
-  background: var(--surface);
-  border-radius: var(--radius-xl);
-  padding: 48px 40px;
   width: 100%;
-  max-width: 440px;
-  box-shadow: var(--shadow-xl);
-  border: 1px solid var(--border);
+  max-width: 480px;
+}
+
+.auth-logo-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.logo-box {
+  width: 3.5rem;
+  height: 3.5rem;
+  background: linear-gradient(135deg, #3b82f6, #2dd4bf);
+  color: white;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
 .auth-header {
   text-align: center;
-  margin-bottom: 32px;
-}
-
-.auth-logo {
-  display: inline-block;
-  margin-bottom: 20px;
+  margin-bottom: 2.5rem;
 }
 
 .auth-header h1 {
-  font-size: 1.8rem;
-  margin-bottom: 8px;
-  letter-spacing: -0.5px;
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+  font-family: 'Outfit', sans-serif;
 }
 
 .auth-header p {
-  color: var(--text-muted);
-  font-size: 0.95rem;
+  color: #64748b;
+  font-size: 1rem;
 }
 
-.auth-form .form-group {
-  margin-bottom: 20px;
+.auth-card {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  border: 1px solid #f1f5f9;
 }
 
-.input-wrapper {
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.5rem;
+}
+
+.input-with-icon {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
-.input-icon {
+.input-with-icon i:first-child {
   position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-  pointer-events: none;
+  left: 1rem;
+  color: #94a3b8;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
-.input-wrapper .form-control {
-  padding-left: 44px;
-  padding-right: 44px;
+.form-control {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 3rem;
+  border: 1.5px solid #f1f5f9;
+  border-radius: 0.75rem;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  color: #1e293b;
+  background: #f8fafc;
+  transition: all 0.2s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 .password-toggle {
   position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+  right: 1rem;
   background: none;
-  color: var(--text-muted);
-  padding: 4px;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
   display: flex;
   align-items: center;
+  padding: 0.25rem;
 }
 
 .password-toggle:hover {
-  color: var(--text-secondary);
+  color: #3b82f6;
 }
 
-.alert {
+.btn-auth-submit {
+  width: 100%;
+  padding: 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  border-radius: var(--radius-md);
-  font-size: 0.85rem;
-  margin-bottom: 20px;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
 }
 
-.alert-error {
-  background: var(--danger-light);
-  color: var(--danger);
-  border: 1px solid rgba(239, 68, 68, .2);
+.btn-auth-submit:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
-.btn-full {
-  width: 100%;
-  padding: 14px;
-  font-size: 1rem;
+.btn-auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.spinner {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255,255,255,.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.error-box {
+  background: #fff1f2;
+  border: 1px solid #ffe4e6;
+  color: #e11d48;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .auth-footer {
   text-align: center;
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid var(--border);
-}
-
-.auth-footer p {
-  color: var(--text-muted);
-  font-size: 0.9rem;
+  margin-top: 2rem;
+  font-size: 0.875rem;
+  color: #64748b;
 }
 
 .auth-footer a {
-  color: var(--primary);
-  font-weight: 600;
-  transition: var(--transition-fast);
+  color: #3b82f6;
+  font-weight: 700;
+  text-decoration: none;
 }
 
-.auth-footer a:hover {
-  text-decoration: underline;
-}
-
-/* Role Selection */
-.role-selector {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.role-option {
-  padding: 16px;
-  border: 2px solid var(--border);
-  border-radius: var(--radius-lg);
-  text-align: center;
-  cursor: pointer;
-  transition: var(--transition);
-  background: var(--surface);
-}
-
-.role-option:hover {
-  border-color: var(--primary-light);
-  background: var(--primary-light);
-}
-
-.role-option.selected {
-  border-color: var(--primary);
-  background: var(--primary-light);
-}
-
-.role-option .role-icon {
-  font-size: 1.8rem;
-  margin-bottom: 8px;
-}
-
-.role-option .role-label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--text);
-}
-
-.role-option .role-desc {
+.ssl-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2.5rem;
+  color: #94a3b8;
   font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-top: 4px;
+  font-weight: 500;
 }
 
-@media (max-width: 480px) {
-  .auth-container {
-    padding: 32px 24px;
-  }
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }

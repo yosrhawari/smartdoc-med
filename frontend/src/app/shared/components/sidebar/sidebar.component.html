@@ -1,13 +1,21 @@
-<aside class="sidebar" [class.collapsed]="collapsed" id="dashboard-sidebar">
+<aside class="sidebar" [class.collapsed]="collapsed">
   <div class="sidebar-header">
-    <h3 *ngIf="!collapsed">{{ title }}</h3>
-    <button class="collapse-btn" (click)="toggleCollapse()" id="sidebar-toggle">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline *ngIf="!collapsed" points="15 18 9 12 15 6"></polyline>
-        <polyline *ngIf="collapsed" points="9 18 15 12 9 6"></polyline>
-      </svg>
+    <div class="header-content-wrapper" (click)="navigateDashboard()" [class.collapsed]="collapsed">
+      <div class="header-content" *ngIf="!collapsed">
+        <div class="header-icon">
+          <i data-lucide="shield-plus"></i>
+        </div>
+        <h3>{{ title }}</h3>
+      </div>
+      <div class="header-icon" *ngIf="collapsed">
+        <i data-lucide="shield-plus"></i>
+      </div>
+    </div>
+    <button class="collapse-btn" (click)="toggleCollapse()" [title]="collapsed ? 'Expand' : 'Collapse'">
+      <i [attr.data-lucide]="collapsed ? 'chevron-right' : 'chevron-left'"></i>
     </button>
   </div>
+
 
   <nav class="sidebar-nav">
     <a *ngFor="let item of items"
@@ -16,8 +24,20 @@
        [routerLinkActiveOptions]="{exact: true}"
        class="sidebar-link"
        [title]="item.label">
-      <span class="sidebar-icon" [innerHTML]="item.icon"></span>
+      <div class="link-icon">
+        <i [attr.data-lucide]="item.icon"></i>
+      </div>
       <span class="sidebar-label" *ngIf="!collapsed">{{ item.label }}</span>
+      <div class="active-indicator" *ngIf="!collapsed"></div>
     </a>
   </nav>
+
+  <div class="sidebar-footer">
+    <button class="logout-btn" (click)="logout()" [title]="collapsed ? 'Sign Out' : ''">
+      <div class="link-icon">
+        <i data-lucide="log-out"></i>
+      </div>
+      <span class="sidebar-label" *ngIf="!collapsed">Sign Out</span>
+    </button>
+  </div>
 </aside>

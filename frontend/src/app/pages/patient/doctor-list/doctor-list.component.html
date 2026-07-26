@@ -1,74 +1,137 @@
-<div class="dashboard-layout">
-  <app-sidebar [items]="sidebarItems" title="Patient"></app-sidebar>
-
+<div class="doctor-list-page">
   <main class="dashboard-main">
-    <div class="page-header">
-      <h1>All Doctors</h1>
-      <p class="subtitle">Find and book your next appointment</p>
-    </div>
+    <header class="page-header animate-fade-in-up">
+      <a routerLink="/patient/dashboard" class="back-link">
+        <i data-lucide="arrow-left"></i>
+        Back to Dashboard
+      </a>
+      <h1>Recommended Doctors</h1>
+      <p class="subtitle">Based on your symptoms and preferences</p>
+    </header>
 
-    <!-- Doctors Grid -->
-    <div class="doctors-grid" *ngIf="filteredDoctors.length > 0">
-      <div *ngFor="let doctor of $any(filteredDoctors)" class="doctor-card-modern">
-        
-        <!-- Verified Badge -->
-        <div class="card-status-badge">
-           <span class="badge-verified">★ VERIFIED</span>
+    <div class="list-layout">
+      <!-- Filters Sidebar -->
+      <aside class="filters-sidebar animate-fade-in-up">
+        <div class="filter-header">
+          <i data-lucide="filter"></i>
+          <h3>Filters</h3>
         </div>
 
-        <div class="doctor-card-content">
-          <!-- Image Box avec fix path et error handler -->
-          <div class="doctor-img-box">
-             <img [src]="doctor.image ? 'http://localhost:8000/uploads/' + doctor.image : 'assets/images/default-avatar.png'" 
-                  class="avatar-img-modern" 
-                  alt="Doctor"
-                  (error)="$any($event.target).src = 'assets/images/default-avatar.png'"> 
-          </div>
-
-          <div class="doctor-info-box">
-            <h3 class="doctor-name">Dr. {{ doctor.nom }} {{ doctor.prenom }}</h3>
-            <p class="doctor-specialty">{{ doctor.specialite || 'Generalist' }}</p>
-            
-            <div class="doctor-stats-container">
-               <div class="stat-item">
-                  <span class="stat-icon">⭐</span>
-                  <span class="stat-value">{{ doctor.note_moyenne || 0 }}</span>
-               </div>
-               <div class="stat-item">
-                  <span class="stat-icon">💰</span>
-                  <span class="stat-value">{{ doctor.tarif > 0 ? doctor.tarif + ' DT' : '0 DT' }}</span>
-               </div>
-            </div>
-
-            <div class="doctor-location">
-              <span class="loc-icon">📍</span>
-              <span class="loc-text">{{ doctor.adresse || 'Tunis, Tunisie' }}</span>
-            </div>
+        <div class="filter-group">
+          <label>Search Name</label>
+          <div class="search-box">
+            <i data-lucide="search"></i>
+            <input 
+              type="text" 
+              [(ngModel)]="searchName" 
+              (ngModelChange)="applyFilters()"
+              placeholder="Doctor name...">
           </div>
         </div>
 
-        <div class="doctor-card-footer">
-          <button (click)="selectedDoctor = doctor" class="btn-view-profile">View Profile</button>
-          <a [routerLink]="['/patient/book', doctor.id]" class="btn-book-now">Book Now</a>
+        <div class="filter-group">
+          <label>Specialty</label>
+          <select [(ngModel)]="selectedSpecialty" (change)="applyFilters()" class="filter-select">
+            <option value="">All Specialties</option>
+            <option *ngFor="let spec of specialties" [value]="spec">{{ spec }}</option>
+          </select>
         </div>
-      </div>
+
+        <div class="filter-group">
+          <label>Price Range (DT)</label>
+          <div class="price-range">
+            <input type="number" [(ngModel)]="minPrice" (ngModelChange)="applyFilters()" placeholder="Min">
+            <input type="number" [(ngModel)]="maxPrice" (ngModelChange)="applyFilters()" placeholder="Max">
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label>Sort By</label>
+          <select [(ngModel)]="sortBy" (change)="applyFilters()" class="filter-select">
+            <option value="default">Default</option>
+            <option value="rating">Top Rated</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+          </select>
+        </div>
+
+        <button class="btn-clear" (click)="clearFilters()">
+          <i data-lucide="refresh-cw"></i> Clear All
+        </button>
+      </aside>
+
+      <!-- Main Content -->
+      <section class="results-content">
+        <div class="results-header">
+          <h2>Available Doctors</h2>
+          <span class="results-count">{{ filteredDoctors.length }} results found</span>
+        </div>
+
+        <div class="doctors-grid" *ngIf="filteredDoctors.length > 0">
+          <div class="doctor-card animate-fade-in-up" *ngFor="let doctor of filteredDoctors">
+            <div class="doctor-card-main">
+              <!-- Gradient Avatar -->
+              <div class="avatar-container">
+                <img *ngIf="doctor.image" [src]="'http://localhost:8000/uploads/' + doctor.image" class="avatar-image">
+                <div *ngIf="!doctor.image" class="avatar-gradient" [style.background]="'linear-gradient(135deg, #3b82f6 0%, #10b981 100%)'">
+                  {{ (doctor.prenom?.charAt(0) || doctor.nom?.charAt(0) || 'D') | uppercase }}
+                </div>
+              </div>
+
+              <!-- Doctor Info -->
+              <div class="doctor-info">
+                <h3 class="doctor-name">Dr. {{ doctor.nom }} {{ doctor.prenom }}</h3>
+                <p class="doctor-specialty">{{ doctor.specialite || 'Generalist' }}</p>
+                <div class="doctor-rating">
+                  <div class="stars">
+                    <i data-lucide="star" *ngFor="let filled of getStarArray(doctor.note_moyenne || 0)" 
+                       [class.filled]="filled"></i>
+                  </div>
+                  <span class="rating-text">
+                    <strong>{{ doctor.note_moyenne || 0 | number:'1.1-1' }}</strong> 
+                    ({{ doctor.nombre_reviews || 0 }} reviews)
+                  </span>
+                </div>
+                <div class="doctor-location">
+                  <i data-lucide="map-pin"></i>
+                  <span>{{ doctor.adresse || 'Tunis, Tunisie' }}</span>
+                </div>
+              </div>
+
+              <!-- Price -->
+              <div class="doctor-price">
+                <div class="price-value">{{ doctor.tarif | number:'1.1-1' }} DT</div>
+                <div class="price-label">PER VISIT</div>
+              </div>
+            </div>
+
+            <div class="doctor-card-actions">
+              <button class="btn-action-outline" (click)="selectedDoctor = doctor">View Profile & Book</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state card animate-fade-in" *ngIf="filteredDoctors.length === 0">
+          <i data-lucide="user-x"></i>
+          <h3>No Doctors Found</h3>
+          <p>Try adjusting your filters or search criteria.</p>
+        </div>
+      </section>
     </div>
 
-    <!-- Empty State -->
-    <div *ngIf="filteredDoctors.length === 0" class="empty-state">
-       <p>No doctors found matching your criteria.</p>
-    </div>
-
-    <!-- Modal Profile Detail (Fix: Use selectedDoctor instead of doctor) -->
+    <!-- Modal Profile Detail -->
     <div *ngIf="selectedDoctor" class="profile-overlay" (click)="selectedDoctor = null">
-      <div class="profile-modal" (click)="$event.stopPropagation()">
+      <div class="profile-modal animate-fade-in" (click)="$event.stopPropagation()">
         <button class="close-modal" (click)="selectedDoctor = null">&times;</button>
         
         <div class="modal-header">
-          <!-- Hna el fix mta' el property 'doctor' error -->
-          <img [src]="selectedDoctor.image ? 'http://localhost:8000/uploads/' + selectedDoctor.image : 'assets/images/default-avatar.jpg'" 
-               class="modal-avatar"
-               (error)="$any($event.target).src = 'assets/images/default-avatar.jpg'">
+          <div class="avatar-container-large">
+            <img *ngIf="selectedDoctor.image" [src]="'http://localhost:8000/uploads/' + selectedDoctor.image" class="avatar-image-large">
+            <div *ngIf="!selectedDoctor.image" class="avatar-gradient-large">
+              {{ (selectedDoctor.prenom?.charAt(0) || 'D') | uppercase }}
+            </div>
+          </div>
           <div class="modal-title-box">
             <h2>Dr. {{ selectedDoctor.nom }} {{ selectedDoctor.prenom }}</h2>
             <span class="modal-spec">{{ selectedDoctor.specialite || 'Specialist' }}</span>
@@ -77,12 +140,23 @@
         </div>
 
         <div class="modal-body">
-          <div class="detail-row"><strong>Address:</strong> {{ selectedDoctor.adresse || 'Not specified' }}</div>
-          <div class="detail-row"><strong>Price:</strong> {{ selectedDoctor.tarif || 0 }} DT</div>
-          <div class="detail-row"><strong>Rating:</strong> ⭐ {{ selectedDoctor.note_moyenne || 0 }}/5</div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Address</label>
+              <p>{{ selectedDoctor.adresse || 'Not specified' }}</p>
+            </div>
+            <div class="detail-item">
+              <label>Price</label>
+              <p>{{ selectedDoctor.tarif || 0 }} DT</p>
+            </div>
+            <div class="detail-item">
+              <label>Rating</label>
+              <p>⭐ {{ selectedDoctor.note_moyenne || 0 }}/5 ({{ selectedDoctor.nombre_reviews || 0 }} reviews)</p>
+            </div>
+          </div>
           <div class="detail-bio">
             <h4>About</h4>
-            <p>Dedicated medical professional with years of experience in {{ selectedDoctor.specialite || 'healthcare' }}.</p>
+            <p>{{ selectedDoctor.biographie || 'Dedicated medical professional with years of experience in ' + (selectedDoctor.specialite || 'healthcare') + '.' }}</p>
           </div>
         </div>
 
