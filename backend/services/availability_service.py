@@ -4,7 +4,7 @@ from models import RendezVous
 
 def get_next_available(medecin_id: int, session: Session):
 
-    now = datetime.now()
+    now = datetime.utcnow()
 
     # 🔹 horaires de travail (modifiable)
     start_hour = 9
@@ -26,7 +26,8 @@ def get_next_available(medecin_id: int, session: Session):
                     (RendezVous.medecin_id == medecin_id) &
                     (RendezVous.date == day) &
                     (RendezVous.heure == slot_time) &
-                    (RendezVous.statut != "ANNULE")
+                    (RendezVous.statut != "ANNULE") &
+                    (RendezVous.statut != "REFUSE")
                 )
             ).first()
 

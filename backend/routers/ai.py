@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from sqlmodel import Session,select
 from database import get_session
 from services.ai_service import detect_specialite
-from models import ProfilMedecin, User,ProfilMedecin, RendezVous, Review,Specialite
+from models import ProfilMedecin, User, Specialite
 from schemas import SymptomeInput
 from services.availability_service import get_next_available
 

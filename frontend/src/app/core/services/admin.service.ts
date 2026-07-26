@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from './api.service';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
@@ -25,9 +24,13 @@ export interface User {
   providedIn: 'root'
 })
 export class AdminService {
+  
   private API = 'http://localhost:8000';
 
   constructor(private http: HttpClient) {}
+   getAllDoctors(): Observable<any[]> {
+     return this.http.get<any[]>(`${this.API}/admin/pending`);
+}
 
   getStats(): Observable<PlatformStats> {
     return this.http.get<PlatformStats>(`${this.API}/admin/stats`);
@@ -38,6 +41,11 @@ export class AdminService {
   }
 
   getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.API}/users/`);
+    return this.http.get<User[]>(`${this.API}/admin/users`);
   }
+
+  getPendingDoctors(): Observable<any> {
+    return this.http.get<any>(`${this.API}/admin/get_pending_medecins`);
+  }
+  
 }

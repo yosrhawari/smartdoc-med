@@ -1,20 +1,20 @@
 from sqlmodel import Session, select
 from models import Specialite, ProfilMedecin, RendezVous, Review
+from services.availability_service import get_next_available
 
 
 def find_medecins_by_symptome(symptome: str, session: Session):
 
-    # récupérer spécialités el kol
     specialites = session.exec(select(Specialite)).all()
 
     matched_specialites = []
 
-    # matching aadyy
     for spec in specialites:
-        mots = spec.mots_cles.lower().split(",")
+        mots_cles = (spec.mots_cles or "").lower().split(",")
+        mots = [m.strip() for m in mots_cles if m.strip()]
 
         for mot in mots:
-            if mot.strip() in symptome.lower():
+            if mot in symptome.lower():
                 matched_specialites.append(spec.id)
                 break
 
@@ -40,9 +40,9 @@ def find_medecins_advanced(symptome: str, session: Session):
 
     matched = []
 
-    # 1. Calcul score de matching
     for spec in specialites:
-        mots = [m.strip().lower() for m in spec.mots_cles.split(",")]
+        mots_cles = (spec.mots_cles or "").lower().split(",")
+        mots = [m.strip() for m in mots_cles if m.strip()]
 
         score = 0
         for mot in mots:
@@ -86,11 +86,12 @@ def find_medecins_advanced(symptome: str, session: Session):
 
             moyenne = sum(notes) / len(notes) if notes else 0
 
-            # score final
-            final_score = item["score"] * 2 + moyenne
+            max_possible_score = max(item["score"] for item in matched) if matched else 1
+            normalized_score = item["score"] / max_possible_score
+            final_score = normalized_score * 5 + moyenne
 
-            from services.availability_service import get_next_available
-            spec_name = session.get(Specialite, med.specialite_id).nom if med.specialite_id else "Médecin"
+            spec_obj = session.get(Specialite, med.specialite_id)
+            spec_name = spec_obj.nom if spec_obj else "Médecin"
 
             results.append({
                 "medecin_id": med.id,
@@ -98,7 +99,7 @@ def find_medecins_advanced(symptome: str, session: Session):
                 "prenom": med.prenom,
                 "specialite": spec_name,
                 "tarif": med.tarif,
-                "est_disponible": getattr(med, "est_disponible", True),
+                "est_disponible": getattr(med, "est_disponible", False),
                 "prochain_rdv": get_next_available(med.id, session),
                 "adresse": med.adresse,
                 "score_matching": item["score"],
@@ -106,7 +107,6 @@ def find_medecins_advanced(symptome: str, session: Session):
                 "score_final": round(final_score, 2)
             })
 
-    # 3. TRI FINAL
     results.sort(key=lambda x: x["score_final"], reverse=True)
 
     return results

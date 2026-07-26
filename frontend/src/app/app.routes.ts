@@ -3,7 +3,6 @@ import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
-  // Landing
   {
     path: '',
     loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent)
@@ -87,6 +86,12 @@ export const routes: Routes = [
   {
     path: 'admin/doctors',
     loadComponent: () => import('./pages/admin/doctors/doctors.component').then(m => m.AdminDoctorsComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { role: 'ADMIN' }
+  },
+  {
+    path: 'admin/doctor/:id',
+    loadComponent: () => import('./pages/patient/doctor-profile/doctor-profile.component').then(m => m.DoctorProfileComponent),
     canActivate: [authGuard, roleGuard],
     data: { role: 'ADMIN' }
   },

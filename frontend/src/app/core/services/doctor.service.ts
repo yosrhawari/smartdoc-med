@@ -113,4 +113,12 @@ export class DoctorService {
   updateMyProfile(data: any): Observable<any> {
     return this.http.put(`${this.API}/medecins/me/update`, data);
   }
+
+  uploadProfileImage(formData: FormData): Observable<any> {
+    return this.http.post(`${this.API}/medecins/upload-image`, formData);
+  }
+
+  getPendingDoctors(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API}/admin/medecins/pending`);
+  }
 }

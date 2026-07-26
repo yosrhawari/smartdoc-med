@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from './api.service';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
@@ -30,10 +29,10 @@ export class AppointmentService {
   }
 
   createAppointment(data: { medecin_id: number; date: string; heure: string }) {
-  return this.http.post('http://localhost:8000/rendezvous/create', data);
+  return this.http.post(`${this.API}/rendezvous/create`, data);
 }
 
   updateStatus(id: number, status: string): Observable<any> {
-    return this.http.put(`${this.API}/rendezvous/${id}/status`, null);
+    return this.http.put(`${this.API}/rendezvous/${id}/status?status=${status}`, null);
   }
 }

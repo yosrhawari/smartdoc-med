@@ -11,11 +11,11 @@ router = APIRouter(prefix="/reviews", tags=["Reviews"])
 # CREATE REVIEW
 @router.post("/")
 def create_review(
-    review: Review,
+    review_data: ReviewCreate,
     session: Session = Depends(get_session),
     user = Depends(require_role("PATIENT"))
 ):
-    rdv = session.get(RendezVous, review.rendezvous_id)
+    rdv = session.get(RendezVous, review_data.rendezvous_id)
 
     if not rdv or rdv.statut != "TERMINE":
         raise HTTPException(status_code=400, detail="RDV not valid")
@@ -28,6 +28,11 @@ def create_review(
     if existing:
         raise HTTPException(status_code=400, detail="Already reviewed")
 
+    review = Review(
+        rendezvous_id=review_data.rendezvous_id,
+        note=review_data.note,
+        commentaire=review_data.commentaire
+    )
     session.add(review)
     session.commit()
     session.refresh(review)

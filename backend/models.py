@@ -38,17 +38,16 @@ class ProfilMedecin(SQLModel, table=True):
 # RENDEZ-VOUS
 class RendezVous(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    patient_id: int
-    medecin_id: int
+    patient_id: int = Field(foreign_key="users.id")
+    medecin_id: int = Field(foreign_key="profilmedecin.id")
     date: date
     heure: time
-    statut: str = "prevu"
+    statut: str = "PREVU"
 
 
-# REVIEW
 class Review(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    rendezvous_id: int
+    rendezvous_id: int = Field(foreign_key="rendezvous.id")
     note: int
     commentaire: str
     reponse_medecin: Optional[str] = None

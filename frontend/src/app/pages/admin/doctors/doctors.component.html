@@ -1,59 +1,109 @@
 <div class="dashboard-layout">
   <app-sidebar [items]="sidebarItems" title="Admin"></app-sidebar>
+
   <main class="dashboard-main">
+
     <div class="page-header animate-fade-in-up">
       <h1 id="admin-doctors-title">Doctor Verification</h1>
       <p class="subtitle">Review and approve doctor registrations</p>
     </div>
 
+    <!-- LOADING -->
     <div *ngIf="loading" class="loading-state">
       <div class="spinner-lg"></div>
     </div>
 
-    <div *ngIf="!loading" class="doctors-list animate-fade-in-up">
-      <div *ngFor="let doc of allDoctors" class="verification-card">
+    <!-- LIST CONTAINER WITH SCROLL -->
+    <div *ngIf="!loading" class="doctors-list animate-fade-in-up" 
+         style="max-height: 500px; overflow-y: auto; padding-right: 10px; border-bottom: 2px solid #eee; margin-bottom: 20px;">
+
+      <div *ngFor="let doc of allDoctors"
+           class="verification-card"
+           [class.active-card]="selectedDoctor?.id === doc.id"
+           (click)="selectedDoctor = doc"> <!-- Houni bech ya3ref anaho el medecin elli nzelet 3lih -->
+
+        <!-- HEADER -->
         <div class="verify-header">
+          <!-- AVATAR -->
           <div class="doctor-avatar-verify">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <img
+              *ngIf="doc?.image; else defaultIcon"
+              [src]="'http://localhost:8000/uploads/' + doc.image"
+              class="avatar-img"
+            />
+            <ng-template #defaultIcon>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </ng-template>
           </div>
+
+          <!-- INFO -->
           <div class="verify-info">
-            <h3>Doctor #{{ doc.id }}</h3>
-            <p>User ID: {{ doc.user_id }} · Specialty: {{ doc.specialite_id }}</p>
+            <h3>Dr. {{ doc.nom }} {{ doc.prenom }}</h3>
+            <p class="specialite-text">⚕️ {{ doc.specialite }}</p>
+            <p>📍 {{ doc.adresse }}</p>
           </div>
+
+          <!-- STATUS -->
           <span class="badge" [ngClass]="getStatusClass(doc.statut_validation)">
             {{ getStatusLabel(doc.statut_validation) }}
-          </span><!-- afficher le statut de validation du docteur (VALIDE, EN_ATTENTE, REJETE) avec une classe CSS différente pour chaque statut (ex: badge-validated, badge-pending, badge-rejected) --> 
-        </div>
-
-        <div class="verify-details">
-          <div class="detail-chip">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            {{ doc.adresse }}
-          </div>
-          <div class="detail-chip">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-            {{ doc.tarif }} DH
-          </div>
-        </div>
-
-        <div class="verify-actions" *ngIf="doc.statut_validation !== 'VALIDE'">
-          <button class="btn btn-accent btn-sm" (click)="validateDoctor(doc.id!)" [id]="'btn-verify-' + doc.id">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            Approve
-          </button>
-        </div>
-        <div class="verify-actions" *ngIf="doc.statut_validation === 'VALIDE'">
-          <span class="verified-text">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            Verified
           </span>
+        </div>
+
+        <!-- DETAILS CHIPS -->
+        <div class="verify-details">
+          <div class="detail-chip">💰 {{ doc.tarif }} DT</div>
+          <div class="detail-chip">📞 Click to see full info</div>
         </div>
       </div>
 
+      <!-- EMPTY STATE -->
       <div *ngIf="allDoctors.length === 0" class="empty-state">
         <h3>No Doctors to Verify</h3>
         <p>All doctors have been reviewed</p>
       </div>
     </div>
+
+    <!-- 🔥 PANEL DETAILS : Ma yodhor ken ki tenzel 3ala medecin -->
+    <div *ngIf="selectedDoctor" class="profile-detail-panel animate-fade-in-up" 
+         style="background: white; border: 2px solid #3b82f6; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+      
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: #1e293b;">📋 Full Profile Review</h2>
+        <button class="btn btn-sm" (click)="selectedDoctor = null" style="background: #ef4444; color: white;">Close X</button>
+      </div>
+
+      <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+        <!-- Photo en grand -->
+        <img [src]="'http://localhost:8000/uploads/' + selectedDoctor.image" 
+             style="width: 150px; height: 150px; border-radius: 15px; object-fit: cover; border: 4px solid #f1f5f9;">
+
+        <div style="flex: 1; min-width: 300px;">
+          <h3 style="margin-top: 0;">Dr. {{ selectedDoctor.nom }} {{ selectedDoctor.prenom }}</h3>
+          <p><strong>Specialty:</strong> {{ selectedDoctor.specialite }}</p>
+          <p><strong>Address:</strong> {{ selectedDoctor.adresse }}</p>
+          <p><strong>Tarif:</strong> {{ selectedDoctor.tarif }} DT</p>
+          <div style="background: #f8fafc; padding: 15px; border-radius: 10px; margin-top: 10px;">
+            <p><strong>Biography:</strong></p>
+            <p style="font-style: italic; color: #64748b;">{{ selectedDoctor.biographie || 'No biography provided.' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIONS IN PANEL -->
+      <div class="verify-actions" style="margin-top: 25px; display: flex; gap: 15px; justify-content: flex-end;">
+        <button *ngIf="selectedDoctor.statut_validation !== 'VALIDE'" 
+                class="btn btn-accent" 
+                (click)="validateDoctor(selectedDoctor.id!)">
+          ✔ Approve Doctor Account
+        </button>
+        <span *ngIf="selectedDoctor.statut_validation === 'VALIDE'" class="verified-text" style="color: green; font-weight: bold; font-size: 1.2rem;">
+          ✔ This Doctor is already Verified
+        </span>
+      </div>
+    </div>
+
   </main>
 </div>

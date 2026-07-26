@@ -84,53 +84,53 @@
         <div *ngIf="!searching && results.length > 0" class="results-grid">
           <div *ngFor="let doc of results; let i = index" class="doctor-result-card" [style.animation-delay]="(i * 0.1) + 's'">
             <div class="result-header">
-              <div class="doctor-avatar-sm">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <!-- Taswira mta' el tbib -->
+              <div class="doctor-avatar-container">
+                <img [src]="doc.image ? 'http://localhost:8000/uploads/' + doc.image : 'assets/images/default-avatar.jpg'" 
+         alt="Doctor" 
+         class="avatar-img-round"
+         (error)="$any($event.target).src = 'assets/images/default-avatar.jpg'"> 
+         <!-- el error line hedhi bech ken el backend path ghalat, i-hot el default direct -->
+ 
               </div>
-              <div class="doc-info">
-                <h4 class="name" style="margin: 0; font-size: 1.2rem; color: var(--text-dark); font-weight: 600;">
-                  {{ doc.nom ? ('Dr. ' + doc.nom + ' ' + doc.prenom) : ('Doctor #' + doc.medecin_id) }}
-                </h4>
-                <p class="specialty" style="margin: 4px 0 0; font-size: 0.9rem; color: var(--primary); font-weight: 500;">
-                  {{ doc.specialite || 'General Physician' }}
-                </p>
-                <p class="location" style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-muted);">
-                  📍 {{ doc.adresse }}
-                </p>
+              
+              <div class="doctor-meta">
+                <h3>Dr. {{ doc.prenom }} {{ doc.nom }}</h3>
+                <p class="location">📍 {{ doc.adresse }}</p>
               </div>
+
               <div class="match-score">
-                <span class="score-value">{{ doc.score_final }}</span>
-                <span class="score-label">MATCH</span>
+                <span class="score-value">{{ doc.score }}</span>
+                <span class="score-label">Match</span>
               </div>
             </div>
-            <div class="result-details" style="display: flex; gap: 24px; padding: 16px; background: rgba(248, 250, 252, 0.5); border-radius: 8px; margin: 16px 0;">
-              <div class="detail-item" style="flex: 1;">
-                <span class="detail-label" style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; letter-spacing: 0.05em;">Rating</span>
-                <div class="stars" style="display: flex; align-items: center; gap: 4px;">
-                  <svg *ngFor="let filled of getStarArray(doc.note_moyenne)"
-                       width="16" height="16" viewBox="0 0 24 24"
+
+            <div class="result-details">
+              <div class="detail-item">
+                <span class="detail-label">Rating</span>
+                <div class="stars">
+                  <svg *ngFor="let filled of getStarArray(doc.note_moyenne || 5)"
+                       width="14" height="14" viewBox="0 0 24 24"
                        [attr.fill]="filled ? '#F59E0B' : 'none'"
                        [attr.stroke]="filled ? '#F59E0B' : '#CBD5E1'" stroke-width="2">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                   </svg>
-                  <span class="rating-text" style="margin-left: 4px; font-weight: 600; color: var(--text-dark);">{{ doc.note_moyenne }}/5</span>
+                  <span class="rating-text">{{ doc.note_moyenne || 5 }}/5</span>
                 </div>
               </div>
-              <div class="detail-item" style="flex: 1;">
-                <span class="detail-label" style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; letter-spacing: 0.05em;">Symptom Match</span>
-                <span class="detail-value" style="font-weight: 600; color: var(--text-dark);">{{ doc.score_matching }} keywords</span>
-              </div>
-              <div class="detail-item" style="flex: 1;">
-                <span class="detail-label" style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; letter-spacing: 0.05em;">Tarif</span>
-                <span class="detail-value" style="font-weight: 600; color: var(--text-dark);">{{ doc.tarif || 0 }} DT</span>
+              <div class="detail-item">
+                <span class="detail-label">Specialty</span>
+                <span class="detail-value highlight">{{ aiAnalysis?.specialite }}</span>
               </div>
             </div>
-            <button class="btn btn-primary btn-sm btn-full-width" (click)="bookDoctor(doc.medecin_id)">
+            
+            <button class="btn btn-primary btn-sm btn-full-width" (click)="bookDoctor(doc.id)">
               Book Appointment
             </button>
           </div>
         </div>
 
+        <!-- Empty State -->
         <div *ngIf="!searching && results.length === 0" class="empty-state">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <h3>No Doctors Found</h3>

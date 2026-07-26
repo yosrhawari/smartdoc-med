@@ -59,7 +59,7 @@ def register(user: UserCreate, session: Session = Depends(get_session)):
 
     except Exception as e:
         session.rollback()
-        raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
+        raise HTTPException(status_code=500, detail="Erreur interne lors de la création")
 # LOGIN
 @router.post("/login")
 def login(data: LoginSchema, session: Session = Depends(get_session)):
@@ -79,5 +79,4 @@ def login(data: LoginSchema, session: Session = Depends(get_session)):
         "role": user.role
     })
 
-    print(hash_password("admin"))
     return {"access_token": token}

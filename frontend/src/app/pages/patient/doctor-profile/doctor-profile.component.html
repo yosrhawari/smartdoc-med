@@ -14,7 +14,11 @@
           <!-- Top Card (Hero) -->
           <div class="glass-card hero-card">
             <div class="hero-left">
-              <div class="doc-avatar-square"></div>
+              <div class="doc-avatar-square">
+                <img [src]="doctor.image ? 'http://localhost:8000/uploads/' + doctor.image : 'assets/images/default-avatar.png'" 
+                     alt="Doctor"
+                     (error)="$any($event.target).src = 'assets/images/default-avatar.png'">
+              </div>
             </div>
             <div class="hero-right">
               <div class="doc-title-row">

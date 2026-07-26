@@ -106,10 +106,13 @@ export class DoctorProfileEditComponent implements OnInit {
     });
   }
 
-  // ── Photo upload preview ──────────────────────────────────────────────────────
+  // ── Photo upload preview and storage ─────────────────────────────────────────
+  selectedPhoto: File | null = null;
+
   onPhotoChange(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
+      this.selectedPhoto = file;
       const reader = new FileReader();
       reader.onload = (e) => {
         this.photoPreview = e.target?.result as string;
@@ -135,6 +138,33 @@ export class DoctorProfileEditComponent implements OnInit {
     this.error   = '';
     this.success = '';
 
+    if (this.selectedPhoto) {
+      const formData = new FormData();
+      formData.append('nom', this.profile.nom);
+      formData.append('prenom', this.profile.prenom);
+      formData.append('adresse', this.profile.adresse);
+      formData.append('tarif', String(this.profile.tarif));
+      formData.append('biographie', this.profile.biographie);
+      if (this.profile.specialite_id !== null) {
+        formData.append('specialite_id', String(this.profile.specialite_id));
+      }
+      formData.append('image', this.selectedPhoto);
+
+      this.doctorService.uploadProfileImage(formData).subscribe({
+        next: () => {
+          this.proceedUpdateProfile();
+        },
+        error: (err) => {
+          this.loading = false;
+          this.error = 'Erreur lors du téléchargement de l\'image';
+        }
+      });
+    } else {
+      this.proceedUpdateProfile();
+    }
+  }
+
+  private proceedUpdateProfile(): void {
     const payload: any = {
       nom:          this.profile.nom,
       prenom:       this.profile.prenom,

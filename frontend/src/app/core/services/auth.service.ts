@@ -48,7 +48,7 @@ export class AuthService {
 
   // ✅ REGISTER (patient + doctor)
   register(data: any) {
-    return this.http.post('http://localhost:8000/users/register', { ...data });
+    return this.http.post(`${this.API}/users/register`, { ...data });
   }
 
   // Envoie les identifiants au backend et récupère le token

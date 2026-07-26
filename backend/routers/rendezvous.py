@@ -5,8 +5,9 @@ from models import RendezVous, ProfilMedecin, Specialite
 from schemas import RendezVousCreate
 from utils.role_checker import require_role
 from utils.dependencies import get_current_user
-router = APIRouter(prefix="/rendezvous", tags=["RendezVous"])
 from datetime import date, time
+
+router = APIRouter(prefix="/rendezvous", tags=["RendezVous"])
 # CREATE RDV
 @router.post("/create")
 def create_rdv(
@@ -30,7 +31,7 @@ def create_rdv(
         raise HTTPException(status_code=400, detail="Ce créneau est déjà réservé.")
 
     rdv = RendezVous(
-        patient_id=user["id"],
+        patient_id=user["user_id"],
         medecin_id=data.medecin_id,
         date=data.date,
         heure=data.heure,
@@ -46,7 +47,8 @@ def create_rdv(
 def update_status(
     id: int,
     status: str,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    user = Depends(get_current_user)
 ):
     rdv = session.get(RendezVous, id)
 
@@ -68,10 +70,27 @@ def update_status(
     session.commit()
 
     return {"message": "updated", "status": status}
-# GET ALL RDV
+# GET MY RDV (authenticated)
 @router.get("/")
-def get_rdv(session: Session = Depends(get_session)):
-    return session.exec(select(RendezVous)).all()
+def get_mes_rdv(
+    session: Session = Depends(get_session),
+    user = Depends(get_current_user)
+):
+    if user["role"] == "PATIENT":
+        return session.exec(
+            select(RendezVous).where(RendezVous.patient_id == user["user_id"])
+        ).all()
+    elif user["role"] == "MEDECIN":
+        profil = session.exec(
+            select(ProfilMedecin).where(ProfilMedecin.user_id == user["user_id"])
+        ).first()
+        if not profil:
+            return []
+        return session.exec(
+            select(RendezVous).where(RendezVous.medecin_id == profil.id)
+        ).all()
+    else:
+        return session.exec(select(RendezVous)).all()
 @router.get("/medecin/{medecin_id}/availability")
 def get_available_slots(
     medecin_id: int,
@@ -113,7 +132,7 @@ def get_summary(medecin_id: int, session: Session = Depends(get_session)):
     ).first()
 
     if not medecin:
-        return {"error": "Médecin introuvable"}
+        raise HTTPException(status_code=404, detail="Médecin introuvable")
 
     #  récupérer nom spécialité
     specialite = session.exec(

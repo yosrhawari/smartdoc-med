@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session,select
 
 from database import get_session
-from models import ProfilMedecin, User,ProfilMedecin, RendezVous, Review,Specialite
+from models import ProfilMedecin, User, RendezVous, Review, Specialite
 
 from utils.role_checker import require_role
 from services.ai_service import clear_cache
@@ -87,7 +87,7 @@ def get_stats(
     ).all())
 
     medecins_attente = len(session.exec(
-        select(ProfilMedecin).where(ProfilMedecin.statut_validation == "EN_ATTENTE")
+        select(ProfilMedecin).where(ProfilMedecin.statut_validation == "en_attente")
     ).all())
 
     # RDV

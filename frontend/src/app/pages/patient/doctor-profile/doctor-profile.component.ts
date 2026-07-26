@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { DoctorService, Doctor } from '../../../core/services/doctor.service';
 import { ReviewService, Review } from '../../../core/services/review.service';
 import { AppointmentService } from '../../../core/services/appointment.service';
@@ -34,32 +35,36 @@ export class DoctorProfileComponent implements OnInit {
     this.loadReviews();
   }
 
-  loadDoctor(): void {
-    this.doctorService.getDoctors().subscribe({
-      next: (doctors) => {
-        this.doctor = doctors.find(d => d.id === this.doctorId) || null;
-        this.loading = false;
-      },
-      error: () => { this.loading = false; }
-    });
+ loadDoctor(): void {
+  this.doctorService.getDoctorById(this.doctorId).subscribe({
+    next: (doctor) => {
+      this.doctor = doctor;
+      this.loading = false;
+    },
+    error: () => {
+      this.loading = false;
+    }
+  });
+
   }
 
   loadReviews(): void {
-    this.reviewService.getReviews().subscribe({
-      next: (reviews) => {
-        // Filter reviews for this doctor's appointments
+    forkJoin({
+      reviews: this.reviewService.getReviews(),
+      apts: this.appointmentService.getAppointments()
+    }).subscribe({
+      next: ({ reviews, apts }) => {
         this.reviews = reviews;
-        this.appointmentService.getAppointments().subscribe({
-          next: (apts) => {
-            const doctorAptIds = apts
-              .filter(a => a.medecin_id === this.doctorId)
-              .map(a => a.id);
-            this.doctorReviews = reviews.filter(r => doctorAptIds.includes(r.rendezvous_id));
-            if (this.doctorReviews.length > 0) {
-              this.averageRating = this.doctorReviews.reduce((sum, r) => sum + r.note, 0) / this.doctorReviews.length;
-            }
-          }
-        });
+        const doctorAptIds = apts
+          .filter(a => a.medecin_id === this.doctorId)
+          .map(a => a.id);
+        this.doctorReviews = reviews.filter(r => doctorAptIds.includes(r.rendezvous_id));
+        if (this.doctorReviews.length > 0) {
+          this.averageRating = this.doctorReviews.reduce((sum, r) => sum + r.note, 0) / this.doctorReviews.length;
+        }
+      },
+      error: () => {
+        console.error('Failed to load reviews');
       }
     });
   }

@@ -1,11 +1,11 @@
+import os
 from sqlmodel import Session, select
 from models import Specialite
 import requests
 
-# 🔥 modèle HuggingFace (gratuit)
-API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-mnli"
+API_URL = os.getenv("HF_API_URL", "https://api-inference.huggingface.co/models/facebook/bart-large-mnli")
+HF_TOKEN = os.getenv("HF_TOKEN", "")
 
-# 🔥 cache pour performance
 cache = {}
 
 def clear_cache():
@@ -20,16 +20,15 @@ def detect_specialite(symptome: str, session: Session):
     if symptome in cache:
         print("Cache utilisé")
         return cache[symptome]
-    # ❤️ Cardiologie
-    if "coeur" in symptome or "cardiaque" in symptome or "poitrine" in symptome or "palpitations" in symptome:
+    if "heart" in symptome or "cardiaque" in symptome or "poitrine" in symptome or "palpitations" in symptome:
         return "Cardiologie"
 
     # 🧴 Dermatologie
-    if "peau" in symptome or "acné" in symptome or "bouton" in symptome or "eczéma" in symptome or "démangeaison" in symptome:
+    if "skin" in symptome or "acne" in symptome or "pimple" in symptome or "eczema" in symptome or "itching" in symptome:
         return "Dermatologie"
 
     # 🧠 Neurologie
-    if "tête" in symptome or "migraine" in symptome or "vertige" in symptome or "nerf" in symptome or "paralysie" in symptome:
+    if "head" in symptome or "migraine" in symptome or "dizziness" in symptome or "nerve" in symptome or "paralysis" in symptome:
         return "Neurologie"
 
     # 🧘 Psychiatrie
@@ -99,21 +98,25 @@ def detect_specialite(symptome: str, session: Session):
             }
         }
 
-        response = requests.post(API_URL, json=payload)
+        headers = {}
+        if HF_TOKEN:
+            headers["Authorization"] = f"Bearer {HF_TOKEN}"
+
+        response = requests.post(API_URL, json=payload, headers=headers, timeout=15)
+        response.raise_for_status()
         result = response.json()
 
-        print(" AI RESULT:", result)
+        if isinstance(result, list) and len(result) > 0:
+            result = result[0]
 
-        if "labels" in result and len(result["labels"]) > 0:
+        if isinstance(result, dict) and "labels" in result and len(result["labels"]) > 0:
             specialite = result["labels"][0]
         else:
             specialite = "Médecin généraliste"
 
-        # 🔹 cache
         cache[symptome] = specialite
-
         return specialite
 
     except Exception as e:
-        print(" Erreur IA:", e)
+        print("Erreur IA:", e)
         return "Médecin généraliste"

@@ -39,9 +39,11 @@ def create_medecin(
     UPLOAD_DIR = "uploads"
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-    #  sauvegarder image
-    filename = f"{user_id}_{image.filename}"
-    file_path = os.path.join(UPLOAD_DIR, filename)
+    import uuid
+    ext = os.path.splitext(image.filename or "")[1] if image.filename else ""
+    safe_filename = f"{uuid.uuid4().hex}{ext}"
+    filename = safe_filename
+    file_path = os.path.join(UPLOAD_DIR, safe_filename)
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(image.file, buffer)
@@ -151,7 +153,7 @@ def accepter_rdv(
 
     # 🔹 récupérer profil médecin
     profil = session.exec(
-        select(ProfilMedecin).where(ProfilMedecin.user_id == user["id"])
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["user_id"])
     ).first()
 
     if not profil:
@@ -187,7 +189,7 @@ def refuser_rdv(
         raise HTTPException(status_code=403, detail="Accès interdit")
 
     profil = session.exec(
-        select(ProfilMedecin).where(ProfilMedecin.user_id == user["id"])
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["user_id"])
     ).first()
 
     rdv = session.exec(
@@ -216,7 +218,7 @@ def get_mes_rdv(
         raise HTTPException(status_code=403, detail="Accès interdit")
 
     profil = session.exec(
-        select(ProfilMedecin).where(ProfilMedecin.user_id == user["id"])
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["user_id"])
     ).first()
 
     rdvs = session.exec(
@@ -238,13 +240,13 @@ def get_my_profile(
         raise HTTPException(status_code=403, detail="Accès interdit")
 
     profil = session.exec(
-        select(ProfilMedecin).where(ProfilMedecin.user_id == user["id"])
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["user_id"])
     ).first()
 
     if not profil:
         raise HTTPException(status_code=404, detail="Profil introuvable")
 
-    user_obj = session.get(User, user["id"])
+    user_obj = session.get(User, user["user_id"])
     spec = session.get(Specialite, profil.specialite_id) if profil.specialite_id else None
 
     return {
@@ -273,7 +275,7 @@ def update_my_profile(
         raise HTTPException(status_code=403, detail="Accès interdit")
 
     profil = session.exec(
-        select(ProfilMedecin).where(ProfilMedecin.user_id == user["id"])
+        select(ProfilMedecin).where(ProfilMedecin.user_id == user["user_id"])
     ).first()
 
     if not profil:
